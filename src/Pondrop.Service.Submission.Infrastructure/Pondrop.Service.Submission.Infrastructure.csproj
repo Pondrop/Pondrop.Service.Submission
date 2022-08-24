@@ -1,0 +1,35 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Remove="C:\Users\bryan\.nuget\packages\microsoft.azure.cosmos\3.29.0\contentFiles\any\netstandard2.0\ThirdPartyNotice.txt" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AutoMapper" Version="11.0.1" />
+    <PackageReference Include="Microsoft.Azure.Cosmos" Version="3.29.0" />
+    <PackageReference Include="Microsoft.Azure.EventGrid" Version="3.2.1" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="6.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Options" Version="6.0.0" />
+    <PackageReference Include="Azure.Messaging.ServiceBus" Version="7.9.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="ServiceBus\" />
+    <None Remove="Azure.Messaging.ServiceBus" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="ServiceBus\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Pondrop.Service.Submission.Application\Pondrop.Service.Submission.Application.csproj" />
+    <ProjectReference Include="..\Pondrop.Service.Submission.Domain\Pondrop.Service.Submission.Domain.csproj" />
+  </ItemGroup>
+</Project>
