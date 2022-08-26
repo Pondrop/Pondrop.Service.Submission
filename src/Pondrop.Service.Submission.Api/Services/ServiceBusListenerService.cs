@@ -1,16 +1,11 @@
-using AutoMapper;
 using Azure.Messaging.ServiceBus;
 using MediatR;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Pondrop.Service.Submission.Application.Commands;
-using Pondrop.Service.Submission.Application.Commands.SubmissionTemplate.UpdateSubmissionTemplateCheckpointById;
-using Pondrop.Service.Submission.Application.Interfaces;
 using Pondrop.Service.Submission.Application.Models;
-using Pondrop.Service.Submission.Domain.Models;
 using System.Text;
-using System.Xml.Linq;
 
 namespace Pondrop.Service.Submission.Api.Services;
 

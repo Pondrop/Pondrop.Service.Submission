@@ -1,7 +1,6 @@
 ﻿using AutoMapper;
 using FluentValidation;
 using Microsoft.Extensions.Logging;
-using Pondrop.Service.Submission.Application.Commands.SubmissionTemplate.UpdateSubmissionTemplateCheckpointById;
 using Pondrop.Service.Submission.Application.Interfaces;
 using Pondrop.Service.Submission.Domain.Models;
 using Pondrop.Service.Submission.Domain.Models.SubmissionTemplate;

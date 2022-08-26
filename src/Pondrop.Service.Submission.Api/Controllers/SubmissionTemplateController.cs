@@ -4,7 +4,6 @@ using Pondrop.Service.Submission.Api.Services;
 using Pondrop.Service.Submission.Application.Commands;
 using Pondrop.Service.Submission.Application.Commands.SubmissionTemplate.AddStepToSubmission;
 using Pondrop.Service.Submission.Application.Commands.SubmissionTemplate.CreateSubmissionTemplate;
-using Pondrop.Service.Submission.Application.Commands.SubmissionTemplate.UpdateSubmissionTemplateCheckpointById;
 using Pondrop.Service.Submission.Application.Interfaces;
 using Pondrop.Service.Submission.Application.Queries.SubmissionTemplate.GetAllSubmissionTemplates;
 using Pondrop.Service.Submission.Application.Queries.SubmissionTemplate.GetSubmissionTemplateById;
