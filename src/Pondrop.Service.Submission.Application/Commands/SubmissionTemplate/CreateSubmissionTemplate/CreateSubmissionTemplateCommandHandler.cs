@@ -21,13 +21,13 @@ public class CreateSubmissionTemplateCommandHandler : DirtyCommandHandler<Submis
     private readonly ILogger<CreateSubmissionTemplateCommandHandler> _logger;
 
     public CreateSubmissionTemplateCommandHandler(
-        IOptions<SubmissionUpdateConfiguration> storeUpdateConfig,
+        IOptions<SubmissionUpdateConfiguration> submissionTemplateUpdateConfig,
         IEventRepository eventRepository,
         IDaprService daprService,
         IUserService userService,
         IMapper mapper,
         IValidator<CreateSubmissionTemplateCommand> validator,
-        ILogger<CreateSubmissionTemplateCommandHandler> logger) : base(eventRepository, storeUpdateConfig.Value, daprService, logger)
+        ILogger<CreateSubmissionTemplateCommandHandler> logger) : base(eventRepository, submissionTemplateUpdateConfig.Value, daprService, logger)
     {
         _eventRepository = eventRepository;
         _mapper = mapper;
@@ -42,7 +42,7 @@ public class CreateSubmissionTemplateCommandHandler : DirtyCommandHandler<Submis
 
         if (!validation.IsValid)
         {
-            var errorMessage = $"Create store failed, errors on validation {validation}";
+            var errorMessage = $"Create submission template failed, errors on validation {validation}";
             _logger.LogError(errorMessage);
             return Result<SubmissionTemplateRecord>.Error(errorMessage);
         }
@@ -52,7 +52,7 @@ public class CreateSubmissionTemplateCommandHandler : DirtyCommandHandler<Submis
         try
         {
 
-            var storeEntity = new SubmissionTemplateEntity(
+            var submissionTemplateEntity = new SubmissionTemplateEntity(
                 command.Title,
                 command.Description,
                 command.IconCodePoint,
@@ -61,9 +61,9 @@ public class CreateSubmissionTemplateCommandHandler : DirtyCommandHandler<Submis
 
             foreach (var step in command.Steps)
             {
-                storeEntity.Apply(new AddStep(
+                submissionTemplateEntity.Apply(new AddStep(
                     Guid.NewGuid(),
-                    storeEntity.Id,
+                    submissionTemplateEntity.Id,
                     step!.Title,
                     step!.Instructions,
                     step!.InstructionsContinueButton,
@@ -74,13 +74,13 @@ public class CreateSubmissionTemplateCommandHandler : DirtyCommandHandler<Submis
                     _userService.CurrentUserName(),
                     _userService.CurrentUserName()), _userService.CurrentUserName());
             }
-            var success = await _eventRepository.AppendEventsAsync(storeEntity.StreamId, 0, storeEntity.GetEvents());
+            var success = await _eventRepository.AppendEventsAsync(submissionTemplateEntity.StreamId, 0, submissionTemplateEntity.GetEvents());
 
             await Task.WhenAll(
-                InvokeDaprMethods(storeEntity.Id, storeEntity.GetEvents()));
+                InvokeDaprMethods(submissionTemplateEntity.Id, submissionTemplateEntity.GetEvents()));
 
             result = success
-                ? Result<SubmissionTemplateRecord>.Success(_mapper.Map<SubmissionTemplateRecord>(storeEntity))
+                ? Result<SubmissionTemplateRecord>.Success(_mapper.Map<SubmissionTemplateRecord>(submissionTemplateEntity))
                 : Result<SubmissionTemplateRecord>.Error(FailedToCreateMessage(command));
         }
         catch (Exception ex)
@@ -93,5 +93,5 @@ public class CreateSubmissionTemplateCommandHandler : DirtyCommandHandler<Submis
     }
 
     private static string FailedToCreateMessage(CreateSubmissionTemplateCommand command) =>
-        $"Failed to create store\nCommand: '{JsonConvert.SerializeObject(command)}'";
+        $"Failed to create submission template \nCommand: '{JsonConvert.SerializeObject(command)}'";
 }
