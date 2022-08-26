@@ -9,7 +9,7 @@ public record FieldRecord(
         List<string?>? PickerValues)
 {
     public FieldRecord() : this(
-        Guid.Empty,
+        Guid.NewGuid(),
         string.Empty,
         false,
         string.Empty,
