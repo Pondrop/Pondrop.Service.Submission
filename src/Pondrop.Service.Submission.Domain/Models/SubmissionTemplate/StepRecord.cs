@@ -1,25 +1,29 @@
 ﻿namespace Pondrop.Service.Submission.Domain.Models.SubmissionTemplate;
 
-public record SubmissionTemplateRecord(
+public record StepRecord(
         Guid Id,
         string Title,
-        string Description,
+        string Instructions,
+        string InstructionsContinueButton,
+        string InstructionsSkipButton,
         int IconCodePoint,
         string IconFontFamily,
-        List<StepRecord> Steps,
+        List<FieldRecord> Fields,
         string CreatedBy,
         string UpdatedBy,
         DateTime CreatedUtc,
         DateTime UpdatedUtc)
     : AuditRecord(CreatedBy, UpdatedBy, CreatedUtc, UpdatedUtc)
 {
-    public SubmissionTemplateRecord() : this(
+    public StepRecord() : this(
         Guid.Empty,
+        string.Empty,
+        string.Empty,
         string.Empty,
         string.Empty,
         int.MinValue,
         string.Empty,
-        new List<StepRecord>(0),
+        new List<FieldRecord>(),
         string.Empty,
         string.Empty,
         DateTime.MinValue,

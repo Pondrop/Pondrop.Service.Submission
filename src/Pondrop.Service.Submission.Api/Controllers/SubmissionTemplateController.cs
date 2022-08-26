@@ -2,10 +2,14 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Pondrop.Service.Submission.Api.Services;
 using Pondrop.Service.Submission.Application.Commands;
+using Pondrop.Service.Submission.Application.Commands.SubmissionTemplate.AddStepToSubmission;
+using Pondrop.Service.Submission.Application.Commands.SubmissionTemplate.CreateSubmissionTemplate;
+using Pondrop.Service.Submission.Application.Commands.SubmissionTemplate.UpdateSubmissionTemplateCheckpointById;
 using Pondrop.Service.Submission.Application.Interfaces;
-using Pondrop.Service.Submission.Application.Queries;
+using Pondrop.Service.Submission.Application.Queries.SubmissionTemplate.GetAllSubmissionTemplates;
+using Pondrop.Service.Submission.Application.Queries.SubmissionTemplate.GetSubmissionTemplateById;
 
-namespace Pondrop.Service.Submission.ApiControllers;
+namespace Pondrop.Service.Submission.Api.Controllers;
 
 [ApiController]
 [Route("[controller]")]
@@ -72,7 +76,7 @@ public class SubmissionController : ControllerBase
     [Route("steptemplate/add")]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> AddStepTemplate([FromBody] AddStepTemplateToSubmissionCommand command)
+    public async Task<IActionResult> AddStepTemplate([FromBody] AddStepCommand command)
     {
         var result = await _mediator.Send(command);
         return await result.MatchAsync<IActionResult>(

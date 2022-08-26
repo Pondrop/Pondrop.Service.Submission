@@ -6,10 +6,11 @@ using Newtonsoft.Json;
 using Pondrop.Service.Submission.Application.Interfaces;
 using Pondrop.Service.Submission.Application.Interfaces.Services;
 using Pondrop.Service.Submission.Application.Models;
-using Pondrop.Service.Submission.Domain.Events.Submission;
+using Pondrop.Service.Submission.Domain.Events.SubmissionTemplate;
 using Pondrop.Service.Submission.Domain.Models;
+using Pondrop.Service.Submission.Domain.Models.SubmissionTemplate;
 
-namespace Pondrop.Service.Submission.Application.Commands;
+namespace Pondrop.Service.Submission.Application.Commands.SubmissionTemplate.CreateSubmissionTemplate;
 
 public class CreateSubmissionTemplateCommandHandler : DirtyCommandHandler<SubmissionTemplateEntity, CreateSubmissionTemplateCommand, Result<SubmissionTemplateRecord>>
 {
@@ -54,16 +55,24 @@ public class CreateSubmissionTemplateCommandHandler : DirtyCommandHandler<Submis
             var storeEntity = new SubmissionTemplateEntity(
                 command.Title,
                 command.Description,
-                command.Icon,
+                command.IconCodePoint,
+                command.IconFontFamily,
                 _userService.CurrentUserName());
 
-            foreach (var stepTemplate in command.StepTemplates)
+            foreach (var step in command.Steps)
             {
-                storeEntity.Apply(new AddSubmissionStepTemplate(
+                storeEntity.Apply(new AddStep(
                     Guid.NewGuid(),
                     storeEntity.Id,
-                    stepTemplate!.Title,
-                    stepTemplate!.Type), _userService.CurrentUserName());
+                    step!.Title,
+                    step!.Instructions,
+                    step!.InstructionsContinueButton,
+                    step!.InstructionsSkipButton,
+                    step!.InstructionsIconCodePoint,
+                    step!.InstructionsIconFontFamily,
+                    step!.Fields,
+                    _userService.CurrentUserName(),
+                    _userService.CurrentUserName()), _userService.CurrentUserName());
             }
             var success = await _eventRepository.AppendEventsAsync(storeEntity.StreamId, 0, storeEntity.GetEvents());
 

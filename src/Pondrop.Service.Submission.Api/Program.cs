@@ -11,6 +11,7 @@ using Pondrop.Service.Submission.Application.Interfaces;
 using Pondrop.Service.Submission.Application.Interfaces.Services;
 using Pondrop.Service.Submission.Application.Models;
 using Pondrop.Service.Submission.Domain.Models;
+using Pondrop.Service.Submission.Domain.Models.SubmissionTemplate;
 using Pondrop.Service.Submission.Infrastructure.CosmosDb;
 using Pondrop.Service.Submission.Infrastructure.Dapr;
 using Pondrop.Service.Submission.Infrastructure.ServiceBus;

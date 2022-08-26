@@ -6,30 +6,30 @@ using Newtonsoft.Json;
 using Pondrop.Service.Submission.Application.Interfaces;
 using Pondrop.Service.Submission.Application.Interfaces.Services;
 using Pondrop.Service.Submission.Application.Models;
-using Pondrop.Service.Submission.Domain.Events;
-using Pondrop.Service.Submission.Domain.Events.Submission;
+using Pondrop.Service.Submission.Domain.Events.SubmissionTemplate;
 using Pondrop.Service.Submission.Domain.Models;
+using Pondrop.Service.Submission.Domain.Models.SubmissionTemplate;
 
-namespace Pondrop.Service.Submission.Application.Commands;
+namespace Pondrop.Service.Submission.Application.Commands.SubmissionTemplate.AddStepToSubmission;
 
-public class AddStepTemplateToSubmissionCommandHandler : DirtyCommandHandler<SubmissionTemplateEntity, AddStepTemplateToSubmissionCommand, Result<SubmissionTemplateRecord>>
+public class AddStepCommandHandler : DirtyCommandHandler<SubmissionTemplateEntity, AddStepCommand, Result<SubmissionTemplateRecord>>
 {
     private readonly IEventRepository _eventRepository;
     private readonly ICheckpointRepository<SubmissionTemplateEntity> _submissionCheckpointRepository;
     private readonly IMapper _mapper;
     private readonly IUserService _userService;
-    private readonly IValidator<AddStepTemplateToSubmissionCommand> _validator;
-    private readonly ILogger<AddStepTemplateToSubmissionCommandHandler> _logger;
+    private readonly IValidator<AddStepCommand> _validator;
+    private readonly ILogger<AddStepCommandHandler> _logger;
 
-    public AddStepTemplateToSubmissionCommandHandler(
+    public AddStepCommandHandler(
         IOptions<SubmissionUpdateConfiguration> submissionUpdateConfig,
         IEventRepository eventRepository,
         ICheckpointRepository<SubmissionTemplateEntity> submissionCheckpointRepository,
         IDaprService daprService,
         IUserService userService,
         IMapper mapper,
-        IValidator<AddStepTemplateToSubmissionCommand> validator,
-        ILogger<AddStepTemplateToSubmissionCommandHandler> logger) : base(eventRepository, submissionUpdateConfig.Value, daprService, logger)
+        IValidator<AddStepCommand> validator,
+        ILogger<AddStepCommandHandler> logger) : base(eventRepository, submissionUpdateConfig.Value, daprService, logger)
     {
         _eventRepository = eventRepository;
         _submissionCheckpointRepository = submissionCheckpointRepository;
@@ -39,7 +39,7 @@ public class AddStepTemplateToSubmissionCommandHandler : DirtyCommandHandler<Sub
         _logger = logger;
     }
 
-    public override async Task<Result<SubmissionTemplateRecord>> Handle(AddStepTemplateToSubmissionCommand command, CancellationToken cancellationToken)
+    public override async Task<Result<SubmissionTemplateRecord>> Handle(AddStepCommand command, CancellationToken cancellationToken)
     {
         var validation = _validator.Validate(command);
 
@@ -50,7 +50,7 @@ public class AddStepTemplateToSubmissionCommandHandler : DirtyCommandHandler<Sub
             return Result<SubmissionTemplateRecord>.Error(errorMessage);
         }
 
-        var result = default(Result<SubmissionTemplateRecord>);
+        Result<SubmissionTemplateRecord> result;
 
         try
         {
@@ -59,11 +59,18 @@ public class AddStepTemplateToSubmissionCommandHandler : DirtyCommandHandler<Sub
 
             if (submissionEntity is not null)
             {
-                var evtPayload = new AddSubmissionStepTemplate(
+                var evtPayload = new AddStep(
                     Guid.NewGuid(),
                     submissionEntity.Id,
                     command.Title,
-                    command.Type);
+                    command!.Instructions,
+                    command!.InstructionsContinueButton,
+                    command!.InstructionsSkipButton,
+                    command!.InstructionsIconCodePoint,
+                    command!.InstructionsIconFontFamily,
+                    command!.Fields,
+                    _userService.CurrentUserName(),
+                    _userService.CurrentUserName());
                 var createdBy = _userService.CurrentUserName();
 
                 var success = await UpdateStreamAsync(submissionEntity, evtPayload, createdBy);
@@ -95,6 +102,6 @@ public class AddStepTemplateToSubmissionCommandHandler : DirtyCommandHandler<Sub
         return result;
     }
 
-    private static string FailedToCreateMessage(AddStepTemplateToSubmissionCommand command) =>
+    private static string FailedToCreateMessage(AddStepCommand command) =>
         $"Failed to create submission step template\nCommand: '{JsonConvert.SerializeObject(command)}'";
 }

@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using Pondrop.Service.Submission.Domain.Events;
-using Pondrop.Service.Submission.Domain.Events.Submission;
+using Pondrop.Service.Submission.Domain.Events.SubmissionTemplate;
+using Pondrop.Service.Submission.Domain.Models.SubmissionTemplate;
 
 namespace Pondrop.Service.Submission.Domain.Models;
 
@@ -10,9 +11,10 @@ public record SubmissionTemplateEntity : EventEntity
     {
         Id = Guid.Empty;
         Title = string.Empty;
-        Icon = string.Empty;
+        IconCodePoint = int.MaxValue;
+        IconFontFamily = string.Empty;
         Description = string.Empty;
-        StepTemplates = new List<SubmissionStepTemplateRecord>();
+        Steps = new List<StepRecord>();
     }
 
     public SubmissionTemplateEntity(IEnumerable<IEvent> events) : this()
@@ -23,23 +25,26 @@ public record SubmissionTemplateEntity : EventEntity
         }
     }
 
-    public SubmissionTemplateEntity(string title, string description, string icon, string createdBy) : this()
+    public SubmissionTemplateEntity(string title, string description, int iconCodePoint, string iconFontFamily, string createdBy) : this()
     {
-        var create = new CreateSubmissionTemplate(Guid.NewGuid(), title, description, icon);
+        var create = new CreateSubmissionTemplate(Guid.NewGuid(), title, description, iconCodePoint, iconFontFamily);
         Apply(create, createdBy);
     }
 
-    [JsonProperty(PropertyName = "Title")]
+    [JsonProperty(PropertyName = "title")]
     public string Title { get; private set; }
 
-    [JsonProperty(PropertyName = "Description")]
+    [JsonProperty(PropertyName = "description")]
     public string Description { get; private set; }
 
-    [JsonProperty(PropertyName = "Icon")]
-    public string Icon { get; private set; }
+    [JsonProperty("iconCodePoint")]
+    public int IconCodePoint { get; private set; }
 
-    [JsonProperty(PropertyName = "stepTemplates")]
-    public List<SubmissionStepTemplateRecord> StepTemplates { get; private set; }
+    [JsonProperty("iconFontFamily")]
+    public string IconFontFamily { get; private set; }
+
+    [JsonProperty(PropertyName = "steps")]
+    public List<StepRecord> Steps { get; private set; }
 
     protected sealed override void Apply(IEvent eventToApply)
     {
@@ -48,8 +53,8 @@ public record SubmissionTemplateEntity : EventEntity
             case CreateSubmissionTemplate create:
                 When(create, eventToApply.CreatedBy, eventToApply.CreatedUtc);
                 break;
-            case AddSubmissionStepTemplate addAddress:
-                When(addAddress, eventToApply.CreatedBy, eventToApply.CreatedUtc);
+            case AddStep addStep:
+                When(addStep, eventToApply.CreatedBy, eventToApply.CreatedUtc);
                 break;
             default:
                 throw new InvalidOperationException($"Unrecognised event type for '{StreamType}', got '{eventToApply.GetType().Name}'");
@@ -77,17 +82,23 @@ public record SubmissionTemplateEntity : EventEntity
         Id = create.Id;
         Title = create.Title;
         Description = create.Description;
-        Icon = create.Icon;
+        IconCodePoint = create.IconCodePoint;
+        IconFontFamily = create.IconFontFamily;
         CreatedBy = UpdatedBy = createdBy;
         CreatedUtc = UpdatedUtc = createdUtc;
     }
 
-    private void When(AddSubmissionStepTemplate stepTemplate, string createdBy, DateTime createdUtc)
+    private void When(AddStep step, string createdBy, DateTime createdUtc)
     {
-        StepTemplates.Add(new SubmissionStepTemplateRecord(
-            stepTemplate.Id,
-            stepTemplate.Title,
-            stepTemplate.Type,
+        Steps.Add(new StepRecord(
+            step.Id,
+            step.Title,
+            step.Instructions,
+            step.InstructionsContinueButton,
+            step.InstructionsSkipButton,
+            step.InstructionsIconCodePoint,
+            step.InstructionsIconFontFamily,
+            step.Fields,
             createdBy,
             createdBy,
             createdUtc,

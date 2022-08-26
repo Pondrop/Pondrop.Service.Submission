@@ -1,7 +1,6 @@
 ﻿using FluentValidation;
-using Pondrop.Service.Submission.Application.Interfaces.Services;
 
-namespace Pondrop.Service.Submission.Application.Commands;
+namespace Pondrop.Service.Submission.Application.Commands.SubmissionTemplate.CreateSubmissionTemplate;
 
 public class CreateSubmissionTemplateCommandHandlerValidator : AbstractValidator<CreateSubmissionTemplateCommand>
 {
@@ -10,13 +9,17 @@ public class CreateSubmissionTemplateCommandHandlerValidator : AbstractValidator
 
         RuleFor(x => x.Title).NotEmpty();
         RuleFor(x => x.Description).NotEmpty();
-        RuleFor(x => x.Icon).NotEmpty();
+        RuleFor(x => x.IconCodePoint).NotEmpty();
+        RuleFor(x => x.IconFontFamily).NotEmpty();
 
-        RuleFor(x => x.StepTemplates).NotNull();
-        RuleForEach(x => x.StepTemplates).ChildRules(step =>
+        RuleFor(x => x.Steps).NotNull();
+        RuleForEach(x => x.Steps).ChildRules(step =>
         {
             step.RuleFor(x => x.Title).NotEmpty();
-            step.RuleFor(x => x.Type).NotEmpty();
+            step.RuleFor(x => x.Instructions).NotEmpty();
+            step.RuleFor(x => x.InstructionsContinueButton).NotEmpty();
+            step.RuleFor(x => x.InstructionsIconCodePoint).NotEmpty();
+            step.RuleFor(x => x.InstructionsIconFontFamily).NotEmpty();
         });
     }
 }
