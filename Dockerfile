@@ -11,7 +11,7 @@ COPY ["src/Pondrop.Service.Submission.Api/Pondrop.Service.Submission.Api.csproj"
 COPY ["src/Pondrop.Service.Submission.Application/Pondrop.Service.Submission.Application.csproj", "src/Pondrop.Service.Submission.Application/"]
 COPY ["src/Pondrop.Service.Submission.Domain/Pondrop.Service.Submission.Domain.csproj", "src/Pondrop.Service.Submission.Domain/"]
 COPY ["src/Pondrop.Service.Submission.Infrastructure/Pondrop.Service.Submission.Infrastructure.csproj", "src/Pondrop.Service.Submission.Infrastructure/"]
-RUN dotnet reSubmission "src/Pondrop.Service.Submission.Api/Pondrop.Service.Submission.Api.csproj"
+RUN dotnet restore "src/Pondrop.Service.Submission.Api/Pondrop.Service.Submission.Api.csproj"
 COPY . .
 WORKDIR "/src/src/Pondrop.Service.Submission.Api"
 RUN dotnet build "Pondrop.Service.Submission.Api.csproj" -c Release -o /app/build
