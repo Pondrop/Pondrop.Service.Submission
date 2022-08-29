@@ -3,6 +3,7 @@ using FluentValidation;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
+using Pondrop.Service.Submission.Application.Commands.SubmissionTemplate.RemoveStepFromSubmission;
 using Pondrop.Service.Submission.Application.Interfaces;
 using Pondrop.Service.Submission.Application.Interfaces.Services;
 using Pondrop.Service.Submission.Application.Models;
@@ -12,24 +13,24 @@ using Pondrop.Service.Submission.Domain.Models.SubmissionTemplate;
 
 namespace Pondrop.Service.Submission.Application.Commands.SubmissionTemplate.AddStepToSubmission;
 
-public class AddStepCommandHandler : DirtyCommandHandler<SubmissionTemplateEntity, AddStepCommand, Result<SubmissionTemplateRecord>>
+public class RemoveStepCommandHandler : DirtyCommandHandler<SubmissionTemplateEntity, RemoveStepCommand, Result<SubmissionTemplateRecord>>
 {
     private readonly IEventRepository _eventRepository;
     private readonly ICheckpointRepository<SubmissionTemplateEntity> _submissionCheckpointRepository;
     private readonly IMapper _mapper;
     private readonly IUserService _userService;
-    private readonly IValidator<AddStepCommand> _validator;
-    private readonly ILogger<AddStepCommandHandler> _logger;
+    private readonly IValidator<RemoveStepCommand> _validator;
+    private readonly ILogger<RemoveStepCommandHandler> _logger;
 
-    public AddStepCommandHandler(
+    public RemoveStepCommandHandler(
         IOptions<SubmissionUpdateConfiguration> submissionUpdateConfig,
         IEventRepository eventRepository,
         ICheckpointRepository<SubmissionTemplateEntity> submissionCheckpointRepository,
         IDaprService daprService,
         IUserService userService,
         IMapper mapper,
-        IValidator<AddStepCommand> validator,
-        ILogger<AddStepCommandHandler> logger) : base(eventRepository, submissionUpdateConfig.Value, daprService, logger)
+        IValidator<RemoveStepCommand> validator,
+        ILogger<RemoveStepCommandHandler> logger) : base(eventRepository, submissionUpdateConfig.Value, daprService, logger)
     {
         _eventRepository = eventRepository;
         _submissionCheckpointRepository = submissionCheckpointRepository;
@@ -39,7 +40,7 @@ public class AddStepCommandHandler : DirtyCommandHandler<SubmissionTemplateEntit
         _logger = logger;
     }
 
-    public override async Task<Result<SubmissionTemplateRecord>> Handle(AddStepCommand command, CancellationToken cancellationToken)
+    public override async Task<Result<SubmissionTemplateRecord>> Handle(RemoveStepCommand command, CancellationToken cancellationToken)
     {
         var validation = _validator.Validate(command);
 
@@ -50,36 +51,27 @@ public class AddStepCommandHandler : DirtyCommandHandler<SubmissionTemplateEntit
             return Result<SubmissionTemplateRecord>.Error(errorMessage);
         }
 
-        var createdBy = !string.IsNullOrEmpty(command.CreatedBy) ? command.CreatedBy : _userService.CurrentUserName();
-
         Result<SubmissionTemplateRecord> result;
+
+        var updatedBy = !string.IsNullOrEmpty(command.UpdatedBy) ? command.UpdatedBy : _userService.CurrentUserName();
 
         try
         {
-            var submissionEntity = await _submissionCheckpointRepository.GetByIdAsync(command.SubmissionId);
-            submissionEntity ??= await GetFromStreamAsync(command.SubmissionId);
+            var submissionEntity = await _submissionCheckpointRepository.GetByIdAsync(command.SubmissionTemplateId);
+            submissionEntity ??= await GetFromStreamAsync(command.SubmissionTemplateId);
 
             if (submissionEntity is not null)
             {
-                var evtPayload = new AddStep(
-                    Guid.NewGuid(),
-                    submissionEntity.Id,
-                    command.Title,
-                    command!.Instructions,
-                    command!.InstructionsContinueButton,
-                    command!.InstructionsSkipButton,
-                    command!.InstructionsIconCodePoint,
-                    command!.InstructionsIconFontFamily,
-                    command!.Fields,
-                    createdBy,
-                    createdBy);
+                var evtPayload = new RemoveStep(
+                    command.Id,
+                    command.SubmissionTemplateId);
 
-                var success = await UpdateStreamAsync(submissionEntity, evtPayload, createdBy);
+                var success = await UpdateStreamAsync(submissionEntity, evtPayload, updatedBy);
 
                 if (!success)
                 {
                     await _submissionCheckpointRepository.FastForwardAsync(submissionEntity);
-                    success = await UpdateStreamAsync(submissionEntity, evtPayload, createdBy);
+                    success = await UpdateStreamAsync(submissionEntity, evtPayload, updatedBy);
                 }
 
                 await Task.WhenAll(
@@ -103,6 +95,6 @@ public class AddStepCommandHandler : DirtyCommandHandler<SubmissionTemplateEntit
         return result;
     }
 
-    private static string FailedToCreateMessage(AddStepCommand command) =>
+    private static string FailedToCreateMessage(RemoveStepCommand command) =>
         $"Failed to create submission step template\nCommand: '{JsonConvert.SerializeObject(command)}'";
 }

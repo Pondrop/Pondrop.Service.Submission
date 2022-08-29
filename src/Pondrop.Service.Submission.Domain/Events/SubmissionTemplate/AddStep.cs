@@ -13,4 +13,4 @@ public record AddStep(
     string InstructionsIconFontFamily,
     List<FieldRecord> Fields,
     string CreatedBy,
-    string UpdatedBys) : EventPayload;
+    string UpdatedBy) : EventPayload;

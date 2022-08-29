@@ -14,6 +14,8 @@ public class CreateSubmissionTemplateCommand : IRequest<Result<SubmissionTemplat
 
     public string IconFontFamily { get; set; } = string.Empty;
 
+    public string CreatedBy { get; set; } = string.Empty;
+
     public List<StepRecord?> Steps { get; init; } = default;
 }
 
@@ -25,7 +27,8 @@ public record StepRecord(
     string InstructionsSkipButton,
     int InstructionsIconCodePoint,
     string InstructionsIconFontFamily,
-    List<FieldRecord> Fields)
+    List<FieldRecord> Fields,
+    string CreatedBy)
 {
     public StepRecord() : this(
         Guid.Empty,
@@ -35,7 +38,8 @@ public record StepRecord(
         string.Empty,
         int.MinValue,
         string.Empty,
-        new List<FieldRecord>())
+        new List<FieldRecord>(),
+        string.Empty)
     {
     }
 }

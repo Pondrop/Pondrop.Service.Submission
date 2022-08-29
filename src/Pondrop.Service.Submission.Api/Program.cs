@@ -1,12 +1,15 @@
 using FluentValidation.AspNetCore;
 using MediatR;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
+using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using Pondrop.Service.Submission.Api.Configurations.Extensions;
 using Pondrop.Service.Submission.Api.Middleware;
 using Pondrop.Service.Submission.Api.Services;
+using Pondrop.Service.Submission.Api.Services.Interfaces;
 using Pondrop.Service.Submission.Application.Interfaces;
 using Pondrop.Service.Submission.Application.Interfaces.Services;
 using Pondrop.Service.Submission.Application.Models;
@@ -15,6 +18,7 @@ using Pondrop.Service.Submission.Domain.Models.SubmissionTemplate;
 using Pondrop.Service.Submission.Infrastructure.CosmosDb;
 using Pondrop.Service.Submission.Infrastructure.Dapr;
 using Pondrop.Service.Submission.Infrastructure.ServiceBus;
+using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -56,6 +60,27 @@ services.AddLogging(config =>
     config.AddDebug();
     config.AddConsole();
 });
+
+services.AddAuthentication(x =>
+{
+    x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+}).AddJwtBearer(o =>
+{
+    var Key = Encoding.UTF8.GetBytes(configuration["JWT:Key"]);
+    o.SaveToken = true;
+    o.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = false,
+        ValidateAudience = false,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = configuration["JWT:Issuer"],
+        ValidAudience = configuration["JWT:Audience"],
+        IssuerSigningKey = new SymmetricSecurityKey(Key)
+    };
+});
+
 services
     .AddControllers()
     .AddJsonOptions(options => options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
@@ -91,6 +116,7 @@ services.AddSingleton<ICheckpointRepository<SubmissionTemplateEntity>, Checkpoin
 services.AddSingleton<IContainerRepository<SubmissionViewRecord>, ContainerRepository<SubmissionViewRecord>>();
 services.AddSingleton<IDaprService, DaprService>();
 services.AddSingleton<IServiceBusService, ServiceBusService>();
+services.AddSingleton<ITokenProvider, JWTTokenProvider>();
 
 var app = builder.Build();
 var provider = app.Services.GetRequiredService<IApiVersionDescriptionProvider>();
@@ -100,6 +126,7 @@ var provider = app.Services.GetRequiredService<IApiVersionDescriptionProvider>()
 app.UseMiddleware<ExceptionMiddleware>();
 app.UseSwaggerDocumentation(provider);
 
+app.UseAuthentication();
 app.UseHttpsRedirection();
 app.UseAuthorization();
 app.MapControllers();

@@ -19,6 +19,7 @@ public class AddStepCommand : IRequest<Result<SubmissionTemplateRecord>>
     public int InstructionsIconCodePoint { get; init; } = int.MinValue;
 
     public string InstructionsIconFontFamily { get; init; } = string.Empty;
+    public string CreatedBy { get; set; } = string.Empty;
 
     public List<FieldRecord?> Fields { get; set; } = default;
 

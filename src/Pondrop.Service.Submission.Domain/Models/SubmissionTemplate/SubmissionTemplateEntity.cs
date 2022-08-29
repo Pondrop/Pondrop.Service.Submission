@@ -56,6 +56,9 @@ public record SubmissionTemplateEntity : EventEntity
             case AddStep addStep:
                 When(addStep, eventToApply.CreatedBy, eventToApply.CreatedUtc);
                 break;
+            case RemoveStep removeStep:
+                When(removeStep, eventToApply.CreatedBy, eventToApply.CreatedUtc);
+                break;
             default:
                 throw new InvalidOperationException($"Unrecognised event type for '{StreamType}', got '{eventToApply.GetType().Name}'");
         }
@@ -106,5 +109,14 @@ public record SubmissionTemplateEntity : EventEntity
 
         UpdatedBy = createdBy;
         UpdatedUtc = createdUtc;
+    }
+
+    private void When(RemoveStep removeItemFromList, string updatedBy, DateTime updatedUtc)
+    {
+        var step = Steps.Single(i => i.Id == removeItemFromList.Id);
+        Steps.Remove(step);
+
+        UpdatedBy = updatedBy;
+        UpdatedUtc = updatedUtc;
     }
 }

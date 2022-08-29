@@ -1,6 +1,8 @@
-using Pondrop.Service.Submission.Domain.Events.Submission;
+using Pondrop.Service.Submission.Domain.Events.SubmissionTemplate;
 using Pondrop.Service.Submission.Domain.Models;
+using Pondrop.Service.Submission.Domain.Models.SubmissionTemplate;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Xunit;
 
@@ -8,169 +10,103 @@ namespace Pondrop.Service.Submission.Domain.Tests;
 
 public class SubmissionTemplateEntityTests
 {
-    private const string Name = "My Submission";
-    private const string Status = "Online";
-    private const string ExternalReferenceId = "dc9145d2-b108-482e-ba6e-a141e2fba16f";
+    private const string Title = "Title";
+    private const string Description = "Description";
+    private const string IconFontFamily = "MaterialIcons";
+    private const int IconCodePoint = 13131;
     private const string CreatedBy = "user/admin1";
     private const string UpdatedBy = "user/admin2";
-    
-    private const string RetailerName = "My Retailer";
-    private const string SubmissionTypeName = "My SubmissionType";
-    
+
     [Fact]
     public void Submission_Ctor_ShouldCreateEmpty()
     {
         // arrange
-        
+
         // act
         var entity = new SubmissionTemplateEntity();
-        
+
         // assert
         Assert.NotNull(entity);
         Assert.Equal(Guid.Empty, entity.Id);
         Assert.Equal(0, entity.EventsCount);
     }
-    
+
     [Fact]
     public void Submission_Ctor_ShouldCreateEvent()
     {
         // arrange
-        
+
         // act
         var entity = GetNewSubmission();
-        
+
         // assert
         Assert.NotNull(entity);
         Assert.NotEqual(Guid.Empty, entity.Id);
-        Assert.Equal(Name, entity.Name);
-        Assert.Equal(Status, entity.Status);
-        Assert.Equal(ExternalReferenceId, entity.ExternalReferenceId);
-        Assert.NotEqual(Guid.Empty, entity.RetailerId);
-        Assert.NotEqual(Guid.Empty, entity.SubmissionTypeId);
+        Assert.Equal(Title, entity.Title);
+        Assert.Equal(Description, entity.Description);
+        Assert.Equal(IconFontFamily, entity.IconFontFamily);
+        Assert.Equal(IconCodePoint, entity.IconCodePoint);
         Assert.Equal(CreatedBy, entity.CreatedBy);
         Assert.Equal(1, entity.EventsCount);
     }
-    
+
     [Fact]
-    public void Submission_UpdateSubmission_ShouldUpdate()
+    public void Submission_AddStep_ShouldAddStep()
     {
         // arrange
-        var updateEvent = new UpdateSubmission("New Name", null, null, null);
         var entity = GetNewSubmission();
-        
+        var addEvent = GetAddStep(entity.Id);
+
         // act
-        entity.Apply(updateEvent, UpdatedBy);
-        
+        entity.Apply(addEvent, UpdatedBy);
+
         // assert
         Assert.NotNull(entity);
-        Assert.Equal(updateEvent.Name, updateEvent.Name);
-        Assert.Equal(Status, entity.Status);
+        Assert.Equal(addEvent.Id, entity.Steps.Single().Id);
+        Assert.Equal(addEvent.Title, entity.Steps.Single().Title);
+        Assert.Equal(addEvent.Instructions, entity.Steps.Single().Instructions);
         Assert.Equal(UpdatedBy, entity.UpdatedBy);
         Assert.Equal(2, entity.EventsCount);
     }
-    
+
+
     [Fact]
-    public void Submission_AddSubmissionAddress_ShouldAddAddress()
+    public void Submission_RemoveStep_ShouldRemoveStep()
     {
         // arrange
         var entity = GetNewSubmission();
-        var addEvent = GetAddSubmissionAddress(entity.Id);
-        
-        // act
+        var addEvent = GetAddStep(entity.Id);
+        var removeEvent = new RemoveStep(addEvent.Id, entity.Id);
         entity.Apply(addEvent, UpdatedBy);
-        
-        // assert
-        Assert.NotNull(entity);
-        Assert.Equal(addEvent.Id, entity.Addresses.Single().Id);
-        Assert.Equal(addEvent.AddressLine1, entity.Addresses.Single().AddressLine1);
-        Assert.Equal(addEvent.AddressLine2, entity.Addresses.Single().AddressLine2);
-        Assert.Equal(UpdatedBy, entity.UpdatedBy);
-        Assert.Equal(2, entity.EventsCount);
-    }
-    
-    [Fact]
-    public void Submission_UpdateSubmissionAddress_ShouldUpdateAddress()
-    {
-        // arrange
-        var entity = GetNewSubmission();
-        var addEvent = GetAddSubmissionAddress(entity.Id);
-        var updateEvent = new UpdateSubmissionAddress(
-            addEvent.Id,
-            entity.Id,
-            addEvent.AddressLine1 + " Updated",
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null);
-        entity.Apply(addEvent, UpdatedBy);
-        
-        // act
-        entity.Apply(updateEvent, UpdatedBy);
-        
-        // assert
-        Assert.NotNull(entity);
-        Assert.Equal(addEvent.Id, entity.Addresses.Single().Id);
-        Assert.Equal(updateEvent.AddressLine1, entity.Addresses.Single().AddressLine1);
-        Assert.Equal(addEvent.AddressLine2, entity.Addresses.Single().AddressLine2);
-        Assert.Equal(UpdatedBy, entity.UpdatedBy);
-        Assert.Equal(3, entity.EventsCount);
-    }
-    
-    [Fact]
-    public void Submission_RemoveAddressFromSubmission_ShouldRemoveAddress()
-    {
-        // arrange
-        var entity = GetNewSubmission();
-        var addEvent = GetAddSubmissionAddress(entity.Id);
-        var removeEvent = new RemoveAddressFromSubmission(addEvent.Id, entity.Id);
-        entity.Apply(addEvent, UpdatedBy);
-        
+
         // act
         entity.Apply(removeEvent, UpdatedBy);
-        
+
         // assert
         Assert.NotNull(entity);
-        Assert.Empty(entity.Addresses);
+        Assert.Empty(entity.Steps);
         Assert.Equal(UpdatedBy, entity.UpdatedBy);
         Assert.Equal(3, entity.EventsCount);
     }
-    
+
     private SubmissionTemplateEntity GetNewSubmission() => new SubmissionTemplateEntity(
-        Name,
-        Status,
-        ExternalReferenceId,
-        GetRetailerRecord().Id,
-        GetSubmissionTypeRecord().Id,
+        Title,
+        Description,
+        IconCodePoint,
+        IconFontFamily,
         CreatedBy);
-    private AddSubmissionAddress GetAddSubmissionAddress(Guid storeId) => new AddSubmissionAddress(
-        Guid.NewGuid(), 
+
+    private AddStep GetAddStep(Guid storeId) => new AddStep(
+        Guid.NewGuid(),
         storeId,
-        Guid.NewGuid().ToString(), 
-        nameof(AddSubmissionAddress.AddressLine1), 
-        nameof(AddSubmissionAddress.AddressLine2), 
-        nameof(AddSubmissionAddress.Suburb), 
-        nameof(AddSubmissionAddress.State), 
-        nameof(AddSubmissionAddress.Postcode),
-        nameof(AddSubmissionAddress.Country),
-        0,
-        0);
-    private RetailerRecord GetRetailerRecord() => new RetailerRecord(
-        Guid.NewGuid(), 
-        Guid.NewGuid().ToString(), 
-        RetailerName, 
-        CreatedBy, 
-        UpdatedBy, 
-        DateTime.UtcNow.AddDays(-1), 
-        DateTime.UtcNow);
-    private SubmissionTypeRecord GetSubmissionTypeRecord() => new SubmissionTypeRecord(
-        Guid.NewGuid(), 
-        Guid.NewGuid().ToString(), 
-        SubmissionTypeName, 
-        CreatedBy, 
-        UpdatedBy, 
-        DateTime.UtcNow.AddDays(-1), 
-        DateTime.UtcNow);
+        Guid.NewGuid().ToString(),
+        nameof(AddStep.Instructions),
+        nameof(AddStep.InstructionsContinueButton),
+        nameof(AddStep.InstructionsSkipButton),
+        1213,
+        nameof(AddStep.InstructionsIconFontFamily),
+        new List<FieldRecord>(),
+        nameof(CreatedBy),
+        nameof(UpdatedBy)
+    );
 }

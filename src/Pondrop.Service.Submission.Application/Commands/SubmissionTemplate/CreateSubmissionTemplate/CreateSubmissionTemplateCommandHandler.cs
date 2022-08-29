@@ -49,6 +49,8 @@ public class CreateSubmissionTemplateCommandHandler : DirtyCommandHandler<Submis
 
         var result = default(Result<SubmissionTemplateRecord>);
 
+        var createdBy = !string.IsNullOrEmpty(command.CreatedBy) ? command.CreatedBy : _userService.CurrentUserName();
+
         try
         {
 
@@ -57,7 +59,8 @@ public class CreateSubmissionTemplateCommandHandler : DirtyCommandHandler<Submis
                 command.Description,
                 command.IconCodePoint,
                 command.IconFontFamily,
-                _userService.CurrentUserName());
+                createdBy
+               );
 
             foreach (var step in command.Steps)
             {
@@ -71,8 +74,8 @@ public class CreateSubmissionTemplateCommandHandler : DirtyCommandHandler<Submis
                     step!.InstructionsIconCodePoint,
                     step!.InstructionsIconFontFamily,
                     step!.Fields,
-                    _userService.CurrentUserName(),
-                    _userService.CurrentUserName()), _userService.CurrentUserName());
+                    createdBy,
+                    createdBy), createdBy);
             }
             var success = await _eventRepository.AppendEventsAsync(submissionTemplateEntity.StreamId, 0, submissionTemplateEntity.GetEvents());
 
