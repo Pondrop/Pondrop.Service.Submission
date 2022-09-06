@@ -21,13 +21,13 @@ public class CreateSubmissionTemplateCommandHandler : DirtyCommandHandler<Submis
     private readonly ILogger<CreateSubmissionTemplateCommandHandler> _logger;
 
     public CreateSubmissionTemplateCommandHandler(
-        IOptions<SubmissionUpdateConfiguration> submissionTemplateUpdateConfig,
+        IOptions<SubmissionUpdateConfiguration> SubmissionTemplateUpdateConfig,
         IEventRepository eventRepository,
         IDaprService daprService,
         IUserService userService,
         IMapper mapper,
         IValidator<CreateSubmissionTemplateCommand> validator,
-        ILogger<CreateSubmissionTemplateCommandHandler> logger) : base(eventRepository, submissionTemplateUpdateConfig.Value, daprService, logger)
+        ILogger<CreateSubmissionTemplateCommandHandler> logger) : base(eventRepository, SubmissionTemplateUpdateConfig.Value, daprService, logger)
     {
         _eventRepository = eventRepository;
         _mapper = mapper;
@@ -42,7 +42,7 @@ public class CreateSubmissionTemplateCommandHandler : DirtyCommandHandler<Submis
 
         if (!validation.IsValid)
         {
-            var errorMessage = $"Create submission template failed, errors on validation {validation}";
+            var errorMessage = $"Create submissionTemplate template failed, errors on validation {validation}";
             _logger.LogError(errorMessage);
             return Result<SubmissionTemplateRecord>.Error(errorMessage);
         }
@@ -54,36 +54,38 @@ public class CreateSubmissionTemplateCommandHandler : DirtyCommandHandler<Submis
         try
         {
 
-            var submissionTemplateEntity = new SubmissionTemplateEntity(
+            var SubmissionTemplateEntity = new SubmissionTemplateEntity(
                 command.Title,
                 command.Description,
                 command.IconCodePoint,
                 command.IconFontFamily,
+                command.Summary,
                 createdBy
                );
 
             foreach (var step in command.Steps)
             {
-                submissionTemplateEntity.Apply(new AddStep(
+                SubmissionTemplateEntity.Apply(new AddStepToSubmissionTemplate(
                     Guid.NewGuid(),
-                    submissionTemplateEntity.Id,
+                    SubmissionTemplateEntity.Id,
                     step!.Title,
                     step!.Instructions,
                     step!.InstructionsContinueButton,
                     step!.InstructionsSkipButton,
                     step!.InstructionsIconCodePoint,
                     step!.InstructionsIconFontFamily,
+                    step!.IsSummary,
                     step!.Fields,
                     createdBy,
                     createdBy), createdBy);
             }
-            var success = await _eventRepository.AppendEventsAsync(submissionTemplateEntity.StreamId, 0, submissionTemplateEntity.GetEvents());
+            var success = await _eventRepository.AppendEventsAsync(SubmissionTemplateEntity.StreamId, 0, SubmissionTemplateEntity.GetEvents());
 
             await Task.WhenAll(
-                InvokeDaprMethods(submissionTemplateEntity.Id, submissionTemplateEntity.GetEvents()));
+                InvokeDaprMethods(SubmissionTemplateEntity.Id, SubmissionTemplateEntity.GetEvents()));
 
             result = success
-                ? Result<SubmissionTemplateRecord>.Success(_mapper.Map<SubmissionTemplateRecord>(submissionTemplateEntity))
+                ? Result<SubmissionTemplateRecord>.Success(_mapper.Map<SubmissionTemplateRecord>(SubmissionTemplateEntity))
                 : Result<SubmissionTemplateRecord>.Error(FailedToCreateMessage(command));
         }
         catch (Exception ex)
@@ -96,5 +98,5 @@ public class CreateSubmissionTemplateCommandHandler : DirtyCommandHandler<Submis
     }
 
     private static string FailedToCreateMessage(CreateSubmissionTemplateCommand command) =>
-        $"Failed to create submission template \nCommand: '{JsonConvert.SerializeObject(command)}'";
+        $"Failed to create submissionTemplate template \nCommand: '{JsonConvert.SerializeObject(command)}'";
 }

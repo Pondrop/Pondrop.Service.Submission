@@ -34,10 +34,10 @@ public static class SubmissionFaker
         return faker.Generate(Math.Max(0, count));
     }
 
-    public static List<SubmissionViewRecord> GetSubmissionTemplateViewRecords(int count = 5)
+    public static List<SubmissionTemplateViewRecord> GetSubmissionTemplateViewRecords(int count = 5)
     {
 
-        var faker = new Faker<SubmissionViewRecord>()
+        var faker = new Faker<SubmissionTemplateViewRecord>()
             .RuleFor(x => x.Id, f => Guid.NewGuid())
             .RuleFor(x => x.Title, f => f.PickRandom(Titles))
             .RuleFor(x => x.Description, f => f.PickRandom(Descriptions))
@@ -92,9 +92,9 @@ public static class SubmissionFaker
         return faker.Generate();
     }
 
-    public static AddStepCommand GetAddStepCommand()
+    public static AddStepToSubmissionTemplateCommand GetAddStepCommand()
     {
-        var faker = new Faker<AddStepCommand>()
+        var faker = new Faker<AddStepToSubmissionTemplateCommand>()
             .RuleFor(x => x.SubmissionId, f => Guid.NewGuid())
             .RuleFor(x => x.Title, f => f.PickRandom(Titles))
             .RuleFor(x => x.Instructions, f => f.PickRandom(Instructions))
@@ -112,7 +112,7 @@ public static class SubmissionFaker
     {
         var utcNow = DateTime.UtcNow;
 
-        var faker = new Faker<SubmissionViewRecord>()
+        var faker = new Faker<SubmissionTemplateViewRecord>()
             .RuleFor(x => x.Id, f => Guid.NewGuid())
             .RuleFor(x => x.Title, f => f.PickRandom(Titles))
             .RuleFor(x => x.Description, f => f.PickRandom(Descriptions))

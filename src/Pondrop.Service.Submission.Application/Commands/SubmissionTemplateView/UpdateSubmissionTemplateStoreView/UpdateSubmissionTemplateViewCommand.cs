@@ -4,7 +4,7 @@ using Pondrop.Service.Submission.Domain.Models;
 
 namespace Pondrop.Service.Submission.Application.Commands;
 
-public class UpdateSubmissionViewCommand : IRequest<Result<int>>
+public class UpdateSubmissionTemplateViewCommand : IRequest<Result<int>>
 {
-    public Guid? SubmissionId { get; init; } = null;
+    public Guid? SubmissionTemplateId { get; init; } = null;
 }

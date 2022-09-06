@@ -10,38 +10,38 @@ using Pondrop.Service.Submission.Domain.Models.SubmissionTemplate;
 
 namespace Pondrop.Service.Submission.Application.Commands;
 
-public class UpdateSubmissionViewCommandHandler : IRequestHandler<UpdateSubmissionViewCommand, Result<int>>
+public class UpdateSubmissionTemplateViewCommandHandler : IRequestHandler<UpdateSubmissionTemplateViewCommand, Result<int>>
 {
-    private readonly ICheckpointRepository<SubmissionTemplateEntity> _submissionCheckpointRepository;
-    private readonly IContainerRepository<SubmissionViewRecord> _containerRepository;
+    private readonly ICheckpointRepository<SubmissionTemplateEntity> _submissionTemplateCheckpointRepository;
+    private readonly IContainerRepository<SubmissionTemplateViewRecord> _containerRepository;
     private readonly IMapper _mapper;
     private readonly IUserService _userService;
-    private readonly ILogger<UpdateSubmissionViewCommandHandler> _logger;
+    private readonly ILogger<UpdateSubmissionTemplateViewCommandHandler> _logger;
 
-    public UpdateSubmissionViewCommandHandler(
-        ICheckpointRepository<SubmissionTemplateEntity> submissionCheckpointRepository,
-        IContainerRepository<SubmissionViewRecord> containerRepository,
+    public UpdateSubmissionTemplateViewCommandHandler(
+        ICheckpointRepository<SubmissionTemplateEntity> submissionTemplateCheckpointRepository,
+        IContainerRepository<SubmissionTemplateViewRecord> containerRepository,
         IMapper mapper,
         IUserService userService,
-        ILogger<UpdateSubmissionViewCommandHandler> logger) : base()
+        ILogger<UpdateSubmissionTemplateViewCommandHandler> logger) : base()
     {
-        _submissionCheckpointRepository = submissionCheckpointRepository;
+        _submissionTemplateCheckpointRepository = submissionTemplateCheckpointRepository;
         _containerRepository = containerRepository;
         _mapper = mapper;
         _userService = userService;
         _logger = logger;
     }
 
-    public async Task<Result<int>> Handle(UpdateSubmissionViewCommand command, CancellationToken cancellationToken)
+    public async Task<Result<int>> Handle(UpdateSubmissionTemplateViewCommand command, CancellationToken cancellationToken)
     {
-        if (!command.SubmissionId.HasValue)
+        if (!command.SubmissionTemplateId.HasValue)
             return Result<int>.Success(0);
 
         var result = default(Result<int>);
 
         try
         {
-            var affectedSubmissionsTask = GetAffectedSubmissionsAsync(command.SubmissionId);
+            var affectedSubmissionsTask = GetAffectedSubmissionsAsync(command.SubmissionTemplateId);
 
             await Task.WhenAll(affectedSubmissionsTask);
 
@@ -51,13 +51,13 @@ public class UpdateSubmissionViewCommandHandler : IRequestHandler<UpdateSubmissi
 
                 try
                 {
-                    var submissionView = _mapper.Map<SubmissionViewRecord>(i);
-                    var result = await _containerRepository.UpsertAsync(submissionView);
+                    var submissionTemplateView = _mapper.Map<SubmissionTemplateViewRecord>(i);
+                    var result = await _containerRepository.UpsertAsync(submissionTemplateView);
                     success = result != null;
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, $"Failed to update submission view for '{i.Id}'");
+                    _logger.LogError(ex, $"Failed to update submissionTemplate view for '{i.Id}'");
                 }
 
                 return success;
@@ -76,18 +76,18 @@ public class UpdateSubmissionViewCommandHandler : IRequestHandler<UpdateSubmissi
         return result;
     }
 
-    private async Task<List<SubmissionTemplateEntity>> GetAffectedSubmissionsAsync(Guid? submissionId)
+    private async Task<List<SubmissionTemplateEntity>> GetAffectedSubmissionsAsync(Guid? submissionTemplateId)
     {
-        const string submissionIdKey = "@submissionId";
+        const string submissionTemplateIdKey = "@submissionTemplateId";
 
         var conditions = new List<string>();
         var parameters = new Dictionary<string, string>();
 
 
-        if (submissionId.HasValue)
+        if (submissionTemplateId.HasValue)
         {
-            conditions.Add($"c.id = {submissionIdKey}");
-            parameters.Add(submissionIdKey, submissionId.Value.ToString());
+            conditions.Add($"c.id = {submissionTemplateIdKey}");
+            parameters.Add(submissionTemplateIdKey, submissionTemplateId.Value.ToString());
         }
 
         if (!conditions.Any())
@@ -95,10 +95,10 @@ public class UpdateSubmissionViewCommandHandler : IRequestHandler<UpdateSubmissi
 
         var sqlQueryText = $"SELECT * FROM c WHERE {string.Join(" AND ", conditions)}";
 
-        var affectedSubmissions = await _submissionCheckpointRepository.QueryAsync(sqlQueryText, parameters);
+        var affectedSubmissions = await _submissionTemplateCheckpointRepository.QueryAsync(sqlQueryText, parameters);
         return affectedSubmissions;
     }
 
-    private static string FailedToMessage(UpdateSubmissionViewCommand command) =>
-        $"Failed to update submission view '{JsonConvert.SerializeObject(command)}'";
+    private static string FailedToMessage(UpdateSubmissionTemplateViewCommand command) =>
+        $"Failed to update submissionTemplate view '{JsonConvert.SerializeObject(command)}'";
 }

@@ -25,9 +25,9 @@ public record SubmissionTemplateEntity : EventEntity
         }
     }
 
-    public SubmissionTemplateEntity(string title, string description, int iconCodePoint, string iconFontFamily, string createdBy) : this()
+    public SubmissionTemplateEntity(string title, string description, int iconCodePoint, string iconFontFamily, FieldRecord summary, string createdBy) : this()
     {
-        var create = new CreateSubmissionTemplate(Guid.NewGuid(), title, description, iconCodePoint, iconFontFamily);
+        var create = new CreateSubmissionTemplate(Guid.NewGuid(), title, description, iconCodePoint, iconFontFamily, summary);
         Apply(create, createdBy);
     }
 
@@ -43,6 +43,9 @@ public record SubmissionTemplateEntity : EventEntity
     [JsonProperty("iconFontFamily")]
     public string IconFontFamily { get; private set; }
 
+    [JsonProperty("summary")]
+    public FieldRecord Summary { get; private set; }
+
     [JsonProperty(PropertyName = "steps")]
     public List<StepRecord> Steps { get; private set; }
 
@@ -53,10 +56,10 @@ public record SubmissionTemplateEntity : EventEntity
             case CreateSubmissionTemplate create:
                 When(create, eventToApply.CreatedBy, eventToApply.CreatedUtc);
                 break;
-            case AddStep addStep:
+            case AddStepToSubmissionTemplate addStep:
                 When(addStep, eventToApply.CreatedBy, eventToApply.CreatedUtc);
                 break;
-            case RemoveStep removeStep:
+            case RemoveStepFromSubmissionTemplate removeStep:
                 When(removeStep, eventToApply.CreatedBy, eventToApply.CreatedUtc);
                 break;
             default:
@@ -87,11 +90,12 @@ public record SubmissionTemplateEntity : EventEntity
         Description = create.Description;
         IconCodePoint = create.IconCodePoint;
         IconFontFamily = create.IconFontFamily;
+        Summary = create.Summary;
         CreatedBy = UpdatedBy = createdBy;
         CreatedUtc = UpdatedUtc = createdUtc;
     }
 
-    private void When(AddStep step, string createdBy, DateTime createdUtc)
+    private void When(AddStepToSubmissionTemplate step, string createdBy, DateTime createdUtc)
     {
         Steps.Add(new StepRecord(
             step.Id,
@@ -101,6 +105,7 @@ public record SubmissionTemplateEntity : EventEntity
             step.InstructionsSkipButton,
             step.InstructionsIconCodePoint,
             step.InstructionsIconFontFamily,
+            step.IsSummary,
             step.Fields,
             createdBy,
             createdBy,
@@ -111,7 +116,7 @@ public record SubmissionTemplateEntity : EventEntity
         UpdatedUtc = createdUtc;
     }
 
-    private void When(RemoveStep removeItemFromList, string updatedBy, DateTime updatedUtc)
+    private void When(RemoveStepFromSubmissionTemplate removeItemFromList, string updatedBy, DateTime updatedUtc)
     {
         var step = Steps.Single(i => i.Id == removeItemFromList.Id);
         Steps.Remove(step);

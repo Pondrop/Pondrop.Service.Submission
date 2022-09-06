@@ -10,14 +10,14 @@ using Pondrop.Service.Submission.Domain.Models.SubmissionTemplate;
 
 namespace Pondrop.Service.Submission.Application.Queries;
 
-public class GetSubmissionTemplateByIdQueryHandler : IRequestHandler<GetSubmissionTemplateByIdQuery, Result<SubmissionViewRecord?>>
+public class GetSubmissionTemplateByIdQueryHandler : IRequestHandler<GetSubmissionTemplateByIdQuery, Result<SubmissionTemplateViewRecord?>>
 {
-    private readonly IContainerRepository<SubmissionViewRecord> _viewRepository;
+    private readonly IContainerRepository<SubmissionTemplateViewRecord> _viewRepository;
     private readonly IValidator<GetSubmissionTemplateByIdQuery> _validator;
     private readonly ILogger<GetSubmissionTemplateByIdQueryHandler> _logger;
 
     public GetSubmissionTemplateByIdQueryHandler(
-        IContainerRepository<SubmissionViewRecord> viewRepository,
+        IContainerRepository<SubmissionTemplateViewRecord> viewRepository,
         IValidator<GetSubmissionTemplateByIdQuery> validator,
         ILogger<GetSubmissionTemplateByIdQueryHandler> logger)
     {
@@ -26,30 +26,30 @@ public class GetSubmissionTemplateByIdQueryHandler : IRequestHandler<GetSubmissi
         _logger = logger;
     }
 
-    public async Task<Result<SubmissionViewRecord?>> Handle(GetSubmissionTemplateByIdQuery query, CancellationToken cancellationToken)
+    public async Task<Result<SubmissionTemplateViewRecord?>> Handle(GetSubmissionTemplateByIdQuery query, CancellationToken cancellationToken)
     {
         var validation = _validator.Validate(query);
 
         if (!validation.IsValid)
         {
-            var errorMessage = $"Get submission template by id failed {validation}";
+            var errorMessage = $"Get submissionTemplate template by id failed {validation}";
             _logger.LogError(errorMessage);
-            return Result<SubmissionViewRecord?>.Error(errorMessage);
+            return Result<SubmissionTemplateViewRecord?>.Error(errorMessage);
         }
 
-        var result = default(Result<SubmissionViewRecord?>);
+        var result = default(Result<SubmissionTemplateViewRecord?>);
 
         try
         {
             var record = await _viewRepository.GetByIdAsync(query.Id);
             result = record is not null
-                ? Result<SubmissionViewRecord?>.Success(record)
-                : Result<SubmissionViewRecord?>.Success(null);
+                ? Result<SubmissionTemplateViewRecord?>.Success(record)
+                : Result<SubmissionTemplateViewRecord?>.Success(null);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, ex.Message);
-            result = Result<SubmissionViewRecord?>.Error(ex);
+            result = Result<SubmissionTemplateViewRecord?>.Error(ex);
         }
 
         return result;

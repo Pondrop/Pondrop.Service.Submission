@@ -1,3 +1,5 @@
+using Pondrop.Service.Submission.Domain.Models.SubmissionTemplate;
+
 namespace Pondrop.Service.Submission.Domain.Events.SubmissionTemplate;
 
 public record CreateSubmissionTemplate(
@@ -5,4 +7,5 @@ public record CreateSubmissionTemplate(
     string Title,
     string Description,
     int IconCodePoint,
-    string IconFontFamily) : EventPayload;
+    string IconFontFamily,
+    FieldRecord Summary) : EventPayload;

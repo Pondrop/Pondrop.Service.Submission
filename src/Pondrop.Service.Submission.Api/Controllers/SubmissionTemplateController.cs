@@ -15,23 +15,23 @@ using System.Security.Claims;
 
 namespace Pondrop.Service.Submission.Api.Controllers;
 
-[Authorize]
+[AllowAnonymous]
 [ApiController]
 [Route("[controller]")]
-public class SubmissionController : ControllerBase
+public class SubmissionTemplateController : ControllerBase
 {
     private readonly IMediator _mediator;
     private readonly IServiceBusService _serviceBusService;
     private readonly IRebuildCheckpointQueueService _rebuildCheckpointQueueService;
     private readonly ITokenProvider _jwtTokenProvider;
-    private readonly ILogger<SubmissionController> _logger;
+    private readonly ILogger<SubmissionTemplateController> _logger;
 
-    public SubmissionController(
+    public SubmissionTemplateController(
         IMediator mediator,
         ITokenProvider jWTTokenProvider,
         IServiceBusService serviceBusService,
         IRebuildCheckpointQueueService rebuildCheckpointQueueService,
-        ILogger<SubmissionController> logger)
+        ILogger<SubmissionTemplateController> logger)
     {
         _mediator = mediator;
         _serviceBusService = serviceBusService;
@@ -84,13 +84,13 @@ public class SubmissionController : ControllerBase
         if (claimsPrincipal is null)
             return new UnauthorizedResult();
 
-        command.CreatedBy = _jwtTokenProvider.GetClaim(claimsPrincipal, ClaimTypes.Email);
+        //command.CreatedBy = _jwtTokenProvider.GetClaim(claimsPrincipal, ClaimTypes.Email);
 
         var result = await _mediator.Send(command);
         return await result.MatchAsync<IActionResult>(
             async i =>
             {
-                await _serviceBusService.SendMessageAsync(new UpdateSubmissionCheckpointByIdCommand() { Id = i!.Id });
+                await _serviceBusService.SendMessageAsync(new UpdateSubmissionTemplateCheckpointByIdCommand() { Id = i!.Id });
                 return StatusCode(StatusCodes.Status201Created, i);
             },
             (ex, msg) => Task.FromResult<IActionResult>(new BadRequestObjectResult(msg)));
@@ -101,7 +101,7 @@ public class SubmissionController : ControllerBase
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> AddStep([FromBody] AddStepCommand command)
+    public async Task<IActionResult> AddStepToSubmissionTemplate([FromBody] AddStepToSubmissionTemplateCommand command)
     {
         var claimsPrincipal = _jwtTokenProvider.ValidateToken(Request?.Headers[HeaderNames.Authorization] ?? string.Empty);
         if (claimsPrincipal is null)
@@ -113,18 +113,18 @@ public class SubmissionController : ControllerBase
         return await result.MatchAsync<IActionResult>(
             async i =>
             {
-                await _serviceBusService.SendMessageAsync(new UpdateSubmissionCheckpointByIdCommand() { Id = i!.Id });
+                await _serviceBusService.SendMessageAsync(new UpdateSubmissionTemplateCheckpointByIdCommand() { Id = i!.Id });
                 return StatusCode(StatusCodes.Status201Created, i);
             },
             (ex, msg) => Task.FromResult<IActionResult>(new BadRequestObjectResult(msg)));
     }
 
 
-    [HttpPost]
+    [HttpDelete]
     [Route("step/remove")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> RemoveStep([FromBody] RemoveStepCommand command)
+    public async Task<IActionResult> RemoveStepFromTemplate([FromBody] RemoveStepFromSubmissionTemplateCommand command)
     {
         var claimsPrincipal = _jwtTokenProvider.ValidateToken(Request?.Headers[HeaderNames.Authorization] ?? string.Empty);
         if (claimsPrincipal is null)
@@ -136,7 +136,7 @@ public class SubmissionController : ControllerBase
         return await result.MatchAsync<IActionResult>(
             async i =>
             {
-                await _serviceBusService.SendMessageAsync(new UpdateSubmissionCheckpointByIdCommand() { Id = i!.Id });
+                await _serviceBusService.SendMessageAsync(new UpdateSubmissionTemplateCheckpointByIdCommand() { Id = i!.Id });
                 return new OkObjectResult(i);
             },
             (ex, msg) => Task.FromResult<IActionResult>(new BadRequestObjectResult(msg)));
@@ -148,7 +148,7 @@ public class SubmissionController : ControllerBase
     [Route("update/checkpoint")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> UpdateCheckpoint([FromBody] UpdateSubmissionCheckpointByIdCommand command)
+    public async Task<IActionResult> UpdateCheckpoint([FromBody] UpdateSubmissionTemplateCheckpointByIdCommand command)
     {
         var result = await _mediator.Send(command);
         return result.Match<IActionResult>(

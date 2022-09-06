@@ -4,11 +4,11 @@ using Pondrop.Service.Submission.Domain.Models.SubmissionTemplate;
 
 namespace Pondrop.Service.Submission.Domain.Mapper;
 
-public class SubmissionProfile : Profile
+public class SubmissionTemplateProfile : Profile
 {
-    public SubmissionProfile()
+    public SubmissionTemplateProfile()
     {
         CreateMap<SubmissionTemplateEntity, SubmissionTemplateRecord>();
-        CreateMap<SubmissionTemplateEntity, SubmissionViewRecord>();
+        CreateMap<SubmissionTemplateEntity, SubmissionTemplateViewRecord>();
     }
 }

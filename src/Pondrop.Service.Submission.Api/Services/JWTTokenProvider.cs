@@ -60,7 +60,7 @@ public class JWTTokenProvider : ITokenProvider
         TokenValidationParameters validationParameters = new TokenValidationParameters();
         validationParameters.IssuerSigningKey = new SymmetricSecurityKey(_tokenKey);
         validationParameters.ValidateAudience = false;
-        validationParameters.ValidateIssuer = false;    
+        validationParameters.ValidateIssuer = false;
 
         ClaimsPrincipal principal = new JwtSecurityTokenHandler().ValidateToken(token, validationParameters, out var validatedToken);
 

@@ -1,6 +1,6 @@
 ﻿namespace Pondrop.Service.Submission.Domain.Models.SubmissionTemplate;
 
-public record SubmissionViewRecord(
+public record SubmissionTemplateViewRecord(
          Guid Id,
         string Title,
         string Description,
@@ -13,7 +13,7 @@ public record SubmissionViewRecord(
         DateTime UpdatedUtc)
     : SubmissionTemplateRecord(Id, Title, Description, IconCodePoint, IconFontFamily, Steps, CreatedBy, UpdatedBy, CreatedUtc, UpdatedUtc)
 {
-    public SubmissionViewRecord() : this(
+    public SubmissionTemplateViewRecord() : this(
         Guid.Empty,
         string.Empty,
         string.Empty,

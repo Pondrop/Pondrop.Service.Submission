@@ -14,6 +14,7 @@ using Pondrop.Service.Submission.Application.Interfaces;
 using Pondrop.Service.Submission.Application.Interfaces.Services;
 using Pondrop.Service.Submission.Application.Models;
 using Pondrop.Service.Submission.Domain.Models;
+using Pondrop.Service.Submission.Domain.Models.Submission;
 using Pondrop.Service.Submission.Domain.Models.SubmissionTemplate;
 using Pondrop.Service.Submission.Infrastructure.CosmosDb;
 using Pondrop.Service.Submission.Infrastructure.Dapr;
@@ -112,7 +113,9 @@ services.AddSingleton<IRebuildCheckpointQueueService, RebuildCheckpointQueueServ
 services.AddSingleton<IAddressService, AddressService>();
 services.AddSingleton<IUserService, UserService>();
 services.AddSingleton<IEventRepository, EventRepository>();
+services.AddSingleton<ICheckpointRepository<SubmissionEntity>, CheckpointRepository<SubmissionEntity>>();
 services.AddSingleton<ICheckpointRepository<SubmissionTemplateEntity>, CheckpointRepository<SubmissionTemplateEntity>>();
+services.AddSingleton<IContainerRepository<SubmissionTemplateViewRecord>, ContainerRepository<SubmissionTemplateViewRecord>>();
 services.AddSingleton<IContainerRepository<SubmissionViewRecord>, ContainerRepository<SubmissionViewRecord>>();
 services.AddSingleton<IDaprService, DaprService>();
 services.AddSingleton<IServiceBusService, ServiceBusService>();

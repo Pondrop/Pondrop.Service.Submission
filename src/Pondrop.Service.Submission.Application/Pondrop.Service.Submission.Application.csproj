@@ -7,12 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Commands\SubmissionView\**" />
-    <EmbeddedResource Remove="Commands\SubmissionView\**" />
-    <None Remove="Commands\SubmissionView\**" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="AutoMapper" Version="11.0.1" />
     <PackageReference Include="Dapr.Client" Version="1.8.0" />
     <PackageReference Include="FluentValidation" Version="11.1.0" />

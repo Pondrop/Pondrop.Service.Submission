@@ -4,6 +4,6 @@ using Pondrop.Service.Submission.Domain.Models;
 
 namespace Pondrop.Service.Submission.Application.Commands;
 
-public class RebuildSubmissionViewCommand : IRequest<Result<int>>
+public class RebuildSubmissionTemplateViewCommand : IRequest<Result<int>>
 {
 }
