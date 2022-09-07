@@ -45,10 +45,6 @@ public class SubmissionTemplateController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> GetAllSubmissionTemplates()
     {
-        //var claimsPrincipal = _jwtTokenProvider.ValidateToken(Request?.Headers[HeaderNames.Authorization] ?? string.Empty);
-        //if (claimsPrincipal is null)
-        //    return new UnauthorizedResult();
-
         var result = await _mediator.Send(new GetAllSubmissionTemplatesQuery());
         return result.Match<IActionResult>(
             i => new OkObjectResult(i),
@@ -63,10 +59,6 @@ public class SubmissionTemplateController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> GetSubmissionTemplateById([FromRoute] Guid id)
     {
-        //var claimsPrincipal = _jwtTokenProvider.ValidateToken(Request?.Headers[HeaderNames.Authorization] ?? string.Empty);
-        //if (claimsPrincipal is null)
-        //    return new UnauthorizedResult();
-
         var result = await _mediator.Send(new GetSubmissionTemplateByIdQuery() { Id = id });
         return result.Match<IActionResult>(
             i => i is not null ? new OkObjectResult(i) : new NotFoundResult(),
@@ -80,12 +72,6 @@ public class SubmissionTemplateController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> CreateSubmissionTemplate([FromBody] CreateSubmissionTemplateCommand command)
     {
-        var claimsPrincipal = _jwtTokenProvider.ValidateToken(Request?.Headers[HeaderNames.Authorization] ?? string.Empty);
-        if (claimsPrincipal is null)
-            return new UnauthorizedResult();
-
-        //command.CreatedBy = _jwtTokenProvider.GetClaim(claimsPrincipal, ClaimTypes.Email);
-
         var result = await _mediator.Send(command);
         return await result.MatchAsync<IActionResult>(
             async i =>
@@ -103,11 +89,6 @@ public class SubmissionTemplateController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> AddStepToSubmissionTemplate([FromBody] AddStepToSubmissionTemplateCommand command)
     {
-        var claimsPrincipal = _jwtTokenProvider.ValidateToken(Request?.Headers[HeaderNames.Authorization] ?? string.Empty);
-        if (claimsPrincipal is null)
-            return new UnauthorizedResult();
-
-        command.CreatedBy = _jwtTokenProvider.GetClaim(claimsPrincipal, ClaimTypes.Email);
 
         var result = await _mediator.Send(command);
         return await result.MatchAsync<IActionResult>(
@@ -126,12 +107,6 @@ public class SubmissionTemplateController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> RemoveStepFromTemplate([FromBody] RemoveStepFromSubmissionTemplateCommand command)
     {
-        var claimsPrincipal = _jwtTokenProvider.ValidateToken(Request?.Headers[HeaderNames.Authorization] ?? string.Empty);
-        if (claimsPrincipal is null)
-            return new UnauthorizedResult();
-
-        command.UpdatedBy = _jwtTokenProvider.GetClaim(claimsPrincipal, ClaimTypes.Email);
-
         var result = await _mediator.Send(command);
         return await result.MatchAsync<IActionResult>(
             async i =>

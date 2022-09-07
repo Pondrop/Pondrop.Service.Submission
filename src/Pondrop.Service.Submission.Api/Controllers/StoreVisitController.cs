@@ -43,10 +43,6 @@ public class StoreVisitController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> GetAllStoreVisits()
     {
-        var claimsPrincipal = _jwtTokenProvider.ValidateToken(Request?.Headers[HeaderNames.Authorization] ?? string.Empty);
-        if (claimsPrincipal is null)
-            return new UnauthorizedResult();
-
         var result = await _mediator.Send(new GetAllStoreVisitsQuery());
         return result.Match<IActionResult>(
             i => new OkObjectResult(i),
@@ -61,10 +57,6 @@ public class StoreVisitController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> GetStoreVisitById([FromRoute] Guid id)
     {
-        var claimsPrincipal = _jwtTokenProvider.ValidateToken(Request?.Headers[HeaderNames.Authorization] ?? string.Empty);
-        if (claimsPrincipal is null)
-            return new UnauthorizedResult();
-
         var result = await _mediator.Send(new GetStoreVisitByIdQuery() { Id = id });
         return result.Match<IActionResult>(
             i => i is not null ? new OkObjectResult(i) : new NotFoundResult(),
@@ -78,10 +70,6 @@ public class StoreVisitController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> CreateStoreVisit([FromBody] CreateStoreVisitCommand command)
     {
-        var claimsPrincipal = _jwtTokenProvider.ValidateToken(Request?.Headers[HeaderNames.Authorization] ?? string.Empty);
-        if (claimsPrincipal is null)
-            return new UnauthorizedResult();
-
         var result = await _mediator.Send(command);
         return await result.MatchAsync<IActionResult>(
             async i =>
