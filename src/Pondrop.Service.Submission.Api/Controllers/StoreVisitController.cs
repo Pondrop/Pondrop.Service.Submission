@@ -14,7 +14,6 @@ using System.Security.Claims;
 namespace Pondrop.Service.StoreVisit.Api.Controllers;
 
 [Authorize]
-[AllowAnonymous]
 [ApiController]
 [Route("[controller]")]
 public class StoreVisitController : ControllerBase

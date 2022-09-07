@@ -14,7 +14,6 @@ using System.Security.Claims;
 namespace Pondrop.Service.Submission.Api.Controllers;
 
 [Authorize]
-[AllowAnonymous]
 [ApiController]
 [Route("[controller]")]
 public class SubmissionController : ControllerBase

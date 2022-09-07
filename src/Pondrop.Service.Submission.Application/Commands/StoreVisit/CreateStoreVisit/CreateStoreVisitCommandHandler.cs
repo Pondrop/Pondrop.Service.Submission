@@ -54,7 +54,7 @@ public class CreateStoreVisitCommandHandler : DirtyCommandHandler<StoreVisitEnti
 
         try
         {
-            var StoreVisitEntity = new StoreVisitEntity(
+            var storeVisitEntity = new StoreVisitEntity(
                 command.StoreId,
                 command.UserId,
                 command.Latitude,
@@ -63,13 +63,13 @@ public class CreateStoreVisitCommandHandler : DirtyCommandHandler<StoreVisitEnti
                 createdBy
                );
 
-            var success = await _eventRepository.AppendEventsAsync(StoreVisitEntity.StreamId, 0, StoreVisitEntity.GetEvents());
+            var success = await _eventRepository.AppendEventsAsync(storeVisitEntity.StreamId, 0, storeVisitEntity.GetEvents());
 
             await Task.WhenAll(
-                InvokeDaprMethods(StoreVisitEntity.Id, StoreVisitEntity.GetEvents()));
+                InvokeDaprMethods(storeVisitEntity.Id, storeVisitEntity.GetEvents()));
 
             result = success
-                ? Result<StoreVisitRecord>.Success(_mapper.Map<StoreVisitRecord>(StoreVisitEntity))
+                ? Result<StoreVisitRecord>.Success(_mapper.Map<StoreVisitRecord>(storeVisitEntity))
                 : Result<StoreVisitRecord>.Error(FailedToCreateMessage(command));
         }
         catch (Exception ex)
