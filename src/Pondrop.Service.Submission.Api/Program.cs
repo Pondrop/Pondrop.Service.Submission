@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using Pondrop.Service.Submission.Api.Configurations.Extensions;
@@ -14,6 +15,7 @@ using Pondrop.Service.Submission.Application.Interfaces;
 using Pondrop.Service.Submission.Application.Interfaces.Services;
 using Pondrop.Service.Submission.Application.Models;
 using Pondrop.Service.Submission.Domain.Models;
+using Pondrop.Service.Submission.Domain.Models.StoreVisit;
 using Pondrop.Service.Submission.Domain.Models.Submission;
 using Pondrop.Service.Submission.Domain.Models.SubmissionTemplate;
 using Pondrop.Service.Submission.Infrastructure.CosmosDb;
@@ -87,7 +89,28 @@ services
     .AddJsonOptions(options => options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 services.AddEndpointsApiExplorer();
-services.AddSwaggerGen();
+services.AddSwaggerGen(c => {
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme()
+    {
+        Name = "Authorization",
+        Type = SecuritySchemeType.ApiKey,
+        Scheme = "Bearer",
+        BearerFormat = "JWT",
+        In = ParameterLocation.Header,
+        Description = "JWT Authorization header using the Bearer scheme. \r\n\r\n Enter 'Bearer' [space] and then your token in the text input below.\r\n\r\nExample: \"Bearer 1safsfsdfdfd\"",
+    });
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement {
+        {
+            new OpenApiSecurityScheme {
+                Reference = new OpenApiReference {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            new string[] {}
+        }
+    });
+});
 
 services.AddAutoMapper(
     typeof(Result<>),
@@ -115,6 +138,8 @@ services.AddSingleton<IUserService, UserService>();
 services.AddSingleton<IEventRepository, EventRepository>();
 services.AddSingleton<ICheckpointRepository<SubmissionEntity>, CheckpointRepository<SubmissionEntity>>();
 services.AddSingleton<ICheckpointRepository<SubmissionTemplateEntity>, CheckpointRepository<SubmissionTemplateEntity>>();
+services.AddSingleton<IContainerRepository<StoreVisitViewRecord>, ContainerRepository<StoreVisitViewRecord>>();
+services.AddSingleton<ICheckpointRepository<StoreVisitEntity>, CheckpointRepository<StoreVisitEntity>>();
 services.AddSingleton<IContainerRepository<SubmissionTemplateViewRecord>, ContainerRepository<SubmissionTemplateViewRecord>>();
 services.AddSingleton<IContainerRepository<SubmissionViewRecord>, ContainerRepository<SubmissionViewRecord>>();
 services.AddSingleton<IDaprService, DaprService>();

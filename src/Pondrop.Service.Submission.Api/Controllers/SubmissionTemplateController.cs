@@ -15,7 +15,7 @@ using System.Security.Claims;
 
 namespace Pondrop.Service.Submission.Api.Controllers;
 
-[AllowAnonymous]
+[Authorize]
 [ApiController]
 [Route("[controller]")]
 public class SubmissionTemplateController : ControllerBase
@@ -45,9 +45,9 @@ public class SubmissionTemplateController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> GetAllSubmissionTemplates()
     {
-        var claimsPrincipal = _jwtTokenProvider.ValidateToken(Request?.Headers[HeaderNames.Authorization] ?? string.Empty);
-        if (claimsPrincipal is null)
-            return new UnauthorizedResult();
+        //var claimsPrincipal = _jwtTokenProvider.ValidateToken(Request?.Headers[HeaderNames.Authorization] ?? string.Empty);
+        //if (claimsPrincipal is null)
+        //    return new UnauthorizedResult();
 
         var result = await _mediator.Send(new GetAllSubmissionTemplatesQuery());
         return result.Match<IActionResult>(
@@ -63,9 +63,9 @@ public class SubmissionTemplateController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> GetSubmissionTemplateById([FromRoute] Guid id)
     {
-        var claimsPrincipal = _jwtTokenProvider.ValidateToken(Request?.Headers[HeaderNames.Authorization] ?? string.Empty);
-        if (claimsPrincipal is null)
-            return new UnauthorizedResult();
+        //var claimsPrincipal = _jwtTokenProvider.ValidateToken(Request?.Headers[HeaderNames.Authorization] ?? string.Empty);
+        //if (claimsPrincipal is null)
+        //    return new UnauthorizedResult();
 
         var result = await _mediator.Send(new GetSubmissionTemplateByIdQuery() { Id = id });
         return result.Match<IActionResult>(
