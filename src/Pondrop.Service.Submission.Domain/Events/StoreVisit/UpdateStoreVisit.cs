@@ -7,10 +7,8 @@ using System.Threading.Tasks;
 
 namespace Pondrop.Service.Submission.Domain.Events.StoreVisit;
 
-public record CreateStoreVisit(
+public record UpdateStoreVisit(
     Guid Id,
-    Guid StoreId,
-    Guid UserId,
     double Latitude,
     double Longitude,
     ShopModeStatus ShopModeStatus) : EventPayload;

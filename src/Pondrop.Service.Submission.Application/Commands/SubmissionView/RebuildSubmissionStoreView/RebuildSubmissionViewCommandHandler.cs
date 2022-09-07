@@ -5,26 +5,27 @@ using Pondrop.Service.Submission.Application.Interfaces;
 using Pondrop.Service.Submission.Application.Interfaces.Services;
 using Pondrop.Service.Submission.Application.Models;
 using Pondrop.Service.Submission.Domain.Models;
+using Pondrop.Service.Submission.Domain.Models.Submission;
 using Pondrop.Service.Submission.Domain.Models.SubmissionTemplate;
 
 namespace Pondrop.Service.Submission.Application.Commands;
 
 public class RebuildSubmissionViewCommandHandler : IRequestHandler<RebuildSubmissionViewCommand, Result<int>>
 {
-    private readonly ICheckpointRepository<SubmissionTemplateEntity> _submissionTemplateCheckpointRepository;
-    private readonly IContainerRepository<SubmissionTemplateViewRecord> _containerRepository;
+    private readonly ICheckpointRepository<SubmissionEntity> _submissionCheckpointRepository;
+    private readonly IContainerRepository<SubmissionViewRecord> _containerRepository;
     private readonly IMapper _mapper;
     private readonly IUserService _userService;
     private readonly ILogger<RebuildSubmissionViewCommandHandler> _logger;
 
     public RebuildSubmissionViewCommandHandler(
-        ICheckpointRepository<SubmissionTemplateEntity> submissionTemplateCheckpointRepository,
-        IContainerRepository<SubmissionTemplateViewRecord> containerRepository,
+        ICheckpointRepository<SubmissionEntity> submissionCheckpointRepository,
+        IContainerRepository<SubmissionViewRecord> containerRepository,
         IMapper mapper,
         IUserService userService,
         ILogger<RebuildSubmissionViewCommandHandler> logger) : base()
     {
-        _submissionTemplateCheckpointRepository = submissionTemplateCheckpointRepository;
+        _submissionCheckpointRepository = submissionCheckpointRepository;
         _containerRepository = containerRepository;
         _mapper = mapper;
         _userService = userService;
@@ -37,7 +38,7 @@ public class RebuildSubmissionViewCommandHandler : IRequestHandler<RebuildSubmis
 
         try
         {
-            var submissionTemplatesTask = _submissionTemplateCheckpointRepository.GetAllAsync();
+            var submissionTemplatesTask = _submissionCheckpointRepository.GetAllAsync();
 
             await Task.WhenAll(submissionTemplatesTask);
 
@@ -47,14 +48,14 @@ public class RebuildSubmissionViewCommandHandler : IRequestHandler<RebuildSubmis
 
                 try
                 {
-                    var submissionTemplateView = _mapper.Map<SubmissionTemplateViewRecord>(i);
+                    var submissionView = _mapper.Map<SubmissionViewRecord>(i);
 
-                    var result = await _containerRepository.UpsertAsync(submissionTemplateView);
+                    var result = await _containerRepository.UpsertAsync(submissionView);
                     success = result != null;
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, $"Failed to update submissionTemplate view for '{i.Id}'");
+                    _logger.LogError(ex, $"Failed to update submission view for '{i.Id}'");
                 }
 
                 return success;
@@ -66,7 +67,7 @@ public class RebuildSubmissionViewCommandHandler : IRequestHandler<RebuildSubmis
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, $"Failed to rebuild submissionTemplate view");
+            _logger.LogError(ex, $"Failed to rebuild submission view");
             result = Result<int>.Error(ex);
         }
 
