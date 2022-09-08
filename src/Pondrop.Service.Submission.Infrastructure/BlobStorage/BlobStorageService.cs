@@ -35,10 +35,9 @@ public class BlobStorageService : IBlobStorageService
         string folder = $"{userId}/{name}";
 
         var stream = ConvertBase64ToStream(base64);
-        await _blobClient.UploadBlobAsync(folder, stream);
-        var blobProperties = _blobClient.Uri;
+        var blobInfo = await _blobClient.UploadBlobAsync(folder, stream);
 
-        return blobProperties.AbsoluteUri;
+        return !blobInfo.GetRawResponse().IsError ? $"{_blobClient.Uri.AbsoluteUri}/{folder}" : string.Empty;
     }
 
     private Stream ConvertBase64ToStream(string base64)

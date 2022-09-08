@@ -92,7 +92,8 @@ public class CreateSubmissionCommandHandler : DirtyCommandHandler<SubmissionEnti
                             !string.IsNullOrEmpty(fieldValue.PhotoFileName))
                         {
                             url = await _blobStorageService.UploadImageAsync(fieldValue.PhotoFileName,
-                                fieldValue.PhotoBase64);
+                                fieldValue.PhotoBase64,
+                                _userService.CurrentUserId());
                         }
 
                         fieldValueRecords.Add(new FieldValuesRecord(fieldValue.Id,
