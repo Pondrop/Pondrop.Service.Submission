@@ -1,7 +1,6 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.Net.Http.Headers;
 using Pondrop.Service.Submission.Api.Services;
 using Pondrop.Service.Submission.Api.Services.Interfaces;
 using Pondrop.Service.Submission.Application.Commands;
@@ -9,7 +8,7 @@ using Pondrop.Service.Submission.Application.Commands.Submission.CreateStoreVisi
 using Pondrop.Service.Submission.Application.Interfaces;
 using Pondrop.Service.Submission.Application.Queries.Submission.GetAllStoreVisits;
 using Pondrop.Service.Submission.Application.Queries.Submission.GetStoreVisitById;
-using System.Security.Claims;
+using Pondrop.Service.Submission.Application.Queries.Submission.GetStoreVisitByStoreId;
 
 namespace Pondrop.Service.StoreVisit.Api.Controllers;
 
@@ -58,6 +57,20 @@ public class StoreVisitController : ControllerBase
     public async Task<IActionResult> GetStoreVisitById([FromRoute] Guid id)
     {
         var result = await _mediator.Send(new GetStoreVisitByIdQuery() { Id = id });
+        return result.Match<IActionResult>(
+            i => i is not null ? new OkObjectResult(i) : new NotFoundResult(),
+            (ex, msg) => new BadRequestObjectResult(msg));
+    }
+
+    [HttpGet]
+    [Route("StoreId/{storeId:guid}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> GetStoreVisitByStoreId([FromRoute] Guid storeId)
+    {
+        var result = await _mediator.Send(new GetStoreVisitByStoreIdQuery() { StoreId = storeId });
         return result.Match<IActionResult>(
             i => i is not null ? new OkObjectResult(i) : new NotFoundResult(),
             (ex, msg) => new BadRequestObjectResult(msg));

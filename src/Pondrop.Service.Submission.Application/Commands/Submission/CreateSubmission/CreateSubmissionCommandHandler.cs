@@ -1,9 +1,11 @@
 ﻿using AutoMapper;
 using FluentValidation;
+using Google.Protobuf.WellKnownTypes;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using Pondrop.Service.Submission.Application.Interfaces;
+using Pondrop.Service.Submission.Application.Interfaces.BlobStorage;
 using Pondrop.Service.Submission.Application.Interfaces.Services;
 using Pondrop.Service.Submission.Application.Models;
 using Pondrop.Service.Submission.Domain.Events.Submission;
@@ -19,6 +21,7 @@ public class CreateSubmissionCommandHandler : DirtyCommandHandler<SubmissionEnti
     private readonly IUserService _userService;
     private readonly IValidator<CreateSubmissionCommand> _validator;
     private readonly ILogger<CreateSubmissionCommandHandler> _logger;
+    private readonly IBlobStorageService _blobStorageService;
 
     public CreateSubmissionCommandHandler(
         IOptions<SubmissionUpdateConfiguration> SubmissionUpdateConfig,
@@ -26,11 +29,13 @@ public class CreateSubmissionCommandHandler : DirtyCommandHandler<SubmissionEnti
         IDaprService daprService,
         IUserService userService,
         IMapper mapper,
+        IBlobStorageService blobStorageService,
         IValidator<CreateSubmissionCommand> validator,
         ILogger<CreateSubmissionCommandHandler> logger) : base(eventRepository, SubmissionUpdateConfig.Value, daprService, logger)
     {
         _eventRepository = eventRepository;
         _mapper = mapper;
+        _blobStorageService = blobStorageService;
         _userService = userService;
         _validator = validator;
         _logger = logger;
@@ -64,12 +69,51 @@ public class CreateSubmissionCommandHandler : DirtyCommandHandler<SubmissionEnti
 
             foreach (var step in command.Steps)
             {
-                SubmissionEntity.Apply(new Domain.Events.Submission.AddStepToSubmission(
-                    Guid.NewGuid(),
-                    step!.TemplateStepId,
-                    step!.Latitude,
-                    step!.Longitude,
-                    step!.Fields), createdBy);
+                if (step == null)
+                    continue;
+
+                var stepFields = new List<SubmissionFieldRecord>();
+
+                foreach (var field in step.Fields)
+                {
+                    var fieldValueRecords = new List<FieldValuesRecord>();
+
+                    if (field is null)
+                        continue;
+
+                    foreach (var fieldValue in field.Values)
+                    {
+                        var url = string.Empty;
+
+                        if (fieldValue is null)
+                            continue;
+
+                        if (!string.IsNullOrEmpty(fieldValue.PhotoBase64) &&
+                            !string.IsNullOrEmpty(fieldValue.PhotoFileName))
+                        {
+                            url = await _blobStorageService.UploadImageAsync(fieldValue.PhotoFileName,
+                                fieldValue.PhotoBase64);
+                        }
+
+                        fieldValueRecords.Add(new FieldValuesRecord(fieldValue.Id,
+                            fieldValue.StringValue,
+                            fieldValue.IntValue,
+                            fieldValue.DoubleValue,
+                            url));
+                    }
+
+                    stepFields.Add(new SubmissionFieldRecord(step.Id, step.TemplateStepId, step.Latitude, step.Longitude, fieldValueRecords));
+                }
+
+                var addStepToSubmission = new Domain.Events.Submission.AddStepToSubmission(
+                        Guid.NewGuid(),
+                        step!.TemplateStepId,
+                        step!.Latitude,
+                        step!.Longitude,
+                        step!.StartedUtc,
+                        stepFields);
+
+                SubmissionEntity.Apply(addStepToSubmission, createdBy);
             }
             var success = await _eventRepository.AppendEventsAsync(SubmissionEntity.StreamId, 0, SubmissionEntity.GetEvents());
 

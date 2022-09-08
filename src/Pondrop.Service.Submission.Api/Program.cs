@@ -12,12 +12,14 @@ using Pondrop.Service.Submission.Api.Middleware;
 using Pondrop.Service.Submission.Api.Services;
 using Pondrop.Service.Submission.Api.Services.Interfaces;
 using Pondrop.Service.Submission.Application.Interfaces;
+using Pondrop.Service.Submission.Application.Interfaces.BlobStorage;
 using Pondrop.Service.Submission.Application.Interfaces.Services;
 using Pondrop.Service.Submission.Application.Models;
 using Pondrop.Service.Submission.Domain.Models;
 using Pondrop.Service.Submission.Domain.Models.StoreVisit;
 using Pondrop.Service.Submission.Domain.Models.Submission;
 using Pondrop.Service.Submission.Domain.Models.SubmissionTemplate;
+using Pondrop.Service.Submission.Infrastructure.BlobStorage;
 using Pondrop.Service.Submission.Infrastructure.CosmosDb;
 using Pondrop.Service.Submission.Infrastructure.Dapr;
 using Pondrop.Service.Submission.Infrastructure.ServiceBus;
@@ -124,6 +126,7 @@ services.AddFluentValidation(config =>
     });
 
 services.Configure<CosmosConfiguration>(configuration.GetSection(CosmosConfiguration.Key));
+services.Configure<BlobStorageConfiguration>(configuration.GetSection(BlobStorageConfiguration.Key));
 services.Configure<ServiceBusConfiguration>(configuration.GetSection(ServiceBusConfiguration.Key));
 services.Configure<SubmissionUpdateConfiguration>(configuration.GetSection(DaprEventTopicConfiguration.Key).GetSection(SubmissionUpdateConfiguration.Key));
 
@@ -136,6 +139,7 @@ services.AddSingleton<IRebuildCheckpointQueueService, RebuildCheckpointQueueServ
 services.AddSingleton<IAddressService, AddressService>();
 services.AddSingleton<IUserService, UserService>();
 services.AddSingleton<IEventRepository, EventRepository>();
+services.AddSingleton<IBlobStorageService, BlobStorageService>();
 services.AddSingleton<ICheckpointRepository<SubmissionEntity>, CheckpointRepository<SubmissionEntity>>();
 services.AddSingleton<ICheckpointRepository<SubmissionTemplateEntity>, CheckpointRepository<SubmissionTemplateEntity>>();
 services.AddSingleton<IContainerRepository<StoreVisitViewRecord>, ContainerRepository<StoreVisitViewRecord>>();
@@ -155,6 +159,7 @@ app.UseMiddleware<ExceptionMiddleware>();
 app.UseSwaggerDocumentation(provider);
 
 app.UseAuthentication();
+app.UseMiddleware<JwtMiddleware>();
 app.UseHttpsRedirection();
 app.UseAuthorization();
 app.MapControllers();

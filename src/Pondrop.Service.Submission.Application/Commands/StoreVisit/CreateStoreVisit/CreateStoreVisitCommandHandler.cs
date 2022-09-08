@@ -56,7 +56,7 @@ public class CreateStoreVisitCommandHandler : DirtyCommandHandler<StoreVisitEnti
         {
             var storeVisitEntity = new StoreVisitEntity(
                 command.StoreId,
-                command.UserId,
+               Guid.Parse(_userService.CurrentUserId()),
                 command.Latitude,
                 command.Longitude,
                 ShopModeStatus.Started,
