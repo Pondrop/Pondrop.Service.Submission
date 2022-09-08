@@ -4,14 +4,14 @@ public record SubmissionFieldRecord(
     Guid TemplateFieldId,
     double Latitude,
     double Longitude,
-    FieldValuesRecord Values)
+    List<FieldValuesRecord> Values)
 {
     public SubmissionFieldRecord() : this(
         Guid.NewGuid(),
         Guid.NewGuid(),
         0,
         0,
-        new FieldValuesRecord())
+        new List<FieldValuesRecord>())
     {
     }
 }

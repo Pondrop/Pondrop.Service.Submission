@@ -3,6 +3,7 @@ using FluentValidation;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using Pondrop.Service.Submission.Application.Interfaces;
+using Pondrop.Service.Submission.Application.Interfaces.Services;
 using Pondrop.Service.Submission.Application.Models;
 using Pondrop.Service.Submission.Application.Queries.Submission.GetStoreVisitById;
 using Pondrop.Service.Submission.Domain.Models.StoreVisit;
@@ -14,14 +15,17 @@ public class GetStoreVisitByIdQueryHandler : IRequestHandler<GetStoreVisitByIdQu
     private readonly IContainerRepository<StoreVisitViewRecord> _viewRepository;
     private readonly IValidator<GetStoreVisitByIdQuery> _validator;
     private readonly ILogger<GetStoreVisitByIdQueryHandler> _logger;
+    private readonly IUserService _userService;
 
     public GetStoreVisitByIdQueryHandler(
         IContainerRepository<StoreVisitViewRecord> viewRepository,
         IValidator<GetStoreVisitByIdQuery> validator,
+        IUserService userService,
         ILogger<GetStoreVisitByIdQueryHandler> logger)
     {
         _viewRepository = viewRepository;
         _validator = validator;
+        _userService = userService;
         _logger = logger;
     }
 
@@ -40,9 +44,9 @@ public class GetStoreVisitByIdQueryHandler : IRequestHandler<GetStoreVisitByIdQu
 
         try
         {
-            var record = await _viewRepository.GetByIdAsync(query.Id);
-            result = record is not null
-                ? Result<StoreVisitViewRecord?>.Success(record)
+            var records = await _viewRepository.QueryAsync($"SELECT * FROM c WHERE c.userId = '{_userService.CurrentUserId()}' AND c.id = '{query.Id}' OFFSET 0 LIMIT 1");
+            result = records is not null
+                ? Result<StoreVisitViewRecord?>.Success(records.FirstOrDefault())
                 : Result<StoreVisitViewRecord?>.Success(null);
         }
         catch (Exception ex)

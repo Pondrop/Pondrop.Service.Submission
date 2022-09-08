@@ -9,8 +9,6 @@ namespace Pondrop.Service.Submission.Application.Commands.Submission.CreateStore
 public class CreateStoreVisitCommand : IRequest<Result<StoreVisitRecord>>
 {
     public Guid StoreId { get; init; }
-    
-    public Guid UserId { get; init; }
 
     public double Latitude { get; set; }
 

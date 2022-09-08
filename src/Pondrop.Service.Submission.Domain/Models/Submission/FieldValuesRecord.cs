@@ -2,15 +2,17 @@
 
 public record FieldValuesRecord(
     Guid Id,
-    string SelectedStringValue,
-    double SelectedDoubleValue,
-    bool SelectedBoolValue)
+    string? StringValue,
+    int? IntValue,
+    double? DoubleValue,
+    string? PhotoUrl)
 {
     public FieldValuesRecord() : this(
         Guid.NewGuid(),
-        string.Empty,
-        0,
-        false)
+        null,
+        null,
+        null,
+        null)
     {
     }
 }

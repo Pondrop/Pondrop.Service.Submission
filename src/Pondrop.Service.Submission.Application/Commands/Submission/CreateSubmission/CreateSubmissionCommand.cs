@@ -14,24 +14,59 @@ public class CreateSubmissionCommand : IRequest<Result<SubmissionRecord>>
 
     public double Longitude { get; set; }
 
-    public List<SubmissionStepRecord?> Steps { get; init; } = default;
+    public List<CreateSubmissionStepRecord?> Steps { get; init; } = default;
 }
 
-public record SubmissionStepRecord(
+public record CreateSubmissionStepRecord(
     Guid Id,
     Guid TemplateStepId,
     double Latitude,
     double Longitude,
-    List<SubmissionFieldRecord> Fields)
+    DateTime StartedUtc,
+    List<CreateSubmissionFieldRecord> Fields)
 {
-    public SubmissionStepRecord() : this(
+    public CreateSubmissionStepRecord() : this(
         Guid.Empty,
         Guid.Empty,
         0,
         0,
-        new List<SubmissionFieldRecord>())
+        DateTime.UtcNow,
+        new List<CreateSubmissionFieldRecord>())
     {
     }
 }
 
-
+public record CreateSubmissionFieldRecord(
+    Guid Id,
+    Guid TemplateFieldId,
+    double Latitude,
+    double Longitude,
+    List<CreateFieldValuesRecord> Values)
+{
+    public CreateSubmissionFieldRecord() : this(
+        Guid.NewGuid(),
+        Guid.NewGuid(),
+        0,
+        0,
+        new List<CreateFieldValuesRecord>())
+    {
+    }
+}
+public record CreateFieldValuesRecord(
+    Guid Id,
+    string? StringValue,
+    int? IntValue,
+    double? DoubleValue,
+    string? PhotoFileName,
+    string? PhotoBase64)
+{
+    public CreateFieldValuesRecord() : this(
+        Guid.NewGuid(),
+        null,
+        null,
+        null,
+        null,
+        null)
+    {
+    }
+}

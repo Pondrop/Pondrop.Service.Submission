@@ -3,6 +3,7 @@ using FluentValidation;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using Pondrop.Service.Submission.Application.Interfaces;
+using Pondrop.Service.Submission.Application.Interfaces.Services;
 using Pondrop.Service.Submission.Application.Models;
 using Pondrop.Service.Submission.Application.Queries.Submission.GetAllStoreVisits;
 using Pondrop.Service.Submission.Domain.Models.StoreVisit;
@@ -15,15 +16,18 @@ public class GetAllStoreVisitsQueryHandler : IRequestHandler<GetAllStoreVisitsQu
     private readonly IMapper _mapper;
     private readonly IValidator<GetAllStoreVisitsQuery> _validator;
     private readonly ILogger<GetAllStoreVisitsQueryHandler> _logger;
+    private readonly IUserService _userService;
 
     public GetAllStoreVisitsQueryHandler(
         IContainerRepository<StoreVisitViewRecord> storeRepository,
+        IUserService userService,
         IMapper mapper,
         IValidator<GetAllStoreVisitsQuery> validator,
         ILogger<GetAllStoreVisitsQueryHandler> logger)
     {
         _containerRepository = storeRepository;
         _mapper = mapper;
+        _userService = userService;
         _validator = validator;
         _logger = logger;
     }
@@ -43,7 +47,7 @@ public class GetAllStoreVisitsQueryHandler : IRequestHandler<GetAllStoreVisitsQu
 
         try
         {
-            var records = await _containerRepository.GetAllAsync();
+            var records = await _containerRepository.QueryAsync($"SELECT * FROM c WHERE c.userId = '{_userService.CurrentUserId()}'");
             result = Result<List<StoreVisitViewRecord>>.Success(records);
         }
         catch (Exception ex)

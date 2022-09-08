@@ -6,4 +6,5 @@ public record AddStepToSubmission(
     Guid TemplateStepId,
     double Latitude,
     double Longitude,
+    DateTime? Started,
     List<SubmissionFieldRecord> Fields) : EventPayload;
