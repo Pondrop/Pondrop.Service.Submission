@@ -103,7 +103,7 @@ public class CreateSubmissionCommandHandler : DirtyCommandHandler<SubmissionEnti
                             url));
                     }
 
-                    stepFields.Add(new SubmissionFieldRecord(step.Id, step.TemplateStepId, step.Latitude, step.Longitude, fieldValueRecords));
+                    stepFields.Add(new SubmissionFieldRecord(field.Id, field.TemplateFieldId, field.Latitude, field.Longitude, fieldValueRecords));
                 }
 
                 var addStepToSubmission = new Domain.Events.Submission.AddStepToSubmission(

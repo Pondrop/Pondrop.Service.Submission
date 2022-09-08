@@ -1,6 +1,7 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
+using Pondrop.Service.StoreVisit.Application.Commands;
 using Pondrop.Service.Submission.Api.Services;
 using Pondrop.Service.Submission.Api.Services.Interfaces;
 using Pondrop.Service.Submission.Application.Commands;
@@ -82,6 +83,23 @@ public class StoreVisitController : ControllerBase
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> CreateStoreVisit([FromBody] CreateStoreVisitCommand command)
+    {
+        var result = await _mediator.Send(command);
+        return await result.MatchAsync<IActionResult>(
+            async i =>
+            {
+                await _serviceBusService.SendMessageAsync(new UpdateStoreVisitCheckpointByIdCommand() { Id = i!.Id });
+                return StatusCode(StatusCodes.Status201Created, i);
+            },
+            (ex, msg) => Task.FromResult<IActionResult>(new BadRequestObjectResult(msg)));
+    }
+
+    [HttpPut]
+    [Route("update")]
+    [ProducesResponseType(StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> UpdateStoreVisit([FromBody] UpdateStoreVisitCommand command)
     {
         var result = await _mediator.Send(command);
         return await result.MatchAsync<IActionResult>(
