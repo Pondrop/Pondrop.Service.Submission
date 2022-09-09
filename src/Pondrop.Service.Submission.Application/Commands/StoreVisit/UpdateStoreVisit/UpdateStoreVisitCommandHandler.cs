@@ -65,7 +65,8 @@ public class UpdateStoreVisitCommandHandler : DirtyCommandHandler<StoreVisitEnti
                     command.Latitude ?? 0,
                     command.Longitude ?? 0,
                     command.ShopModeStatus ?? ShopModeStatus.Started);
-                var createdBy = _userService.CurrentUserName();
+
+                var createdBy = _userService.CurrentUserId();
 
                 var success = await UpdateStreamAsync(storeEntity, evtPayload, createdBy);
 

@@ -52,8 +52,7 @@ public class RemoveStepFromSubmissionTemplateCommandHandler : DirtyCommandHandle
         }
 
         Result<SubmissionTemplateRecord> result;
-
-        var updatedBy = !string.IsNullOrEmpty(command.UpdatedBy) ? command.UpdatedBy : _userService.CurrentUserName();
+        
 
         try
         {
@@ -66,12 +65,12 @@ public class RemoveStepFromSubmissionTemplateCommandHandler : DirtyCommandHandle
                     command.Id,
                     command.SubmissionTemplateId);
 
-                var success = await UpdateStreamAsync(submissionTemplateEntity, evtPayload, updatedBy);
+                var success = await UpdateStreamAsync(submissionTemplateEntity, evtPayload, _userService.CurrentUserId());
 
                 if (!success)
                 {
                     await _submissionTemplateCheckpointRepository.FastForwardAsync(submissionTemplateEntity);
-                    success = await UpdateStreamAsync(submissionTemplateEntity, evtPayload, updatedBy);
+                    success = await UpdateStreamAsync(submissionTemplateEntity, evtPayload, _userService.CurrentUserId());
                 }
 
                 await Task.WhenAll(

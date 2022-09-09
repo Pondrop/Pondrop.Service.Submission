@@ -46,7 +46,7 @@ public class CreateSubmissionCommandHandlerTests
             .Setup(x => x.Value)
             .Returns(new SubmissionUpdateConfiguration());
         _userServiceMock
-            .Setup(x => x.CurrentUserName())
+            .Setup(x => x.CurrentUserId())
             .Returns("test/user");
     }
     

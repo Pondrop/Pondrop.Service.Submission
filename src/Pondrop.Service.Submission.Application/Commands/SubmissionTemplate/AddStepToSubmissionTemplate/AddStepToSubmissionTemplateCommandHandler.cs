@@ -49,9 +49,7 @@ public class AddStepToSubmissionTemplateCommandHandler : DirtyCommandHandler<Sub
             _logger.LogError(errorMessage);
             return Result<SubmissionTemplateRecord>.Error(errorMessage);
         }
-
-        var createdBy = !string.IsNullOrEmpty(command.CreatedBy) ? command.CreatedBy : _userService.CurrentUserName();
-
+        
         Result<SubmissionTemplateRecord> result;
 
         try
@@ -72,15 +70,15 @@ public class AddStepToSubmissionTemplateCommandHandler : DirtyCommandHandler<Sub
                     command!.InstructionsIconFontFamily,
                     command!.IsSummary,
                     command!.Fields,
-                    createdBy,
-                    createdBy);
+                    _userService.CurrentUserId(),
+                    _userService.CurrentUserId());
 
-                var success = await UpdateStreamAsync(submissionTemplateEntity, evtPayload, createdBy);
+                var success = await UpdateStreamAsync(submissionTemplateEntity, evtPayload, _userService.CurrentUserId());
 
                 if (!success)
                 {
                     await _submissionTemplateCheckpointRepository.FastForwardAsync(submissionTemplateEntity);
-                    success = await UpdateStreamAsync(submissionTemplateEntity, evtPayload, createdBy);
+                    success = await UpdateStreamAsync(submissionTemplateEntity, evtPayload, _userService.CurrentUserId());
                 }
 
                 await Task.WhenAll(
