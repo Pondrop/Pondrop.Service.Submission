@@ -4,30 +4,31 @@ using MediatR;
 using Microsoft.Extensions.Logging;
 using Pondrop.Service.Submission.Application.Interfaces;
 using Pondrop.Service.Submission.Application.Models;
+using Pondrop.Service.Submission.Domain.Models;
 using Pondrop.Service.Submission.Domain.Models.SubmissionTemplate;
 
 namespace Pondrop.Service.Submission.Application.Queries.SubmissionTemplate.GetAllSubmissionTemplates;
 
-public class GetAllSubmissionTemplatesQueryHandler : IRequestHandler<GetAllSubmissionTemplatesQuery, Result<List<SubmissionTemplateViewRecord>>>
+public class GetAllSubmissionTemplatesQueryHandler : IRequestHandler<GetAllSubmissionTemplatesQuery, Result<List<SubmissionTemplateRecord>>>
 {
-    private readonly IContainerRepository<SubmissionTemplateViewRecord> _containerRepository;
+    private readonly ICheckpointRepository<SubmissionTemplateEntity> _checkpointRepository;
     private readonly IMapper _mapper;
     private readonly IValidator<GetAllSubmissionTemplatesQuery> _validator;
     private readonly ILogger<GetAllSubmissionTemplatesQueryHandler> _logger;
 
     public GetAllSubmissionTemplatesQueryHandler(
-        IContainerRepository<SubmissionTemplateViewRecord> storeRepository,
+        ICheckpointRepository<SubmissionTemplateEntity> checkpointRepository,
         IMapper mapper,
         IValidator<GetAllSubmissionTemplatesQuery> validator,
         ILogger<GetAllSubmissionTemplatesQueryHandler> logger)
     {
-        _containerRepository = storeRepository;
+        _checkpointRepository = checkpointRepository;
         _mapper = mapper;
         _validator = validator;
         _logger = logger;
     }
 
-    public async Task<Result<List<SubmissionTemplateViewRecord>>> Handle(GetAllSubmissionTemplatesQuery request, CancellationToken cancellationToken)
+    public async Task<Result<List<SubmissionTemplateRecord>>> Handle(GetAllSubmissionTemplatesQuery request, CancellationToken cancellationToken)
     {
         var validation = _validator.Validate(request);
 
@@ -35,20 +36,20 @@ public class GetAllSubmissionTemplatesQueryHandler : IRequestHandler<GetAllSubmi
         {
             var errorMessage = $"Get all submissionTemplate templates failed {validation}";
             _logger.LogError(errorMessage);
-            return Result<List<SubmissionTemplateViewRecord>>.Error(errorMessage);
+            return Result<List<SubmissionTemplateRecord>>.Error(errorMessage);
         }
 
-        var result = default(Result<List<SubmissionTemplateViewRecord>>);
+        var result = default(Result<List<SubmissionTemplateRecord>>);
 
         try
         {
-            var records = await _containerRepository.GetAllAsync();
-            result = Result<List<SubmissionTemplateViewRecord>>.Success(records);
+            var entities = await _checkpointRepository.GetAllAsync();
+            result = Result<List<SubmissionTemplateRecord>>.Success(_mapper.Map<List<SubmissionTemplateRecord>>(entities));
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, ex.Message);
-            result = Result<List<SubmissionTemplateViewRecord>>.Error(ex);
+            result = Result<List<SubmissionTemplateRecord>>.Error(ex);
         }
 
         return result;
