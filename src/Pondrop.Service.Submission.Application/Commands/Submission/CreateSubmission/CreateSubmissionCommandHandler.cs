@@ -53,18 +53,16 @@ public class CreateSubmissionCommandHandler : DirtyCommandHandler<SubmissionEnti
         }
 
         var result = default(Result<SubmissionRecord>);
-
-        var createdBy = _userService.CurrentUserName();
+        
 
         try
         {
-
             var SubmissionEntity = new SubmissionEntity(
                 command.StoreVisitId,
                 command.SubmissionTemplateId,
-                command.Latitude,
-                command.Longitude,
-                createdBy
+                command.Latitude ?? 0,
+                command.Longitude ?? 0,
+                _userService.CurrentUserId()
                );
 
             foreach (var step in command.Steps)
@@ -83,7 +81,7 @@ public class CreateSubmissionCommandHandler : DirtyCommandHandler<SubmissionEnti
 
                     foreach (var fieldValue in field.Values)
                     {
-                        var url = string.Empty;
+                        string? url = null;
 
                         if (fieldValue is null)
                             continue;
@@ -103,18 +101,18 @@ public class CreateSubmissionCommandHandler : DirtyCommandHandler<SubmissionEnti
                             url));
                     }
 
-                    stepFields.Add(new SubmissionFieldRecord(field.Id, field.TemplateFieldId, field.Latitude, field.Longitude, fieldValueRecords));
+                    stepFields.Add(new SubmissionFieldRecord(field.Id, field.TemplateFieldId, field.Latitude ?? 0, field.Longitude ?? 0, fieldValueRecords));
                 }
 
                 var addStepToSubmission = new Domain.Events.Submission.AddStepToSubmission(
                         Guid.NewGuid(),
                         step!.TemplateStepId,
-                        step!.Latitude,
-                        step!.Longitude,
+                        step!.Latitude ?? 0,
+                        step!.Longitude ?? 0,
                         step!.StartedUtc,
                         stepFields);
 
-                SubmissionEntity.Apply(addStepToSubmission, createdBy);
+                SubmissionEntity.Apply(addStepToSubmission, _userService.CurrentUserId());
             }
             var success = await _eventRepository.AppendEventsAsync(SubmissionEntity.StreamId, 0, SubmissionEntity.GetEvents());
 

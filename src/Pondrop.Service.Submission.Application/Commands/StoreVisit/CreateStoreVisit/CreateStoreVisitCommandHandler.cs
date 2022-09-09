@@ -50,7 +50,7 @@ public class CreateStoreVisitCommandHandler : DirtyCommandHandler<StoreVisitEnti
 
         var result = default(Result<StoreVisitRecord>);
 
-        var createdBy = _userService.CurrentUserName();
+        var createdBy = _userService.CurrentUserId();
 
         try
         {

@@ -10,9 +10,9 @@ public class CreateSubmissionCommand : IRequest<Result<SubmissionRecord>>
 
     public Guid SubmissionTemplateId { get; set; }
 
-    public double Latitude { get; set; }
+    public double? Latitude { get; set; }
 
-    public double Longitude { get; set; }
+    public double? Longitude { get; set; }
 
     public List<CreateSubmissionStepRecord?> Steps { get; init; } = default;
 }
@@ -20,8 +20,8 @@ public class CreateSubmissionCommand : IRequest<Result<SubmissionRecord>>
 public record CreateSubmissionStepRecord(
     Guid Id,
     Guid TemplateStepId,
-    double Latitude,
-    double Longitude,
+    double? Latitude,
+    double? Longitude,
     DateTime StartedUtc,
     List<CreateSubmissionFieldRecord> Fields)
 {
@@ -39,8 +39,8 @@ public record CreateSubmissionStepRecord(
 public record CreateSubmissionFieldRecord(
     Guid Id,
     Guid TemplateFieldId,
-    double Latitude,
-    double Longitude,
+    double? Latitude,
+    double? Longitude,
     List<CreateFieldValuesRecord> Values)
 {
     public CreateSubmissionFieldRecord() : this(

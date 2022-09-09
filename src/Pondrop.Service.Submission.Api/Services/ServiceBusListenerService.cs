@@ -98,18 +98,18 @@ public class ServiceBusListenerService : IServiceBusListenerService
                             var mediator = scoped.ServiceProvider.GetService<IMediator>();
                             await mediator!.Send(command);
 
-                            switch (command)
-                            {
-                                case UpdateSubmissionTemplateCheckpointByIdCommand SubmissionTemplate:
-                                    await mediator!.Send(new UpdateSubmissionTemplateViewCommand() { SubmissionTemplateId = SubmissionTemplate.Id });
-                                    break;
-                                case UpdateSubmissionCheckpointByIdCommand Submission:
-                                    await mediator!.Send(new UpdateSubmissionViewCommand() { SubmissionId = Submission.Id });
-                                    break;
-                                case UpdateStoreVisitCheckpointByIdCommand StoreVisit:
-                                    await mediator!.Send(new UpdateStoreVisitViewCommand() { StoreVisitId = StoreVisit.Id });
-                                    break;
-                            }
+                            //switch (command)
+                            //{
+                            //    case UpdateSubmissionTemplateCheckpointByIdCommand SubmissionTemplate:
+                            //        await mediator!.Send(new UpdateSubmissionTemplateViewCommand() { SubmissionTemplateId = SubmissionTemplate.Id });
+                            //        break;
+                            //    case UpdateSubmissionCheckpointByIdCommand Submission:
+                            //        await mediator!.Send(new UpdateSubmissionViewCommand() { SubmissionId = Submission.Id });
+                            //        break;
+                            //    case UpdateStoreVisitCheckpointByIdCommand StoreVisit:
+                            //        await mediator!.Send(new UpdateStoreVisitViewCommand() { StoreVisitId = StoreVisit.Id });
+                            //        break;
+                            //}
                         }
                         catch (Exception ex)
                         {
