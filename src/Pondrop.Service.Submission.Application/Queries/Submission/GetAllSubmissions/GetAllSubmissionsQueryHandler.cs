@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using Pondrop.Service.Submission.Application.Interfaces;
 using Pondrop.Service.Submission.Application.Interfaces.Services;
 using Pondrop.Service.Submission.Application.Models;
+using Pondrop.Service.Submission.Domain.Enums.User;
 using Pondrop.Service.Submission.Domain.Models.Submission;
 
 namespace Pondrop.Service.Submission.Application.Queries.Submission.GetAllSubmissions;
@@ -46,7 +47,11 @@ public class GetAllSubmissionsQueryHandler : IRequestHandler<GetAllSubmissionsQu
 
         try
         {
-            var entities = await _checkpointRepository.QueryAsync($"SELECT * FROM c WHERE c.createdBy = '{_userService.CurrentUserId()}'");
+            var query = $"SELECT * FROM c";
+            query += _userService.CurrentUserType() == UserType.Shopper
+                ? $" WHERE c.createdBy = '{_userService.CurrentUserId()}'" : string.Empty;
+
+            var entities = await _checkpointRepository.QueryAsync(query);
             result = Result<List<SubmissionRecord>>.Success(_mapper.Map<List<SubmissionRecord>>(entities));
         }
         catch (Exception ex)

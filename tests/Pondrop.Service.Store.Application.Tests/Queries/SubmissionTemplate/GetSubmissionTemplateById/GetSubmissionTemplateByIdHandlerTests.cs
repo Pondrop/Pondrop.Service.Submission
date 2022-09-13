@@ -1,3 +1,4 @@
+using AutoMapper;
 using FluentValidation;
 using FluentValidation.Results;
 using Microsoft.Extensions.Logging;
@@ -5,6 +6,7 @@ using Moq;
 using Pondrop.Service.Submission.Application.Interfaces;
 using Pondrop.Service.Submission.Application.Queries;
 using Pondrop.Service.Submission.Application.Queries.SubmissionTemplate.GetSubmissionTemplateById;
+using Pondrop.Service.Submission.Domain.Models;
 using Pondrop.Service.Submission.Domain.Models.SubmissionTemplate;
 using Pondrop.Service.Submission.Tests.Faker;
 using System;
@@ -17,15 +19,17 @@ namespace Pondrop.Service.Submission.Application.Tests.Queries.SubmissionTemplat
 
 public class GetSubmissionTemplateByIdQueryHandlerTests
 {
-    private readonly Mock<IContainerRepository<SubmissionTemplateViewRecord>> _storeContainerRepositoryMock;
+    private readonly Mock<ICheckpointRepository<SubmissionTemplateEntity>> _storeContainerRepositoryMock;
     private readonly Mock<IValidator<GetSubmissionTemplateByIdQuery>> _validatorMock;
     private readonly Mock<ILogger<GetSubmissionTemplateByIdQueryHandler>> _loggerMock;
+    private readonly Mock<IMapper> _mapperMock;
 
     public GetSubmissionTemplateByIdQueryHandlerTests()
     {
-        _storeContainerRepositoryMock = new Mock<IContainerRepository<SubmissionTemplateViewRecord>>();
+        _storeContainerRepositoryMock = new Mock<ICheckpointRepository<SubmissionTemplateEntity>>();
         _validatorMock = new Mock<IValidator<GetSubmissionTemplateByIdQuery>>();
         _loggerMock = new Mock<ILogger<GetSubmissionTemplateByIdQueryHandler>>();
+        _mapperMock = new Mock<IMapper>();
     }
 
     [Fact]
@@ -38,7 +42,7 @@ public class GetSubmissionTemplateByIdQueryHandlerTests
             .Returns(new ValidationResult());
         _storeContainerRepositoryMock
             .Setup(x => x.GetByIdAsync(query.Id))
-            .Returns(Task.FromResult<SubmissionTemplateViewRecord?>(new SubmissionTemplateViewRecord()));
+            .Returns(Task.FromResult<SubmissionTemplateEntity?>(new SubmissionTemplateEntity()));
         var handler = GetQueryHandler();
 
         // act
@@ -64,7 +68,7 @@ public class GetSubmissionTemplateByIdQueryHandlerTests
             .Returns(new ValidationResult(new[] { new ValidationFailure() }));
         _storeContainerRepositoryMock
             .Setup(x => x.GetByIdAsync(query.Id))
-            .Returns(Task.FromResult<SubmissionTemplateViewRecord?>(new SubmissionTemplateViewRecord()));
+            .Returns(Task.FromResult<SubmissionTemplateEntity?>(new SubmissionTemplateEntity()));
         var handler = GetQueryHandler();
 
         // act
@@ -90,7 +94,7 @@ public class GetSubmissionTemplateByIdQueryHandlerTests
             .Returns(new ValidationResult());
         _storeContainerRepositoryMock
             .Setup(x => x.GetByIdAsync(query.Id))
-            .Returns(Task.FromResult<SubmissionTemplateViewRecord?>(null));
+            .Returns(Task.FromResult<SubmissionTemplateEntity?>(null));
         var handler = GetQueryHandler();
 
         // act
@@ -138,5 +142,6 @@ public class GetSubmissionTemplateByIdQueryHandlerTests
         new GetSubmissionTemplateByIdQueryHandler(
             _storeContainerRepositoryMock.Object,
             _validatorMock.Object,
+            _mapperMock.Object,
             _loggerMock.Object);
 }
