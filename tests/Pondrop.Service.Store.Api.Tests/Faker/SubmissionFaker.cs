@@ -1,7 +1,6 @@
 ﻿using Bogus;
-using Pondrop.Service.Submission.Application.Commands.SubmissionTemplate.AddStepToSubmission;
-using Pondrop.Service.Submission.Application.Commands.SubmissionTemplate.CreateSubmissionTemplate;
-using Pondrop.Service.Submission.Domain.Models.SubmissionTemplate;
+using Pondrop.Service.Submission.Application.Commands.Submission.CreateSubmission;
+using Pondrop.Service.Submission.Domain.Models.Submission;
 using System;
 using System.Collections.Generic;
 
@@ -17,14 +16,14 @@ public static class SubmissionFaker
     private static readonly string[] InstructionButtons = new[] { "Okay", "Close", "Accept", };
     private static readonly string[] UserNames = new[] { "test/faker", "test/jsmith", "test/bsmith", "test/asmith", "test/account" };
 
-    public static List<SubmissionTemplateRecord> GetSubmissionTemplateRecords(int count = 5)
+    public static List<SubmissionRecord> GetSubmissionRecords(int count = 5)
     {
-        var faker = new Faker<SubmissionTemplateRecord>()
+        var faker = new Faker<SubmissionRecord>()
             .RuleFor(x => x.Id, f => Guid.NewGuid())
-            .RuleFor(x => x.Title, f => f.PickRandom(Titles))
-            .RuleFor(x => x.Description, f => f.PickRandom(Descriptions))
-            .RuleFor(x => x.IconCodePoint, f => f.Random.Int())
-            .RuleFor(x => x.IconFontFamily, f => f.PickRandom(IconFontFamilies))
+            .RuleFor(x => x.StoreVisitId, f => Guid.NewGuid())
+            .RuleFor(x => x.SubmissionTemplateId, f => Guid.NewGuid())
+            .RuleFor(x => x.Latitude, f => f.Random.Double())
+            .RuleFor(x => x.Longitude, f => f.Random.Double())
             .RuleFor(x => x.Steps, f => GetStepRecords(1))
             .RuleFor(x => x.CreatedBy, f => f.PickRandom(UserNames))
             .RuleFor(x => x.CreatedUtc, f => DateTime.UtcNow.AddSeconds(-1 * f.Random.Int(5000, 10000)))
@@ -34,90 +33,101 @@ public static class SubmissionFaker
         return faker.Generate(Math.Max(0, count));
     }
 
-    public static List<SubmissionTemplateViewRecord> GetSubmissionTemplateViewRecords(int count = 5)
+    public static List<SubmissionStepRecord> GetStepRecords(int count = 1)
     {
-
-        var faker = new Faker<SubmissionTemplateViewRecord>()
+        var faker = new Faker<SubmissionStepRecord>()
             .RuleFor(x => x.Id, f => Guid.NewGuid())
-            .RuleFor(x => x.Title, f => f.PickRandom(Titles))
-            .RuleFor(x => x.Description, f => f.PickRandom(Descriptions))
-            .RuleFor(x => x.IconCodePoint, f => f.Random.Int())
-            .RuleFor(x => x.IconFontFamily, f => f.PickRandom(IconFontFamilies))
-            .RuleFor(x => x.Steps, f => GetStepRecords(1))
-            .RuleFor(x => x.CreatedBy, f => f.PickRandom(UserNames))
-            .RuleFor(x => x.CreatedUtc, f => DateTime.UtcNow.AddSeconds(-1 * f.Random.Int(5000, 10000)))
-            .RuleFor(x => x.UpdatedBy, f => f.PickRandom(UserNames))
-            .RuleFor(x => x.UpdatedUtc, f => DateTime.UtcNow);
+            .RuleFor(x => x.Latitude, f => f.Random.Double())
+            .RuleFor(x => x.Longitude, f => f.Random.Double())
+            .RuleFor(x => x.TemplateStepId, f => Guid.NewGuid())
+            .RuleFor(x => x.Fields, f => GetFieldRecords());
 
         return faker.Generate(Math.Max(0, count));
     }
 
-    public static List<Pondrop.Service.Submission.Domain.Models.SubmissionTemplate.StepRecord> GetStepRecords(int count = 1)
+    public static List<SubmissionFieldRecord> GetFieldRecords(int count = 1)
     {
-        var faker = new Faker<Pondrop.Service.Submission.Domain.Models.SubmissionTemplate.StepRecord>()
+        var faker = new Faker<SubmissionFieldRecord>()
             .RuleFor(x => x.Id, f => Guid.NewGuid())
-            .RuleFor(x => x.Title, f => f.PickRandom(Titles))
-            .RuleFor(x => x.Instructions, f => f.PickRandom(Instructions))
-            .RuleFor(x => x.InstructionsContinueButton, f => f.PickRandom(InstructionButtons))
-            .RuleFor(x => x.InstructionsSkipButton, f => f.PickRandom(InstructionButtons))
-            .RuleFor(x => x.InstructionsIconCodePoint, f => f.Random.Int())
-            .RuleFor(x => x.InstructionsIconFontFamily, f => f.PickRandom(IconFontFamilies))
-            .RuleFor(x => x.Fields, f => GetFieldRecords(1));
-
-        return faker.Generate(Math.Max(0, count));
-    }
-
-    public static List<FieldRecord> GetFieldRecords(int count = 1)
-    {
-        var faker = new Faker<FieldRecord>()
-            .RuleFor(x => x.Id, f => Guid.NewGuid())
-            .RuleFor(x => x.FieldType, f => f.PickRandom(FieldTypes))
-            .RuleFor(x => x.MaxValue, f => f.Random.Int())
-            .RuleFor(x => x.PickerValues, f => new List<string?>())
-            .RuleFor(x => x.Label, f => f.PickRandom(FieldTypes))
-            .RuleFor(x => x.Mandatory, f => f.Random.Bool());
+            .RuleFor(x => x.TemplateFieldId, f => Guid.NewGuid())
+            .RuleFor(x => x.Latitude, f => f.Random.Double())
+            .RuleFor(x => x.Longitude, f => f.Random.Double())
+            .RuleFor(x => x.Values, GetFieldValuesRecords());
         return faker.Generate(Math.Max(0, count));
     }
 
 
-    public static CreateSubmissionTemplateCommand GetCreateSubmissionTemplateCommand()
+    public static List<FieldValuesRecord> GetFieldValuesRecords(int count = 1)
     {
-        var faker = new Faker<CreateSubmissionTemplateCommand>()
-            .RuleFor(x => x.Title, f => f.PickRandom(Titles))
-            .RuleFor(x => x.Description, f => f.PickRandom(Descriptions))
-            .RuleFor(x => x.IconFontFamily, f => f.PickRandom(IconFontFamilies))
-            .RuleFor(x => x.CreatedBy, f => f.PickRandom(UserNames))
-            .RuleFor(x => x.IconCodePoint, f => f.Random.Int());
+        var faker = new Faker<FieldValuesRecord>()
+            .RuleFor(x => x.Id, f => Guid.NewGuid())
+            .RuleFor(x => x.StringValue, f => f.PickRandom(Descriptions))
+            .RuleFor(x => x.DoubleValue, f => f.Random.Double())
+            .RuleFor(x => x.IntValue, f => f.Random.Int())
+            .RuleFor(x => x.PhotoUrl, string.Empty);
+        return faker.Generate(Math.Max(0, count));
+    }
+
+
+    public static CreateSubmissionCommand GetCreateSubmissionCommand()
+    {
+        var faker = new Faker<CreateSubmissionCommand>()
+            .RuleFor(x => x.StoreVisitId, f => Guid.NewGuid())
+            .RuleFor(x => x.SubmissionTemplateId, f => Guid.NewGuid())
+            .RuleFor(x => x.Latitude, f => f.Random.Double())
+            .RuleFor(x => x.Longitude, f => f.Random.Double())
+            .RuleFor(x => x.Steps, f => GetCreateStepRecords(1));
 
         return faker.Generate();
     }
 
-    public static AddStepToSubmissionTemplateCommand GetAddStepCommand()
+    public static List<CreateSubmissionStepRecord> GetCreateStepRecords(int count = 1)
     {
-        var faker = new Faker<AddStepToSubmissionTemplateCommand>()
-            .RuleFor(x => x.SubmissionId, f => Guid.NewGuid())
-            .RuleFor(x => x.Title, f => f.PickRandom(Titles))
-            .RuleFor(x => x.Instructions, f => f.PickRandom(Instructions))
-            .RuleFor(x => x.InstructionsContinueButton, f => f.PickRandom(InstructionButtons))
-            .RuleFor(x => x.InstructionsSkipButton, f => f.PickRandom(InstructionButtons))
-            .RuleFor(x => x.InstructionsIconCodePoint, f => f.Random.Int())
-            .RuleFor(x => x.InstructionsIconFontFamily, f => f.PickRandom(IconFontFamilies))
-            .RuleFor(x => x.CreatedBy, f => f.PickRandom(UserNames))
-            .RuleFor(x => x.Fields, f => GetFieldRecords(1));
+        var faker = new Faker<CreateSubmissionStepRecord>()
+            .RuleFor(x => x.Id, f => Guid.NewGuid())
+            .RuleFor(x => x.Latitude, f => f.Random.Double())
+            .RuleFor(x => x.Longitude, f => f.Random.Double())
+            .RuleFor(x => x.TemplateStepId, f => Guid.NewGuid())
+            .RuleFor(x => x.Fields, f => GetCreateFieldRecords());
 
-        return faker.Generate();
+        return faker.Generate(Math.Max(0, count));
     }
 
-    public static SubmissionTemplateRecord GetSubmissionTemplateRecord(CreateSubmissionTemplateCommand command)
+    public static List<CreateSubmissionFieldRecord> GetCreateFieldRecords(int count = 1)
+    {
+        var faker = new Faker<CreateSubmissionFieldRecord>()
+            .RuleFor(x => x.Id, f => Guid.NewGuid())
+            .RuleFor(x => x.TemplateFieldId, f => Guid.NewGuid())
+            .RuleFor(x => x.Latitude, f => f.Random.Double())
+            .RuleFor(x => x.Longitude, f => f.Random.Double())
+            .RuleFor(x => x.Values, GetCreateFieldValuesRecords());
+        return faker.Generate(Math.Max(0, count));
+    }
+
+
+    public static List<CreateFieldValuesRecord> GetCreateFieldValuesRecords(int count = 1)
+    {
+        var faker = new Faker<CreateFieldValuesRecord>()
+            .RuleFor(x => x.Id, f => Guid.NewGuid())
+            .RuleFor(x => x.StringValue, f => f.PickRandom(Descriptions))
+            .RuleFor(x => x.DoubleValue, f => f.Random.Double())
+            .RuleFor(x => x.IntValue, f => f.Random.Int())
+            .RuleFor(x => x.PhotoFileName, string.Empty)
+            .RuleFor(x => x.PhotoBase64, string.Empty);
+        return faker.Generate(Math.Max(0, count));
+    }
+
+
+    public static SubmissionRecord GetSubmissionRecord(CreateSubmissionCommand command)
     {
         var utcNow = DateTime.UtcNow;
 
-        var faker = new Faker<SubmissionTemplateViewRecord>()
+        var faker = new Faker<SubmissionRecord>()
             .RuleFor(x => x.Id, f => Guid.NewGuid())
-            .RuleFor(x => x.Title, f => f.PickRandom(Titles))
-            .RuleFor(x => x.Description, f => f.PickRandom(Descriptions))
-            .RuleFor(x => x.IconCodePoint, f => f.Random.Int())
-            .RuleFor(x => x.IconFontFamily, f => f.PickRandom(IconFontFamilies))
+            .RuleFor(x => x.StoreVisitId, f => Guid.NewGuid())
+            .RuleFor(x => x.SubmissionTemplateId, f => Guid.NewGuid())
+            .RuleFor(x => x.Latitude, f => f.Random.Double())
+            .RuleFor(x => x.Longitude, f => f.Random.Double())
             .RuleFor(x => x.Steps, f => GetStepRecords(1))
             .RuleFor(x => x.CreatedBy, f => f.PickRandom(UserNames))
             .RuleFor(x => x.CreatedUtc, f => DateTime.UtcNow.AddSeconds(-1 * f.Random.Int(5000, 10000)))

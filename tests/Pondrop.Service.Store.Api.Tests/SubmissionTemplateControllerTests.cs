@@ -51,10 +51,10 @@ namespace Pondrop.Service.Submission.Api.Tests
         public async void GetAllSubmissions_ShouldReturnOkResult()
         {
             // arrange
-            var items = SubmissionFaker.GetSubmissionTemplateViewRecords();
+            var items = SubmissionTemplateFaker.GetSubmissionTemplateRecords();
             _mediatorMock
                 .Setup(x => x.Send(It.IsAny<GetAllSubmissionTemplatesQuery>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(Result<List<SubmissionTemplateViewRecord>>.Success(items));
+                .ReturnsAsync(Result<List<SubmissionTemplateRecord>>.Success(items));
             var controller = GetController();
 
             // act
@@ -70,7 +70,7 @@ namespace Pondrop.Service.Submission.Api.Tests
         public async void GetAllSubmissions_ShouldReturnBadResult_WhenFailedResult()
         {
             // arrange
-            var failedResult = Result<List<SubmissionTemplateViewRecord>>.Error("Invalid result!");
+            var failedResult = Result<List<SubmissionTemplateRecord>>.Error("Invalid result!");
             _mediatorMock
                 .Setup(x => x.Send(It.IsAny<GetAllSubmissionTemplatesQuery>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(failedResult);
@@ -89,10 +89,10 @@ namespace Pondrop.Service.Submission.Api.Tests
         public async void GetSubmissionById_ShouldReturnOkResult()
         {
             // arrange
-            var item = SubmissionFaker.GetSubmissionTemplateViewRecords(1).Single();
+            var item = SubmissionTemplateFaker.GetSubmissionTemplateRecords(1).Single();
             _mediatorMock
                 .Setup(x => x.Send(It.Is<GetSubmissionTemplateByIdQuery>(x => x.Id == item.Id), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(Result<SubmissionTemplateViewRecord>.Success(item));
+                .ReturnsAsync(Result<SubmissionTemplateRecord>.Success(item));
             var controller = GetController();
 
             // act
@@ -108,7 +108,7 @@ namespace Pondrop.Service.Submission.Api.Tests
         public async void GetSubmissionById_ShouldReturnBadResult_WhenFailedResult()
         {
             // arrange
-            var failedResult = Result<SubmissionTemplateViewRecord>.Error("Invalid result!");
+            var failedResult = Result<SubmissionTemplateRecord>.Error("Invalid result!");
             _mediatorMock
                 .Setup(x => x.Send(It.IsAny<GetSubmissionTemplateByIdQuery>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(failedResult);
@@ -127,8 +127,8 @@ namespace Pondrop.Service.Submission.Api.Tests
         public async void CreateSubmissionCommand_ShouldReturnOkResult()
         {
             // arrange
-            var cmd = SubmissionFaker.GetCreateSubmissionTemplateCommand();
-            var item = SubmissionFaker.GetSubmissionTemplateRecord(cmd);
+            var cmd = SubmissionTemplateFaker.GetCreateSubmissionTemplateCommand();
+            var item = SubmissionTemplateFaker.GetSubmissionTemplateRecord(cmd);
             _mediatorMock
                 .Setup(x => x.Send(cmd, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(Result<SubmissionTemplateRecord>.Success(item));
@@ -168,8 +168,8 @@ namespace Pondrop.Service.Submission.Api.Tests
         public async void AddStepToSubmissionCommand_ShouldReturnOkResult()
         {
             // arrange
-            var cmd = SubmissionFaker.GetAddStepCommand();
-            var item = SubmissionFaker.GetSubmissionTemplateRecords(1).Single() with { Id = cmd.SubmissionId };
+            var cmd = SubmissionTemplateFaker.GetAddStepCommand();
+            var item = SubmissionTemplateFaker.GetSubmissionTemplateRecords(1).Single() with { Id = cmd.SubmissionId };
             _mediatorMock
                 .Setup(x => x.Send(cmd, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(Result<SubmissionTemplateRecord>.Success(item));
@@ -209,7 +209,7 @@ namespace Pondrop.Service.Submission.Api.Tests
         public async void RemoveAddressToSubmissionCommand_ShouldReturnOkResult()
         {
             // arrange
-            var item = SubmissionFaker.GetSubmissionTemplateRecords(1).Single();
+            var item = SubmissionTemplateFaker.GetSubmissionTemplateRecords(1).Single();
             var cmd = new RemoveStepFromSubmissionTemplateCommand()
             {
                 Id = item.Steps.First().Id,
@@ -236,7 +236,7 @@ namespace Pondrop.Service.Submission.Api.Tests
         {
             // arrange
             var cmd = new UpdateSubmissionTemplateCheckpointByIdCommand() { Id = Guid.NewGuid() };
-            var item = SubmissionFaker.GetSubmissionTemplateRecords(1).Single() with { Id = cmd.Id };
+            var item = SubmissionTemplateFaker.GetSubmissionTemplateRecords(1).Single() with { Id = cmd.Id };
             _mediatorMock
                 .Setup(x => x.Send(cmd, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(Result<SubmissionTemplateRecord>.Success(item));

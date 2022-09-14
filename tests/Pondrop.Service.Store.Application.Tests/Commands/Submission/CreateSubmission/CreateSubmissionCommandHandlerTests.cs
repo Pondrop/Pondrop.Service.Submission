@@ -4,14 +4,18 @@ using FluentValidation.Results;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Moq;
+using Pondrop.Service.Submission.Api.Tests.Faker;
 using Pondrop.Service.Submission.Application.Commands;
-using Pondrop.Service.Submission.Application.Commands.SubmissionTemplate.CreateSubmissionTemplate;
+using Pondrop.Service.Submission.Application.Commands.Submission.CreateSubmission;
+using Pondrop.Service.Submission.Application.Commands.Submission.CreateSubmission;
 using Pondrop.Service.Submission.Application.Interfaces;
+using Pondrop.Service.Submission.Application.Interfaces.BlobStorage;
 using Pondrop.Service.Submission.Application.Interfaces.Services;
 using Pondrop.Service.Submission.Application.Models;
 using Pondrop.Service.Submission.Domain.Events;
 using Pondrop.Service.Submission.Domain.Models;
-using Pondrop.Service.Submission.Domain.Models.SubmissionTemplate;
+using Pondrop.Service.Submission.Domain.Models.Submission;
+using Pondrop.Service.Submission.Domain.Models.Submission;
 using Pondrop.Service.Submission.Tests.Faker;
 using System;
 using System.Collections.Generic;
@@ -29,9 +33,10 @@ public class CreateSubmissionCommandHandlerTests
     private readonly Mock<IDaprService> _daprServiceMock;
     private readonly Mock<IUserService> _userServiceMock;
     private readonly Mock<IMapper> _mapperMock;
-    private readonly Mock<IValidator<CreateSubmissionTemplateCommand>> _validatorMock;
-    private readonly Mock<ILogger<CreateSubmissionTemplateCommandHandler>> _loggerMock;
-    
+    private readonly Mock<IValidator<CreateSubmissionCommand>> _validatorMock;
+    private readonly Mock<ILogger<CreateSubmissionCommandHandler>> _loggerMock;
+    private readonly Mock<IBlobStorageService> _blobStorageMock;
+
     public CreateSubmissionCommandHandlerTests()
     {
         _SubmissionUpdateConfigMock = new Mock<IOptions<SubmissionUpdateConfiguration>>();
@@ -39,8 +44,9 @@ public class CreateSubmissionCommandHandlerTests
         _daprServiceMock = new Mock<IDaprService>();
         _userServiceMock = new Mock<IUserService>();
         _mapperMock = new Mock<IMapper>();
-        _validatorMock = new Mock<IValidator<CreateSubmissionTemplateCommand>>();
-        _loggerMock = new Mock<ILogger<CreateSubmissionTemplateCommandHandler>>();
+        _validatorMock = new Mock<IValidator<CreateSubmissionCommand>>();
+        _loggerMock = new Mock<ILogger<CreateSubmissionCommandHandler>>();
+        _blobStorageMock = new Mock<IBlobStorageService>();
 
         _SubmissionUpdateConfigMock
             .Setup(x => x.Value)
@@ -48,14 +54,17 @@ public class CreateSubmissionCommandHandlerTests
         _userServiceMock
             .Setup(x => x.CurrentUserId())
             .Returns("test/user");
+        _blobStorageMock
+            .Setup(x => x.UploadImageAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
+            .ReturnsAsync("test/user");
     }
     
     //[Fact]
     //public async void CreateSubmissionCommand_ShouldSucceed()
     //{
     //    // arrange
-    //    var cmd = SubmissionFaker.GetCreateSubmissionTemplateCommand();
-    //    var item = SubmissionFaker.GetSubmissionTemplateRecord(cmd);
+    //    var cmd = SubmissionFaker.GetCreateSubmissionCommand();
+    //    var item = SubmissionFaker.GetSubmissionRecord(cmd);
     //    _validatorMock
     //        .Setup(x => x.Validate(cmd))
     //        .Returns(new ValidationResult());
@@ -63,7 +72,7 @@ public class CreateSubmissionCommandHandlerTests
     //        .Setup(x => x.AppendEventsAsync(It.IsAny<string>(), It.IsAny<long>(), It.IsAny<IEnumerable<IEvent>>()))
     //        .Returns(Task.FromResult(true));
     //    _mapperMock
-    //        .Setup(x => x.Map<SubmissionTemplateRecord>(It.IsAny<SubmissionTemplateEntity>()))
+    //        .Setup(x => x.Map<SubmissionRecord>(It.IsAny<SubmissionEntity>()))
     //        .Returns(item);
     //    var handler = GetCommandHandler();
         
@@ -80,7 +89,7 @@ public class CreateSubmissionCommandHandlerTests
     //        x => x.AppendEventsAsync(It.IsAny<string>(), It.IsAny<long>(), It.IsAny<IEnumerable<IEvent>>()),
     //        Times.Once());
     //    _mapperMock.Verify(
-    //        x => x.Map<SubmissionTemplateRecord>(It.IsAny<SubmissionTemplateEntity>()),
+    //        x => x.Map<SubmissionRecord>(It.IsAny<SubmissionEntity>()),
     //        Times.Once);
     //}
     
@@ -88,8 +97,8 @@ public class CreateSubmissionCommandHandlerTests
     public async void CreateSubmissionCommand_WhenInvalid_ShouldFail()
     {
         // arrange
-        var cmd = SubmissionFaker.GetCreateSubmissionTemplateCommand();
-        var item = SubmissionFaker.GetSubmissionTemplateRecord(cmd);
+        var cmd = SubmissionFaker.GetCreateSubmissionCommand();
+        var item = SubmissionFaker.GetSubmissionRecord(cmd);
         _validatorMock
             .Setup(x => x.Validate(cmd))
             .Returns(new ValidationResult(new [] { new ValidationFailure() }));
@@ -107,7 +116,7 @@ public class CreateSubmissionCommandHandlerTests
         //    x => x.AppendEventsAsync(It.IsAny<string>(), It.IsAny<long>(), It.IsAny<IEnumerable<IEvent>>()),
         //    Times.Never());
         _mapperMock.Verify(
-            x => x.Map<SubmissionTemplateRecord>(It.IsAny<SubmissionTemplateEntity>()),
+            x => x.Map<SubmissionRecord>(It.IsAny<SubmissionEntity>()),
             Times.Never);
     }
 
@@ -115,8 +124,8 @@ public class CreateSubmissionCommandHandlerTests
     public async void CreateSubmissionCommand_WhenAppendEventsFail_ShouldFail()
     {
         // arrange
-        var cmd = SubmissionFaker.GetCreateSubmissionTemplateCommand();
-        var item = SubmissionFaker.GetSubmissionTemplateRecord(cmd);
+        var cmd = SubmissionFaker.GetCreateSubmissionCommand();
+        var item = SubmissionFaker.GetSubmissionRecord(cmd);
         _validatorMock
             .Setup(x => x.Validate(cmd))
             .Returns(new ValidationResult());
@@ -124,7 +133,7 @@ public class CreateSubmissionCommandHandlerTests
             .Setup(x => x.AppendEventsAsync(It.IsAny<string>(), It.IsAny<long>(), It.IsAny<IEnumerable<IEvent>>()))
             .Returns(Task.FromResult(false));
         _mapperMock
-            .Setup(x => x.Map<SubmissionTemplateRecord>(It.IsAny<SubmissionTemplateEntity>()))
+            .Setup(x => x.Map<SubmissionRecord>(It.IsAny<SubmissionEntity>()))
             .Returns(item);
         var handler = GetCommandHandler();
         
@@ -140,7 +149,7 @@ public class CreateSubmissionCommandHandlerTests
         //    x => x.AppendEventsAsync(It.IsAny<string>(), It.IsAny<long>(), It.IsAny<IEnumerable<IEvent>>()),
         //    Times.Once());
         _mapperMock.Verify(
-            x => x.Map<SubmissionTemplateRecord>(It.IsAny<SubmissionTemplateEntity>()),
+            x => x.Map<SubmissionRecord>(It.IsAny<SubmissionEntity>()),
             Times.Never);
     }
     
@@ -148,8 +157,8 @@ public class CreateSubmissionCommandHandlerTests
     public async void CreateSubmissionCommand_WhenException_ShouldFail()
     {
         // arrange
-        var cmd = SubmissionFaker.GetCreateSubmissionTemplateCommand();
-        var item = SubmissionFaker.GetSubmissionTemplateRecord(cmd);
+        var cmd = SubmissionFaker.GetCreateSubmissionCommand();
+        var item = SubmissionFaker.GetSubmissionRecord(cmd);
         _validatorMock
             .Setup(x => x.Validate(cmd))
             .Returns(new ValidationResult());
@@ -157,7 +166,7 @@ public class CreateSubmissionCommandHandlerTests
             .Setup(x => x.AppendEventsAsync(It.IsAny<string>(), It.IsAny<long>(), It.IsAny<IEnumerable<IEvent>>()))
             .Throws(new Exception());
         _mapperMock
-            .Setup(x => x.Map<SubmissionTemplateRecord>(It.IsAny<SubmissionTemplateEntity>()))
+            .Setup(x => x.Map<SubmissionRecord>(It.IsAny<SubmissionEntity>()))
             .Returns(item);
         var handler = GetCommandHandler();
         
@@ -173,83 +182,19 @@ public class CreateSubmissionCommandHandlerTests
         //    x => x.AppendEventsAsync(It.IsAny<string>(), It.IsAny<long>(), It.IsAny<IEnumerable<IEvent>>()),
         //    Times.Once());
         _mapperMock.Verify(
-            x => x.Map<SubmissionTemplateRecord>(It.IsAny<SubmissionTemplateEntity>()),
+            x => x.Map<SubmissionRecord>(It.IsAny<SubmissionEntity>()),
             Times.Never);
     }
     
-    [Fact]
-    public async void CreateSubmissionCommand_WhenRetailerNotFound_ShouldFail()
-    {
-        // arrange
-        var cmd = SubmissionFaker.GetCreateSubmissionTemplateCommand();
-        var item = SubmissionFaker.GetSubmissionTemplateRecord(cmd);
-        _validatorMock
-            .Setup(x => x.Validate(cmd))
-            .Returns(new ValidationResult());
-        _eventRepositoryMock
-            .Setup(x => x.AppendEventsAsync(It.IsAny<string>(), It.IsAny<long>(), It.IsAny<IEnumerable<IEvent>>()))
-            .Returns(Task.FromResult(true));
-        _mapperMock
-            .Setup(x => x.Map<SubmissionTemplateRecord>(It.IsAny<SubmissionTemplateEntity>()))
-            .Returns(item);
-        var handler = GetCommandHandler();
-        
-        // act
-        var result = await handler.Handle(cmd, CancellationToken.None);
-        
-        // assert
-        Assert.False(result.IsSuccess);
-        _validatorMock.Verify(
-            x => x.Validate(cmd),
-            Times.Once());
-        _eventRepositoryMock.Verify(
-            x => x.AppendEventsAsync(It.IsAny<string>(), It.IsAny<long>(), It.IsAny<IEnumerable<IEvent>>()),
-            Times.Never());
-        _mapperMock.Verify(
-            x => x.Map<SubmissionTemplateRecord>(It.IsAny<SubmissionTemplateEntity>()),
-            Times.Never());
-    }
     
-    [Fact]
-    public async void CreateSubmissionCommand_WhenSubmissionTypeNotFound_ShouldFail()
-    {
-        // arrange
-        var cmd = SubmissionFaker.GetCreateSubmissionTemplateCommand();
-        var item = SubmissionFaker.GetSubmissionTemplateRecord(cmd);
-        _validatorMock
-            .Setup(x => x.Validate(cmd))
-            .Returns(new ValidationResult());
-        _eventRepositoryMock
-            .Setup(x => x.AppendEventsAsync(It.IsAny<string>(), It.IsAny<long>(), It.IsAny<IEnumerable<IEvent>>()))
-            .Returns(Task.FromResult(true));
-        _mapperMock
-            .Setup(x => x.Map<SubmissionTemplateRecord>(It.IsAny<SubmissionTemplateEntity>()))
-            .Returns(item);
-        var handler = GetCommandHandler();
-        
-        // act
-        var result = await handler.Handle(cmd, CancellationToken.None);
-        
-        // assert
-        Assert.False(result.IsSuccess);
-        _validatorMock.Verify(
-            x => x.Validate(cmd),
-            Times.Once());
-        _eventRepositoryMock.Verify(
-            x => x.AppendEventsAsync(It.IsAny<string>(), It.IsAny<long>(), It.IsAny<IEnumerable<IEvent>>()),
-            Times.Never());
-        _mapperMock.Verify(
-            x => x.Map<SubmissionTemplateRecord>(It.IsAny<SubmissionTemplateEntity>()),
-            Times.Never());
-    }
-    
-    private CreateSubmissionTemplateCommandHandler GetCommandHandler() =>
-        new CreateSubmissionTemplateCommandHandler(
+    private CreateSubmissionCommandHandler GetCommandHandler() =>
+        new CreateSubmissionCommandHandler(
             _SubmissionUpdateConfigMock.Object,
             _eventRepositoryMock.Object,
             _daprServiceMock.Object,
             _userServiceMock.Object,
             _mapperMock.Object,
+            _blobStorageMock.Object,
             _validatorMock.Object,
             _loggerMock.Object);
 }

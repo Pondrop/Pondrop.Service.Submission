@@ -10,26 +10,29 @@ using Pondrop.Service.Submission.Domain.Models.StoreVisit;
 
 namespace Pondrop.Service.StoreVisit.Application.Queries;
 
-public class GetStoreVisitByIdQueryHandler : IRequestHandler<GetStoreVisitByIdQuery, Result<StoreVisitViewRecord?>>
+public class GetStoreVisitByIdQueryHandler : IRequestHandler<GetStoreVisitByIdQuery, Result<StoreVisitRecord?>>
 {
-    private readonly IContainerRepository<StoreVisitViewRecord> _viewRepository;
+    private readonly ICheckpointRepository<StoreVisitEntity> _checkpointRepository;
     private readonly IValidator<GetStoreVisitByIdQuery> _validator;
     private readonly ILogger<GetStoreVisitByIdQueryHandler> _logger;
     private readonly IUserService _userService;
+    private readonly IMapper _mapper;
 
     public GetStoreVisitByIdQueryHandler(
-        IContainerRepository<StoreVisitViewRecord> viewRepository,
+        ICheckpointRepository<StoreVisitEntity> checkpointRepository,
         IValidator<GetStoreVisitByIdQuery> validator,
         IUserService userService,
+        IMapper mapper,
         ILogger<GetStoreVisitByIdQueryHandler> logger)
     {
-        _viewRepository = viewRepository;
+        _checkpointRepository = checkpointRepository;
         _validator = validator;
         _userService = userService;
+        _mapper = mapper;
         _logger = logger;
     }
 
-    public async Task<Result<StoreVisitViewRecord?>> Handle(GetStoreVisitByIdQuery query, CancellationToken cancellationToken)
+    public async Task<Result<StoreVisitRecord?>> Handle(GetStoreVisitByIdQuery query, CancellationToken cancellationToken)
     {
         var validation = _validator.Validate(query);
 
@@ -37,22 +40,22 @@ public class GetStoreVisitByIdQueryHandler : IRequestHandler<GetStoreVisitByIdQu
         {
             var errorMessage = $"Get store visit by id failed {validation}";
             _logger.LogError(errorMessage);
-            return Result<StoreVisitViewRecord?>.Error(errorMessage);
+            return Result<StoreVisitRecord?>.Error(errorMessage);
         }
 
-        var result = default(Result<StoreVisitViewRecord?>);
+        var result = default(Result<StoreVisitRecord?>);
 
         try
         {
-            var records = await _viewRepository.QueryAsync($"SELECT * FROM c WHERE c.userId = '{_userService.CurrentUserId()}' AND c.id = '{query.Id}' OFFSET 0 LIMIT 1");
+            var records = await _checkpointRepository.QueryAsync($"SELECT * FROM c WHERE c.userId = '{_userService.CurrentUserId()}' AND c.id = '{query.Id}' OFFSET 0 LIMIT 1");
             result = records is not null
-                ? Result<StoreVisitViewRecord?>.Success(records.FirstOrDefault())
-                : Result<StoreVisitViewRecord?>.Success(null);
+                ? Result<StoreVisitRecord?>.Success(_mapper.Map<StoreVisitRecord>(records.FirstOrDefault()))
+                : Result<StoreVisitRecord?>.Success(null);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, ex.Message);
-            result = Result<StoreVisitViewRecord?>.Error(ex);
+            result = Result<StoreVisitRecord?>.Error(ex);
         }
 
         return result;

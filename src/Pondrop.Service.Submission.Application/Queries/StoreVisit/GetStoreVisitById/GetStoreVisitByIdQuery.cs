@@ -5,7 +5,7 @@ using Pondrop.Service.Submission.Domain.Models.Submission;
 
 namespace Pondrop.Service.Submission.Application.Queries.Submission.GetStoreVisitById;
 
-public class GetStoreVisitByIdQuery : IRequest<Result<StoreVisitViewRecord?>>
+public class GetStoreVisitByIdQuery : IRequest<Result<StoreVisitRecord?>>
 {
     public Guid Id { get; init; } = Guid.Empty;
 }
