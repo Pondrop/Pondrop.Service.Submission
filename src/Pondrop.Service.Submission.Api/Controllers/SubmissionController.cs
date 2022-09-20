@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.Net.Http.Headers;
 using Pondrop.Service.Submission.Api.Services.Interfaces;
 using System.Security.Claims;
+using Pondrop.Service.Submission.Application.Queries.Submission.GetAllSubmissionsWithStore;
 
 namespace Pondrop.Service.Submission.Api.Controllers;
 
@@ -48,6 +49,21 @@ public class SubmissionController : ControllerBase
             return new UnauthorizedResult();
 
         var result = await _mediator.Send(new GetAllSubmissionsQuery());
+        return result.Match<IActionResult>(
+            i => new OkObjectResult(i),
+            (ex, msg) => new BadRequestObjectResult(msg));
+    }
+    [HttpGet]
+    [Route("withstore")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> GetAllSubmissionsWithStore()
+    {
+        var claimsPrincipal = _jwtTokenProvider.ValidateToken(Request?.Headers[HeaderNames.Authorization] ?? string.Empty);
+        if (claimsPrincipal is null)
+            return new UnauthorizedResult();
+
+        var result = await _mediator.Send(new GetAllSubmissionsWithStoreQuery());
         return result.Match<IActionResult>(
             i => new OkObjectResult(i),
             (ex, msg) => new BadRequestObjectResult(msg));

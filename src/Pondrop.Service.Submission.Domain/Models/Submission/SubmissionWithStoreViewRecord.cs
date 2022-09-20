@@ -13,7 +13,7 @@ public record SubmissionWithStoreViewRecord(
         DateTime? SubmittedUtc,
         string? RetailerName,
         string? StoreName,
-        List<SubmissionStepViewRecord> Steps)
+        string Images)
 {
     public SubmissionWithStoreViewRecord() : this(
         Guid.Empty,
@@ -23,7 +23,7 @@ public record SubmissionWithStoreViewRecord(
         DateTime.MinValue,
         string.Empty,
         string.Empty,
-        new List<SubmissionStepViewRecord>(0))
+        string.Empty)
     {
     }
 }
