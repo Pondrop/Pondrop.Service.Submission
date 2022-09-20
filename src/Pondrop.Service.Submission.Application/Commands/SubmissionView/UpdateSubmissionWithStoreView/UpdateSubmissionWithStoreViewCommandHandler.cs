@@ -93,14 +93,29 @@ public class UpdateSubmissionWithStoreViewCommandHandler : IRequestHandler<Updat
                 if (submissionTemplate == null)
                     return false;
 
+                List<string> stepsWithImages = new List<string>();
+
                 try
                 {
+                    foreach (var step in i.Steps)
+                    {
+                        foreach (var field in step.Fields)
+                        {
+                            if (field.Values.Any(v => !string.IsNullOrEmpty(v.PhotoUrl)))
+                            {
+                                stepsWithImages.Add(submissionTemplate?.Steps?.FirstOrDefault(s => s.Id == step.TemplateStepId)?.Title);
+                                continue;
+                            }
+                        }
+                    }
+
                     var submissionView = _mapper.Map<SubmissionWithStoreViewRecord>(i) with
                     {
                         StoreName = command.Name ?? store?.Name,
                         RetailerName = command.RetailerName ?? store?.Retailer?.Name,
                         TaskType = submissionTemplate.Title,
                         SubmittedUtc = submittedUtc,
+                        Images = string.Join(',', stepsWithImages)
                     };
 
                     var result = await _containerRepository.UpsertAsync(submissionView);
