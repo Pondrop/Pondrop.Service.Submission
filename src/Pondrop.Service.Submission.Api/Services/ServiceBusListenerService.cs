@@ -1,5 +1,6 @@
 using Azure.Messaging.ServiceBus;
 using MediatR;
+using Microsoft.Azure.EventGrid.Models;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -79,7 +80,7 @@ public class ServiceBusListenerService : IServiceBusListenerService
     {
         try
         {
-            if (args.Message.Subject.Contains("Command"))
+            if (args.Message.Subject != null && args.Message.Subject.Contains("Command"))
             {
                 var commandType = typeof(UpdateCheckpointByIdCommand);
                 var commandTypeName = $"{commandType.FullName!.Replace(nameof(UpdateCheckpointByIdCommand), args.Message.Subject)}, {commandType.Assembly.GetName()}";
@@ -98,23 +99,46 @@ public class ServiceBusListenerService : IServiceBusListenerService
                             var mediator = scoped.ServiceProvider.GetService<IMediator>();
                             await mediator!.Send(command);
 
-                            //switch (command)
-                            //{
-                            //    case UpdateSubmissionTemplateCheckpointByIdCommand SubmissionTemplate:
-                            //        await mediator!.Send(new UpdateSubmissionTemplateViewCommand() { SubmissionTemplateId = SubmissionTemplate.Id });
-                            //        break;
-                            //    case UpdateSubmissionCheckpointByIdCommand Submission:
-                            //        await mediator!.Send(new UpdateSubmissionViewCommand() { SubmissionId = Submission.Id });
-                            //        break;
-                            //    case UpdateStoreVisitCheckpointByIdCommand StoreVisit:
-                            //        await mediator!.Send(new UpdateStoreVisitViewCommand() { StoreVisitId = StoreVisit.Id });
-                            //        break;
-                            //}
+                            switch (command)
+                            {
+                                case UpdateSubmissionTemplateCheckpointByIdCommand SubmissionTemplate:
+                                    await mediator!.Send(new UpdateSubmissionViewCommand() { SubmissionTemplateId = SubmissionTemplate.Id });
+                                    break;
+                                case UpdateSubmissionCheckpointByIdCommand Submission:
+                                    await mediator!.Send(new UpdateSubmissionViewCommand() { SubmissionId = Submission.Id });
+                                    await mediator!.Send(new UpdateSubmissionWithStoreViewCommand() { SubmissionId = Submission.Id });
+                                    break;
+                                case UpdateStoreVisitCheckpointByIdCommand StoreVisit:
+                                    await mediator!.Send(new UpdateSubmissionViewCommand() { StoreVisitId = StoreVisit.Id });
+                                    break;
+                            }
                         }
                         catch (Exception ex)
                         {
                             _logger.LogError(ex, $"Failed to run process event '{args.Message.Subject}'");
                         }
+                    }
+                }
+            }
+
+            if (args.Message.Body != null)
+            {
+                var payload = Encoding.UTF8.GetString(args.Message.Body);
+
+                if (!string.IsNullOrEmpty(payload))
+                {
+                    var eventGridEvent = JsonConvert.DeserializeObject<EventGridEvent>(payload);
+
+                    var eventGridData = eventGridEvent?.Data as JObject;
+
+                    var eventData = eventGridData?.ToObject<UpdateSubmissionWithStoreViewCommand>();
+
+                    using var scoped = _serviceProvider.CreateScope();
+                    var mediator = scoped.ServiceProvider.GetService<IMediator>();
+
+                    if (eventData != null)
+                    {
+                        await mediator!.Send(eventData);
                     }
                 }
             }

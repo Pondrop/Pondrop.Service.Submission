@@ -45,10 +45,11 @@ public class JwtMiddleware
             }, out SecurityToken validatedToken);
 
             var jwtToken = (JwtSecurityToken)validatedToken;
-            var userId = jwtToken.Claims.First(x => x.Type == JwtRegisteredClaimNames.Sub).Value.ToString() ?? string.Empty;
-            var email = jwtToken.Claims.First(x => x.Type == JwtRegisteredClaimNames.Email).Value.ToString() ?? string.Empty;
+            var userId = jwtToken.Claims.FirstOrDefault(x => x.Type == JwtRegisteredClaimNames.Sub)?.Value.ToString() ?? string.Empty;
+            var email = jwtToken.Claims.FirstOrDefault(x => x.Type == JwtRegisteredClaimNames.Email)?.Value.ToString() ?? string.Empty;
+            var userType = jwtToken.Claims.FirstOrDefault(x => x.Type == JwtRegisteredClaimNames.Typ)?.Value.ToString() ?? string.Empty;
 
-            userService.SetCurrentUser(new UserModel() { Id = userId, Email = email });
+            userService.SetCurrentUser(new UserModel() { Id = userId, Email = email, Type = userType });
 
         }
         catch(Exception ex)

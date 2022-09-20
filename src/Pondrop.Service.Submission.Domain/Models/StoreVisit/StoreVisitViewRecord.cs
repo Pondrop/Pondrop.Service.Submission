@@ -1,10 +1,12 @@
-﻿using Pondrop.Service.Submission.Domain.Enums.StoreVisit;
+﻿using Pondrop.Service.Store.Domain.Models;
+using Pondrop.Service.Submission.Domain.Enums.StoreVisit;
 
 namespace Pondrop.Service.Submission.Domain.Models.StoreVisit;
 public record StoreVisitViewRecord(
         Guid Id,
         Guid StoreId,
         Guid UserId,
+        StoreViewRecord Store,
         double Latitude,
         double Longitude,
         ShopModeStatus ShopModeStatus,
@@ -18,6 +20,7 @@ public record StoreVisitViewRecord(
         Guid.Empty,
         Guid.Empty,
         Guid.Empty,
+        new StoreViewRecord(),
         0,
         0,
         ShopModeStatus.Started,
