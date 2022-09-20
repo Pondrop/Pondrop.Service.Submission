@@ -3,10 +3,12 @@ using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
+using Pondrop.Service.Store.Domain.Models;
 using Pondrop.Service.Submission.Api.Configurations.Extensions;
 using Pondrop.Service.Submission.Api.Middleware;
 using Pondrop.Service.Submission.Api.Services;
@@ -91,7 +93,8 @@ services
     .AddJsonOptions(options => options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 services.AddEndpointsApiExplorer();
-services.AddSwaggerGen(c => {
+services.AddSwaggerGen(c =>
+{
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme()
     {
         Name = "Authorization",
@@ -125,7 +128,13 @@ services.AddFluentValidation(config =>
         config.RegisterValidatorsFromAssemblyContaining(typeof(Result<>));
     });
 
+var databaseName = configuration["StoreCosmosConfiguration:DatabaseName"];
+var connectionString = configuration["StoreCosmosConfiguration:ConnectionString"];
+var applicationName = configuration["StoreCosmosConfiguration:ApplicationName"];
+
+
 services.Configure<CosmosConfiguration>(configuration.GetSection(CosmosConfiguration.Key));
+services.Configure<StoreCosmosConfiguration>(configuration.GetSection(StoreCosmosConfiguration.Key));
 services.Configure<BlobStorageConfiguration>(configuration.GetSection(BlobStorageConfiguration.Key));
 services.Configure<ServiceBusConfiguration>(configuration.GetSection(ServiceBusConfiguration.Key));
 services.Configure<SubmissionUpdateConfiguration>(configuration.GetSection(DaprEventTopicConfiguration.Key).GetSection(SubmissionUpdateConfiguration.Key));
@@ -145,7 +154,17 @@ services.AddSingleton<ICheckpointRepository<SubmissionTemplateEntity>, Checkpoin
 services.AddSingleton<IContainerRepository<StoreVisitViewRecord>, ContainerRepository<StoreVisitViewRecord>>();
 services.AddSingleton<ICheckpointRepository<StoreVisitEntity>, CheckpointRepository<StoreVisitEntity>>();
 services.AddSingleton<IContainerRepository<SubmissionTemplateViewRecord>, ContainerRepository<SubmissionTemplateViewRecord>>();
+services.AddSingleton<IContainerRepository<SubmissionWithStoreViewRecord>, ContainerRepository<SubmissionWithStoreViewRecord>>();
 services.AddSingleton<IContainerRepository<SubmissionViewRecord>, ContainerRepository<SubmissionViewRecord>>();
+services.AddSingleton<IContainerRepository<StoreViewRecord>, ContainerRepository<StoreViewRecord>>(provider =>
+    new ContainerRepository<StoreViewRecord>(
+        Options.Create(new CosmosConfiguration()
+        {
+            ConnectionString = connectionString,
+            ApplicationName = applicationName,
+            DatabaseName = databaseName
+        }), null));
+
 services.AddSingleton<IDaprService, DaprService>();
 services.AddSingleton<IServiceBusService, ServiceBusService>();
 services.AddSingleton<ITokenProvider, JWTTokenProvider>();

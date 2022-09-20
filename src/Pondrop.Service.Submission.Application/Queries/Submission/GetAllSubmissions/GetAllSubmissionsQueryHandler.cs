@@ -2,24 +2,28 @@
 using FluentValidation;
 using MediatR;
 using Microsoft.Extensions.Logging;
+using Pondrop.Service.Store.Domain.Models;
 using Pondrop.Service.Submission.Application.Interfaces;
 using Pondrop.Service.Submission.Application.Interfaces.Services;
 using Pondrop.Service.Submission.Application.Models;
 using Pondrop.Service.Submission.Domain.Enums.User;
+using Pondrop.Service.Submission.Domain.Models.StoreVisit;
 using Pondrop.Service.Submission.Domain.Models.Submission;
+using System.Net.Http.Headers;
 
 namespace Pondrop.Service.Submission.Application.Queries.Submission.GetAllSubmissions;
 
-public class GetAllSubmissionsQueryHandler : IRequestHandler<GetAllSubmissionsQuery, Result<List<SubmissionRecord>>>
+public class GetAllSubmissionsQueryHandler : IRequestHandler<GetAllSubmissionsQuery, Result<List<SubmissionViewRecord>>>
 {
-    private readonly ICheckpointRepository<SubmissionEntity> _checkpointRepository;
+    private readonly IContainerRepository<SubmissionViewRecord> _checkpointRepository;
     private readonly IMapper _mapper;
     private readonly IValidator<GetAllSubmissionsQuery> _validator;
     private readonly ILogger<GetAllSubmissionsQueryHandler> _logger;
     private readonly IUserService _userService;
 
+
     public GetAllSubmissionsQueryHandler(
-        ICheckpointRepository<SubmissionEntity> checkpointRepository,
+        IContainerRepository<SubmissionViewRecord> checkpointRepository,
         IMapper mapper,
         IUserService userService,
         IValidator<GetAllSubmissionsQuery> validator,
@@ -32,7 +36,7 @@ public class GetAllSubmissionsQueryHandler : IRequestHandler<GetAllSubmissionsQu
         _logger = logger;
     }
 
-    public async Task<Result<List<SubmissionRecord>>> Handle(GetAllSubmissionsQuery request, CancellationToken cancellationToken)
+    public async Task<Result<List<SubmissionViewRecord>>> Handle(GetAllSubmissionsQuery request, CancellationToken cancellationToken)
     {
         var validation = _validator.Validate(request);
 
@@ -40,10 +44,10 @@ public class GetAllSubmissionsQueryHandler : IRequestHandler<GetAllSubmissionsQu
         {
             var errorMessage = $"Get all submissionTemplate templates failed {validation}";
             _logger.LogError(errorMessage);
-            return Result<List<SubmissionRecord>>.Error(errorMessage);
+            return Result<List<SubmissionViewRecord>>.Error(errorMessage);
         }
 
-        var result = default(Result<List<SubmissionRecord>>);
+        var result = default(Result<List<SubmissionViewRecord>>);
 
         try
         {
@@ -51,13 +55,14 @@ public class GetAllSubmissionsQueryHandler : IRequestHandler<GetAllSubmissionsQu
             query += _userService.CurrentUserType() == UserType.Shopper
                 ? $" WHERE c.createdBy = '{_userService.CurrentUserId()}'" : string.Empty;
 
-            var entities = await _checkpointRepository.QueryAsync(query);
-            result = Result<List<SubmissionRecord>>.Success(_mapper.Map<List<SubmissionRecord>>(entities));
+            var records = await _checkpointRepository.QueryAsync(query);
+
+            result = Result<List<SubmissionViewRecord>>.Success(records);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, ex.Message);
-            result = Result<List<SubmissionRecord>>.Error(ex);
+            result = Result<List<SubmissionViewRecord>>.Error(ex);
         }
 
         return result;

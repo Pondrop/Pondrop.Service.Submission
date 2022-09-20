@@ -5,6 +5,7 @@ using Pondrop.Service.Submission.Application.Interfaces;
 using Pondrop.Service.Submission.Application.Interfaces.Services;
 using Pondrop.Service.Submission.Application.Models;
 using Pondrop.Service.Submission.Domain.Models;
+using Pondrop.Service.Submission.Domain.Models.StoreVisit;
 using Pondrop.Service.Submission.Domain.Models.Submission;
 using Pondrop.Service.Submission.Domain.Models.SubmissionTemplate;
 
@@ -13,6 +14,8 @@ namespace Pondrop.Service.Submission.Application.Commands;
 public class RebuildSubmissionViewCommandHandler : IRequestHandler<RebuildSubmissionViewCommand, Result<int>>
 {
     private readonly ICheckpointRepository<SubmissionEntity> _submissionCheckpointRepository;
+    private readonly ICheckpointRepository<StoreVisitEntity> _storeVisitCheckpointRepository;
+    private readonly ICheckpointRepository<SubmissionTemplateEntity> _submissionTemplateCheckpointRepository;
     private readonly IContainerRepository<SubmissionViewRecord> _containerRepository;
     private readonly IMapper _mapper;
     private readonly IUserService _userService;
@@ -20,12 +23,16 @@ public class RebuildSubmissionViewCommandHandler : IRequestHandler<RebuildSubmis
 
     public RebuildSubmissionViewCommandHandler(
         ICheckpointRepository<SubmissionEntity> submissionCheckpointRepository,
+        ICheckpointRepository<StoreVisitEntity> storeVisitCheckpointRepository,
+        ICheckpointRepository<SubmissionTemplateEntity> submissionTemplateCheckpointRepository,
         IContainerRepository<SubmissionViewRecord> containerRepository,
         IMapper mapper,
         IUserService userService,
         ILogger<RebuildSubmissionViewCommandHandler> logger) : base()
     {
         _submissionCheckpointRepository = submissionCheckpointRepository;
+        _storeVisitCheckpointRepository = storeVisitCheckpointRepository;
+        _submissionTemplateCheckpointRepository = submissionTemplateCheckpointRepository;
         _containerRepository = containerRepository;
         _mapper = mapper;
         _userService = userService;
@@ -38,28 +45,39 @@ public class RebuildSubmissionViewCommandHandler : IRequestHandler<RebuildSubmis
 
         try
         {
-            var submissionTemplatesTask = _submissionCheckpointRepository.GetAllAsync();
+            var storeVisitTask = _storeVisitCheckpointRepository.GetAllAsync();
+            var submissionTemplateTask = _submissionTemplateCheckpointRepository.GetAllAsync();
+            var submissionsTask = _submissionCheckpointRepository.GetAllAsync();
 
-            await Task.WhenAll(submissionTemplatesTask);
+            await Task.WhenAll(storeVisitTask, submissionTemplateTask, submissionsTask);
 
-            var tasks = submissionTemplatesTask.Result.Select(async i =>
+            var storeVisitLookup = storeVisitTask.Result.ToDictionary(i => i.Id, i => _mapper.Map<StoreVisitViewRecord>(i));
+            var submissionTemplateLookup = submissionTemplateTask.Result.ToDictionary(i => i.Id, i => _mapper.Map<SubmissionTemplateRecord>(i));
+
+
+            await Task.WhenAll(storeVisitTask, submissionTemplateTask, submissionsTask);
+
+            var tasks = submissionsTask.Result.Select(async i =>
+        {
+            var success = false;
+
+            try
             {
-                var success = false;
-
-                try
+                var submissionView = _mapper.Map<SubmissionViewRecord>(i) with
                 {
-                    var submissionView = _mapper.Map<SubmissionViewRecord>(i);
+                    SubmissionTemplate = submissionTemplateLookup[i.SubmissionTemplateId]
+                };
 
-                    var result = await _containerRepository.UpsertAsync(submissionView);
-                    success = result != null;
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, $"Failed to update submission view for '{i.Id}'");
-                }
+                var result = await _containerRepository.UpsertAsync(submissionView);
+                success = result != null;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Failed to update submission view for '{i.Id}'");
+            }
 
-                return success;
-            }).ToList();
+            return success;
+        }).ToList();
 
             await Task.WhenAll(tasks);
 

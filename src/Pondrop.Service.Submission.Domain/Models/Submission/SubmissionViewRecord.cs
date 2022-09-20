@@ -1,8 +1,14 @@
-﻿namespace Pondrop.Service.Submission.Domain.Models.Submission;
+﻿using Pondrop.Service.Submission.Domain.Models.StoreVisit;
+using Pondrop.Service.Submission.Domain.Models.SubmissionTemplate;
+
+namespace Pondrop.Service.Submission.Domain.Models.Submission;
 public record SubmissionViewRecord(
         Guid Id,
         Guid StoreVisitId,
         Guid SubmissionTemplateId,
+        SubmissionTemplateRecord SubmissionTemplate,
+        string? StoreName,
+        string? RetailerName,
         double Latitude,
         double Longitude,
         List<SubmissionStepRecord> Steps,
@@ -16,6 +22,9 @@ public record SubmissionViewRecord(
         Guid.Empty,
         Guid.Empty,
         Guid.Empty,
+        new SubmissionTemplateRecord(),
+        string.Empty,
+        string.Empty,
         0,
         0,
         new List<SubmissionStepRecord>(0),
