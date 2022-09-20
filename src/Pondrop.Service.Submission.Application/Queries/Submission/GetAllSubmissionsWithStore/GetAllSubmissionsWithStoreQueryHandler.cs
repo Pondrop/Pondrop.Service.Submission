@@ -11,32 +11,32 @@ using Pondrop.Service.Submission.Domain.Models.StoreVisit;
 using Pondrop.Service.Submission.Domain.Models.Submission;
 using System.Net.Http.Headers;
 
-namespace Pondrop.Service.Submission.Application.Queries.Submission.GetAllSubmissions;
+namespace Pondrop.Service.Submission.Application.Queries.Submission.GetAllSubmissionsWithStore;
 
-public class GetAllSubmissionsQueryHandler : IRequestHandler<GetAllSubmissionsQuery, Result<List<SubmissionViewRecord>>>
+public class GetAllSubmissionsWithStoreQueryHandler : IRequestHandler<GetAllSubmissionsWithStoreQuery, Result<List<SubmissionWithStoreViewRecord>>>
 {
-    private readonly IContainerRepository<SubmissionViewRecord> _checkpointRepository;
+    private readonly IContainerRepository<SubmissionWithStoreViewRecord> _containerRepository;
     private readonly IMapper _mapper;
-    private readonly IValidator<GetAllSubmissionsQuery> _validator;
-    private readonly ILogger<GetAllSubmissionsQueryHandler> _logger;
+    private readonly IValidator<GetAllSubmissionsWithStoreQuery> _validator;
+    private readonly ILogger<GetAllSubmissionsWithStoreQueryHandler> _logger;
     private readonly IUserService _userService;
 
 
-    public GetAllSubmissionsQueryHandler(
-        IContainerRepository<SubmissionViewRecord> checkpointRepository,
+    public GetAllSubmissionsWithStoreQueryHandler(
+        IContainerRepository<SubmissionWithStoreViewRecord> containerRepository,
         IMapper mapper,
         IUserService userService,
-        IValidator<GetAllSubmissionsQuery> validator,
-        ILogger<GetAllSubmissionsQueryHandler> logger)
+        IValidator<GetAllSubmissionsWithStoreQuery> validator,
+        ILogger<GetAllSubmissionsWithStoreQueryHandler> logger)
     {
-        _checkpointRepository = checkpointRepository;
+        _containerRepository = containerRepository;
         _mapper = mapper;
         _validator = validator;
         _userService = userService;
         _logger = logger;
     }
 
-    public async Task<Result<List<SubmissionViewRecord>>> Handle(GetAllSubmissionsQuery request, CancellationToken cancellationToken)
+    public async Task<Result<List<SubmissionWithStoreViewRecord>>> Handle(GetAllSubmissionsWithStoreQuery request, CancellationToken cancellationToken)
     {
         var validation = _validator.Validate(request);
 
@@ -44,10 +44,10 @@ public class GetAllSubmissionsQueryHandler : IRequestHandler<GetAllSubmissionsQu
         {
             var errorMessage = $"Get all submissionTemplate templates failed {validation}";
             _logger.LogError(errorMessage);
-            return Result<List<SubmissionViewRecord>>.Error(errorMessage);
+            return Result<List<SubmissionWithStoreViewRecord>>.Error(errorMessage);
         }
 
-        var result = default(Result<List<SubmissionViewRecord>>);
+        var result = default(Result<List<SubmissionWithStoreViewRecord>>);
 
         try
         {
@@ -55,14 +55,14 @@ public class GetAllSubmissionsQueryHandler : IRequestHandler<GetAllSubmissionsQu
             query += _userService.CurrentUserType() == UserType.Shopper
                 ? $" WHERE c.createdBy = '{_userService.CurrentUserId()}'" : string.Empty;
 
-            var records = await _checkpointRepository.QueryAsync(query);
+            var records = await _containerRepository.QueryAsync(query);
 
-            result = Result<List<SubmissionViewRecord>>.Success(records);
+            result = Result<List<SubmissionWithStoreViewRecord>>.Success(records);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, ex.Message);
-            result = Result<List<SubmissionViewRecord>>.Error(ex);
+            result = Result<List<SubmissionWithStoreViewRecord>>.Error(ex);
         }
 
         return result;

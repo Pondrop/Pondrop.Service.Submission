@@ -9,5 +9,6 @@ public class SubmissionProfile : Profile
     {
         CreateMap<SubmissionEntity, SubmissionRecord>();
         CreateMap<SubmissionEntity, SubmissionViewRecord>();
+        CreateMap<SubmissionEntity, SubmissionWithStoreViewRecord>();
     }
 }
