@@ -69,6 +69,21 @@ public class SubmissionController : ControllerBase
             i => new OkObjectResult(i),
             (ex, msg) => new BadRequestObjectResult(msg));
     }
+    [HttpGet]
+    [Route("withstore")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> GetAllSubmissionsWithStore()
+    {
+        var claimsPrincipal = _jwtTokenProvider.ValidateToken(Request?.Headers[HeaderNames.Authorization] ?? string.Empty);
+        if (claimsPrincipal is null)
+            return new UnauthorizedResult();
+
+        var result = await _mediator.Send(new GetAllSubmissionsWithStoreQuery());
+        return result.Match<IActionResult>(
+            i => new OkObjectResult(i),
+            (ex, msg) => new BadRequestObjectResult(msg));
+    }
 
     [HttpGet]
     [Route("{id:guid}")]
