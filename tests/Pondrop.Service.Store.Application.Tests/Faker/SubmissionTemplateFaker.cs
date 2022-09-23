@@ -1,6 +1,7 @@
 using Bogus;
 using Pondrop.Service.Submission.Application.Commands.SubmissionTemplate.AddStepToSubmission;
 using Pondrop.Service.Submission.Application.Commands.SubmissionTemplate.CreateSubmissionTemplate;
+using Pondrop.Service.Submission.Domain.Models;
 using Pondrop.Service.Submission.Domain.Models.SubmissionTemplate;
 using System;
 using System.Collections.Generic;
@@ -113,6 +114,25 @@ public static class SubmissionTemplateFaker
         var utcNow = DateTime.UtcNow;
 
         var faker = new Faker<SubmissionTemplateViewRecord>()
+            .RuleFor(x => x.Id, f => Guid.NewGuid())
+            .RuleFor(x => x.Title, f => f.PickRandom(Titles))
+            .RuleFor(x => x.Description, f => f.PickRandom(Descriptions))
+            .RuleFor(x => x.IconCodePoint, f => f.Random.Int())
+            .RuleFor(x => x.IconFontFamily, f => f.PickRandom(IconFontFamilies))
+            .RuleFor(x => x.Steps, f => GetStepRecords(1))
+            .RuleFor(x => x.CreatedBy, f => f.PickRandom(UserNames))
+            .RuleFor(x => x.CreatedUtc, f => DateTime.UtcNow.AddSeconds(-1 * f.Random.Int(5000, 10000)))
+            .RuleFor(x => x.UpdatedBy, f => f.PickRandom(UserNames))
+            .RuleFor(x => x.UpdatedUtc, f => DateTime.UtcNow);
+
+        return faker.Generate();
+    }
+
+    public static SubmissionTemplateEntity GetSubmissionTemplateEntity()
+    {
+        var utcNow = DateTime.UtcNow;
+
+        var faker = new Faker<SubmissionTemplateEntity>()
             .RuleFor(x => x.Id, f => Guid.NewGuid())
             .RuleFor(x => x.Title, f => f.PickRandom(Titles))
             .RuleFor(x => x.Description, f => f.PickRandom(Descriptions))

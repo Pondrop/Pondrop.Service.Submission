@@ -82,11 +82,9 @@ public class ServiceBusListenerService : IServiceBusListenerService
         {
             if (args.Message.Subject != null && args.Message.Subject.Contains("Command"))
             {
-                var commandType = typeof(UpdateCheckpointByIdCommand);
-                var commandTypeName = $"{commandType.FullName!.Replace(nameof(UpdateCheckpointByIdCommand), args.Message.Subject)}, {commandType.Assembly.GetName()}";
-
-                commandType = Type.GetType(commandTypeName);
                 var payload = Encoding.UTF8.GetString(args.Message.Body);
+
+                var commandType = GetCommandType(args.Message.Subject);
 
                 if (commandType is not null && !string.IsNullOrEmpty(payload))
                 {
@@ -102,14 +100,14 @@ public class ServiceBusListenerService : IServiceBusListenerService
                             switch (command)
                             {
                                 case UpdateSubmissionTemplateCheckpointByIdCommand SubmissionTemplate:
-                                    await mediator!.Send(new UpdateSubmissionViewCommand() { SubmissionTemplateId = SubmissionTemplate.Id });
+                                    //await mediator!.Send(new UpdateSubmissionViewCommand() { SubmissionTemplateId = SubmissionTemplate.Id });
                                     break;
                                 case UpdateSubmissionCheckpointByIdCommand Submission:
-                                    await mediator!.Send(new UpdateSubmissionViewCommand() { SubmissionId = Submission.Id });
+                                    //await mediator!.Send(new UpdateSubmissionViewCommand() { SubmissionId = Submission.Id });
                                     await mediator!.Send(new UpdateSubmissionWithStoreViewCommand() { SubmissionId = Submission.Id });
                                     break;
                                 case UpdateStoreVisitCheckpointByIdCommand StoreVisit:
-                                    await mediator!.Send(new UpdateSubmissionViewCommand() { StoreVisitId = StoreVisit.Id });
+                                    //await mediator!.Send(new UpdateSubmissionViewCommand() { StoreVisitId = StoreVisit.Id });
                                     break;
                             }
                         }
@@ -128,9 +126,7 @@ public class ServiceBusListenerService : IServiceBusListenerService
                 if (!string.IsNullOrEmpty(payload))
                 {
                     var eventGridEvent = JsonConvert.DeserializeObject<EventGridEvent>(payload);
-
                     var eventGridData = eventGridEvent?.Data as JObject;
-
                     var eventData = eventGridData?.ToObject<UpdateSubmissionWithStoreViewCommand>();
 
                     using var scoped = _serviceProvider.CreateScope();
@@ -157,5 +153,14 @@ public class ServiceBusListenerService : IServiceBusListenerService
         _logger.LogDebug($"- FullyQualifiedNamespace: {arg.FullyQualifiedNamespace}");
 
         return Task.CompletedTask;
+    }
+
+    private Type? GetCommandType(string commandString)
+    {
+        var commandType = typeof(UpdateCheckpointByIdCommand);
+        var commandTypeName = $"{commandType.FullName!.Replace(nameof(UpdateCheckpointByIdCommand), commandString)}, {commandType.Assembly.GetName()}";
+
+        commandType = Type.GetType(commandTypeName);
+        return commandType;
     }
 }

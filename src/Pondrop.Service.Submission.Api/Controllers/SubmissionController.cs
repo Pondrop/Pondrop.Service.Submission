@@ -39,20 +39,21 @@ public class SubmissionController : ControllerBase
         _logger = logger;
     }
 
-    [HttpGet]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> GetAllSubmissions()
-    {
-        var claimsPrincipal = _jwtTokenProvider.ValidateToken(Request?.Headers[HeaderNames.Authorization] ?? string.Empty);
-        if (claimsPrincipal is null)
-            return new UnauthorizedResult();
+    //[HttpGet]
+    //[ProducesResponseType(StatusCodes.Status200OK)]
+    //[ProducesResponseType(StatusCodes.Status400BadRequest)]
+    //public async Task<IActionResult> GetAllSubmissions()
+    //{
+    //    var claimsPrincipal = _jwtTokenProvider.ValidateToken(Request?.Headers[HeaderNames.Authorization] ?? string.Empty);
+    //    if (claimsPrincipal is null)
+    //        return new UnauthorizedResult();
 
-        var result = await _mediator.Send(new GetAllSubmissionsQuery());
-        return result.Match<IActionResult>(
-            i => new OkObjectResult(i),
-            (ex, msg) => new BadRequestObjectResult(msg));
-    }
+    //    var result = await _mediator.Send(new GetAllSubmissionsQuery());
+    //    return result.Match<IActionResult>(
+    //        i => new OkObjectResult(i),
+    //        (ex, msg) => new BadRequestObjectResult(msg));
+    //}
+
     [HttpGet]
     [Route("withstore")]
     [ProducesResponseType(StatusCodes.Status200OK)]

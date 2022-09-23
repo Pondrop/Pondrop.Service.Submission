@@ -68,7 +68,6 @@ public class UpdateSubmissionViewCommandHandler : IRequestHandler<UpdateSubmissi
                 {
                     var submissionView = _mapper.Map<SubmissionViewRecord>(i) with
                     {
-                        SubmissionTemplate = submissionTemplateLookup[i.SubmissionTemplateId]
                     };
                     var result = await _containerRepository.UpsertAsync(submissionView);
                     success = result != null;

@@ -53,6 +53,19 @@ services.Configure<JsonOptions>(options =>
     options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
 });
 
+var AllowedOrigins = "allowedOrigins";
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(name: AllowedOrigins,
+        policy =>
+        {
+            policy.WithOrigins("https://admin-portal.ashyocean-bde16918.australiaeast.azurecontainerapps.io",
+                    "http://localhost:3000")
+                .AllowAnyHeader()
+                .AllowAnyMethod();
+        });
+});
+
 // Add services to the container.
 services.AddVersionedApiExplorer(options => options.GroupNameFormat = "'v'VVV");
 services.AddApiVersioning(options =>
@@ -128,10 +141,9 @@ services.AddFluentValidation(config =>
         config.RegisterValidatorsFromAssemblyContaining(typeof(Result<>));
     });
 
-var databaseName = configuration["StoreCosmosConfiguration:DatabaseName"];
-var connectionString = configuration["StoreCosmosConfiguration:ConnectionString"];
-var applicationName = configuration["StoreCosmosConfiguration:ApplicationName"];
-
+var storeDatabaseName = configuration["StoreCosmosConfiguration:DatabaseName"];
+var storeConnectionString = configuration["StoreCosmosConfiguration:ConnectionString"];
+var storeApplicationName = configuration["StoreCosmosConfiguration:ApplicationName"];
 
 services.Configure<CosmosConfiguration>(configuration.GetSection(CosmosConfiguration.Key));
 services.Configure<StoreCosmosConfiguration>(configuration.GetSection(StoreCosmosConfiguration.Key));
@@ -160,9 +172,9 @@ services.AddSingleton<IContainerRepository<StoreViewRecord>, ContainerRepository
     new ContainerRepository<StoreViewRecord>(
         Options.Create(new CosmosConfiguration()
         {
-            ConnectionString = connectionString,
-            ApplicationName = applicationName,
-            DatabaseName = databaseName
+            ConnectionString = storeConnectionString,
+            ApplicationName = storeApplicationName,
+            DatabaseName = storeDatabaseName
         }), null));
 
 services.AddSingleton<IDaprService, DaprService>();
@@ -177,6 +189,7 @@ var provider = app.Services.GetRequiredService<IApiVersionDescriptionProvider>()
 app.UseMiddleware<ExceptionMiddleware>();
 app.UseSwaggerDocumentation(provider);
 
+app.UseCors(AllowedOrigins);
 app.UseAuthentication();
 app.UseMiddleware<JwtMiddleware>();
 app.UseHttpsRedirection();
