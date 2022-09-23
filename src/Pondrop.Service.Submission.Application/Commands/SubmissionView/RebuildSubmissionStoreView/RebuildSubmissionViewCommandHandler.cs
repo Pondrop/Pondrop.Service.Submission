@@ -65,7 +65,7 @@ public class RebuildSubmissionViewCommandHandler : IRequestHandler<RebuildSubmis
             {
                 var submissionView = _mapper.Map<SubmissionViewRecord>(i) with
                 {
-                    SubmissionTemplate = submissionTemplateLookup[i.SubmissionTemplateId]
+                    //SubmissionTemplate = submissionTemplateLookup[i.SubmissionTemplateId]
                 };
 
                 var result = await _containerRepository.UpsertAsync(submissionView);
