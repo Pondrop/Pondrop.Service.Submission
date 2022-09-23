@@ -136,4 +136,40 @@ public static class SubmissionFaker
 
         return faker.Generate();
     }
+
+    public static SubmissionEntity GetSubmissionEntity()
+    {
+        var utcNow = DateTime.UtcNow;
+
+        var faker = new Faker<SubmissionEntity>()
+            .RuleFor(x => x.Id, f => Guid.NewGuid())
+            .RuleFor(x => x.StoreVisitId, f => Guid.NewGuid())
+            .RuleFor(x => x.SubmissionTemplateId, f => Guid.NewGuid())
+            .RuleFor(x => x.Latitude, f => f.Random.Double())
+            .RuleFor(x => x.Longitude, f => f.Random.Double())
+            .RuleFor(x => x.CreatedBy, f => f.PickRandom(UserNames))
+            .RuleFor(x => x.CreatedUtc, f => DateTime.UtcNow.AddSeconds(-1 * f.Random.Int(5000, 10000)))
+            .RuleFor(x => x.UpdatedBy, f => f.PickRandom(UserNames))
+            .RuleFor(x => x.UpdatedUtc, f => DateTime.UtcNow);
+
+        return faker.Generate();
+    }
+
+    public static List<SubmissionEntity> GetSubmissionEntities(int count = 1)
+    {
+        var utcNow = DateTime.UtcNow;
+
+        var faker = new Faker<SubmissionEntity>()
+            .RuleFor(x => x.Id, f => Guid.NewGuid())
+            .RuleFor(x => x.StoreVisitId, f => Guid.NewGuid())
+            .RuleFor(x => x.SubmissionTemplateId, f => Guid.NewGuid())
+            .RuleFor(x => x.Latitude, f => f.Random.Double())
+            .RuleFor(x => x.Longitude, f => f.Random.Double())
+            .RuleFor(x => x.CreatedBy, f => f.PickRandom(UserNames))
+            .RuleFor(x => x.CreatedUtc, f => DateTime.UtcNow.AddSeconds(-1 * f.Random.Int(5000, 10000)))
+            .RuleFor(x => x.UpdatedBy, f => f.PickRandom(UserNames))
+            .RuleFor(x => x.UpdatedUtc, f => DateTime.UtcNow);
+
+        return faker.Generate(Math.Max(0, count));
+    }
 }

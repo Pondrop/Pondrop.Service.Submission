@@ -50,6 +50,23 @@ public static class StoreVisitFaker
         return faker.Generate();
     }
 
+    public static StoreVisitEntity GetStoreVisitEntity()
+    {
+        var faker = new Faker<StoreVisitEntity>()
+            .RuleFor(x => x.Id, f => Guid.NewGuid())
+            .RuleFor(x => x.UserId, f => Guid.NewGuid())
+            .RuleFor(x => x.StoreId, f => Guid.NewGuid())
+            .RuleFor(x => x.Latitude, f => f.Random.Double())
+            .RuleFor(x => x.Longitude, f => f.Random.Double())
+            .RuleFor(x => x.CreatedBy, f => f.PickRandom(UserNames))
+            .RuleFor(x => x.CreatedUtc, f => DateTime.UtcNow.AddSeconds(-1 * f.Random.Int(5000, 10000)))
+            .RuleFor(x => x.UpdatedBy, f => f.PickRandom(UserNames))
+            .RuleFor(x => x.UpdatedUtc, f => DateTime.UtcNow);
+
+        return faker.Generate();
+    }
+
+
     public static CreateStoreVisitCommand GetCreateStoreVisitCommand()
     {
         var faker = new Faker<CreateStoreVisitCommand>()

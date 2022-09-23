@@ -28,7 +28,7 @@ public class GetSubmissionByIdQueryHandler : IRequestHandler<GetSubmissionByIdQu
     private readonly IUserService _userService;
     private readonly ILogger<GetSubmissionByIdQueryHandler> _logger;
     private readonly IContainerRepository<StoreViewRecord> _storeContainerRepository;
-    private static IValidator<GetSubmissionByIdQuery> _validator;
+    private readonly IValidator<GetSubmissionByIdQuery> _validator;
 
     public GetSubmissionByIdQueryHandler(
         ICheckpointRepository<SubmissionEntity> submissionCheckpointRepository,

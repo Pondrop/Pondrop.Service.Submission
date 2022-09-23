@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Pondrop.Service.Submission.Application.Models;
-using Pondrop.Service.Submission.Domain.Models;
 using Moq;
 using Pondrop.Service.Submission.Api.Controllers;
 using Pondrop.Service.Submission.Api.Services;
@@ -13,13 +12,9 @@ using Pondrop.Service.Submission.Api.Tests.Faker;
 using Pondrop.Service.Submission.Application.Commands;
 using Pondrop.Service.Submission.Application.Commands.Submission.CreateSubmission;
 using Pondrop.Service.Submission.Application.Interfaces;
-using Pondrop.Service.Submission.Application.Queries;
-using Pondrop.Service.Submission.Application.Queries.Submission.GetAllSubmissions;
 using Pondrop.Service.Submission.Application.Queries.Submission.GetSubmissionById;
-using Pondrop.Service.Submission.Domain.Events.Submission;
 using Pondrop.Service.Submission.Domain.Models.Submission;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using Xunit;
@@ -87,10 +82,10 @@ namespace Pondrop.Service.Submission.Api.Tests
         public async void GetSubmissionById_ShouldReturnOkResult()
         {
             // arrange
-            var item = SubmissionFaker.GetSubmissionRecords(1).Single();
+            var item = SubmissionFaker.GetSubmissionViewRecords(1).Single();
             _mediatorMock
                 .Setup(x => x.Send(It.Is<GetSubmissionByIdQuery>(x => x.Id == item.Id), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(Result<SubmissionRecord>.Success(item));
+                .ReturnsAsync(Result<SubmissionViewRecord>.Success(item));
             var controller = GetController();
 
             // act
@@ -106,7 +101,7 @@ namespace Pondrop.Service.Submission.Api.Tests
         public async void GetSubmissionById_ShouldReturnBadResult_WhenFailedResult()
         {
             // arrange
-            var failedResult = Result<SubmissionRecord>.Error("Invalid result!");
+            var failedResult = Result<SubmissionViewRecord>.Error("Invalid result!");
             _mediatorMock
                 .Setup(x => x.Send(It.IsAny<GetSubmissionByIdQuery>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(failedResult);
