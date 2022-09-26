@@ -1,3 +1,4 @@
+using Pondrop.Service.Submission.Domain.Enums.SubmissionTemplate;
 using Pondrop.Service.Submission.Domain.Events.SubmissionTemplate;
 using Pondrop.Service.Submission.Domain.Models;
 using Pondrop.Service.Submission.Domain.Models.SubmissionTemplate;
@@ -94,7 +95,7 @@ public class SubmissionTemplateEntityTests
         Description,
         IconCodePoint,
         IconFontFamily,
-        new FieldRecord(Guid.NewGuid(), "TestLabel", false, "Test", 1, new List<string?>()),
+        new FieldRecord(Guid.NewGuid(), "TestLabel", false, SubmissionFieldType.text, null, null, new List<string?>()),
         CreatedBy);
 
     private AddStepToSubmissionTemplate GetAddStep(Guid storeId) => new AddStepToSubmissionTemplate(

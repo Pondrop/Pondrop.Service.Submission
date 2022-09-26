@@ -8,6 +8,7 @@ using Pondrop.Service.Submission.Application.Interfaces.Services;
 using Pondrop.Service.Submission.Application.Models;
 using Pondrop.Service.Submission.Application.Queries.Submission.GetAllSubmissions;
 using Pondrop.Service.Submission.Application.Queries.Submission.GetSubmissionById;
+using Pondrop.Service.Submission.Domain.Enums.SubmissionTemplate;
 using Pondrop.Service.Submission.Domain.Enums.User;
 using Pondrop.Service.Submission.Domain.Models;
 using Pondrop.Service.Submission.Domain.Models.StoreVisit;
@@ -107,7 +108,7 @@ public class GetSubmissionByIdQueryHandler : IRequestHandler<GetSubmissionByIdQu
                                     templateStep.Fields.FirstOrDefault(s => s.Id == field.TemplateFieldId);
                                 if (templateField != null)
                                     fields.Add(new SubmissionFieldWithDetailsViewRecord(field.Id, field.TemplateFieldId,
-                                        templateField?.Label ?? string.Empty, templateField?.FieldType ?? string.Empty,
+                                        templateField?.Label ?? string.Empty, templateField?.FieldType ?? SubmissionFieldType.unknown,
                                         field.Values));
                             }
 

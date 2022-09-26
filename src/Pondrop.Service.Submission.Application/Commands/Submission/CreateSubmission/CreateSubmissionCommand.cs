@@ -1,5 +1,7 @@
-﻿using MediatR;
+﻿using Google.Protobuf.WellKnownTypes;
+using MediatR;
 using Pondrop.Service.Submission.Application.Models;
+using Pondrop.Service.Submission.Domain.Enums.SubmissionTemplate;
 using Pondrop.Service.Submission.Domain.Models.Submission;
 
 namespace Pondrop.Service.Submission.Application.Commands.Submission.CreateSubmission;
@@ -58,7 +60,8 @@ public record CreateFieldValuesRecord(
     int? IntValue,
     double? DoubleValue,
     string? PhotoFileName,
-    string? PhotoBase64)
+    string? PhotoBase64,
+    CreateItemValueRecord? ItemValue)
 {
     public CreateFieldValuesRecord() : this(
         Guid.NewGuid(),
@@ -66,7 +69,21 @@ public record CreateFieldValuesRecord(
         null,
         null,
         null,
+        null,
         null)
+    {
+    }
+}
+
+public record CreateItemValueRecord(
+    string ItemId,
+    string ItemName,
+    SubmissionFieldItemType ItemType)
+{
+    public CreateItemValueRecord() : this(
+        string.Empty,
+        string.Empty,
+        SubmissionFieldItemType.unknown)
     {
     }
 }
