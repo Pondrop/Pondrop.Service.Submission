@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Pondrop.Service.Submission.Domain.Enums.SubmissionTemplate;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,7 +10,7 @@ public record SubmissionFieldWithDetailsViewRecord(
     Guid Id,
     Guid TemplateFieldId,
     string Label,
-    string Type,
+    SubmissionFieldType Type,
     List<FieldValuesRecord> Values)
 {
 }

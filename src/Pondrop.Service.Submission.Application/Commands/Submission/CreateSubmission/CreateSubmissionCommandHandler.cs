@@ -98,7 +98,13 @@ public class CreateSubmissionCommandHandler : DirtyCommandHandler<SubmissionEnti
                             fieldValue.StringValue,
                             fieldValue.IntValue,
                             fieldValue.DoubleValue,
-                            url));
+                            url,
+                            !string.IsNullOrEmpty(fieldValue.ItemValue?.ItemId)
+                            ? new ItemValueRecord(
+                                fieldValue.ItemValue.ItemId,
+                                fieldValue.ItemValue.ItemName,
+                                fieldValue.ItemValue.ItemType)
+                            : null));
                     }
 
                     stepFields.Add(new SubmissionFieldRecord(field.Id, field.TemplateFieldId, field.Latitude ?? 0, field.Longitude ?? 0, fieldValueRecords));

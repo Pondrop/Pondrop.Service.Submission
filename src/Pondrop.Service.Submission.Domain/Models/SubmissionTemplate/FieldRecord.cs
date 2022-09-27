@@ -1,10 +1,13 @@
-﻿namespace Pondrop.Service.Submission.Domain.Models.SubmissionTemplate;
+﻿using Pondrop.Service.Submission.Domain.Enums.SubmissionTemplate;
+
+namespace Pondrop.Service.Submission.Domain.Models.SubmissionTemplate;
 
 public record FieldRecord(
         Guid Id,
         string Label,
         bool Mandatory,
-        string FieldType,
+        SubmissionFieldType FieldType,
+        SubmissionFieldItemType? ItemType,
         int? MaxValue,
         List<string?>? PickerValues)
 {
@@ -12,7 +15,8 @@ public record FieldRecord(
         Guid.NewGuid(),
         string.Empty,
         false,
-        string.Empty,
+        SubmissionFieldType.unknown,
+        null,
         null,
         null)
     {
