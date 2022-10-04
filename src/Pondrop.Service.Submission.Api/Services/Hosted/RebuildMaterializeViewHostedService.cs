@@ -34,6 +34,7 @@ public class RebuildMaterializeViewHostedService : BackgroundService
                 {
                     case RebuildSubmissionCheckpointCommand store:
                         await mediator!.Send(new RebuildSubmissionViewCommand(), stoppingToken);
+                        await mediator!.Send(new RebuildSubmissionWithStoreViewCommand(), stoppingToken);
                         break;
                 }
             }

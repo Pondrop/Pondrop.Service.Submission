@@ -117,7 +117,7 @@ public class GetSubmissionByIdQueryHandler : IRequestHandler<GetSubmissionByIdQu
                     }
 
                     var submissionView = new SubmissionViewRecord(submissionEntity.Id, submissionEntity.StoreVisitId,
-                        submissionEntity.SubmissionTemplateId, storeVisit.StoreId, submissionTemplate.Title, storeVisit.UpdatedUtc, store.Name,
+                        submissionEntity.SubmissionTemplateId, storeVisit.StoreId, submissionTemplate.Title, submissionEntity.CreatedUtc, store.Name,
                         store.Retailer.Name, submissionEntity.Latitude, submissionEntity.Longitude, steps,
                         submissionEntity.CreatedBy, submissionEntity.UpdatedBy, submissionEntity.CreatedUtc,
                         submissionEntity.UpdatedUtc);
