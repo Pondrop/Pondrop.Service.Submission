@@ -71,7 +71,6 @@ public static class SubmissionTemplateFaker
     {
         var faker = new Faker<FieldRecord>()
             .RuleFor(x => x.Id, f => Guid.NewGuid())
-            .RuleFor(x => x.FieldType, f => f.PickRandom(FieldTypes))
             .RuleFor(x => x.MaxValue, f => f.Random.Int())
             .RuleFor(x => x.PickerValues, f => new List<string?>())
             .RuleFor(x => x.Label, f => f.PickRandom(FieldTypes))
