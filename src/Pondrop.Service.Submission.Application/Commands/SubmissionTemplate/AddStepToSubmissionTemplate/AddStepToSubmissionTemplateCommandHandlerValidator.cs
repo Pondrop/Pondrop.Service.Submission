@@ -7,11 +7,6 @@ public class AddStepToSubmissionTemplateCommandHandlerValidator : AbstractValida
     public AddStepToSubmissionTemplateCommandHandlerValidator()
     {
         RuleFor(x => x.Title).NotEmpty();
-        RuleFor(x => x.Instructions).NotEmpty();
-        RuleFor(x => x.InstructionsContinueButton).NotEmpty();
-        RuleFor(x => x.InstructionsSkipButton).NotEmpty();
-        RuleFor(x => x.InstructionsIconCodePoint).NotEmpty();
-        RuleFor(x => x.InstructionsIconFontFamily).NotEmpty();
 
         RuleFor(x => x.Fields).NotNull();
         RuleForEach(x => x.Fields).ChildRules(field =>

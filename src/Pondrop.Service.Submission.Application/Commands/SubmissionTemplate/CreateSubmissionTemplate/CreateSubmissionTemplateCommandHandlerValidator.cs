@@ -16,10 +16,6 @@ public class CreateSubmissionTemplateCommandHandlerValidator : AbstractValidator
         RuleForEach(x => x.Steps).ChildRules(step =>
         {
             step.RuleFor(x => x.Title).NotEmpty();
-            step.RuleFor(x => x.Instructions).NotEmpty();
-            step.RuleFor(x => x.InstructionsContinueButton).NotEmpty();
-            step.RuleFor(x => x.InstructionsIconCodePoint).NotEmpty();
-            step.RuleFor(x => x.InstructionsIconFontFamily).NotEmpty();
         });
     }
 }
