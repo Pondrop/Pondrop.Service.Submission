@@ -19,6 +19,7 @@ using Pondrop.Service.Submission.Application.Interfaces.BlobStorage;
 using Pondrop.Service.Submission.Application.Interfaces.Services;
 using Pondrop.Service.Submission.Application.Models;
 using Pondrop.Service.Submission.Domain.Models;
+using Pondrop.Service.Submission.Domain.Models.Campaign;
 using Pondrop.Service.Submission.Domain.Models.StoreVisit;
 using Pondrop.Service.Submission.Domain.Models.Submission;
 using Pondrop.Service.Submission.Domain.Models.SubmissionTemplate;
@@ -169,6 +170,7 @@ services.AddSingleton<ICheckpointRepository<SubmissionTemplateEntity>, Checkpoin
 services.AddSingleton<IContainerRepository<StoreVisitViewRecord>, ContainerRepository<StoreVisitViewRecord>>();
 services.AddSingleton<ICheckpointRepository<StoreVisitEntity>, CheckpointRepository<StoreVisitEntity>>();
 services.AddSingleton<ICheckpointRepository<FieldEntity>, CheckpointRepository<FieldEntity>>();
+services.AddSingleton<ICheckpointRepository<CampaignEntity>, CheckpointRepository<CampaignEntity>>();
 services.AddSingleton<IContainerRepository<SubmissionTemplateViewRecord>, ContainerRepository<SubmissionTemplateViewRecord>>();
 services.AddSingleton<IContainerRepository<SubmissionWithStoreViewRecord>, ContainerRepository<SubmissionWithStoreViewRecord>>();
 services.AddSingleton<IContainerRepository<SubmissionViewRecord>, ContainerRepository<SubmissionViewRecord>>();
