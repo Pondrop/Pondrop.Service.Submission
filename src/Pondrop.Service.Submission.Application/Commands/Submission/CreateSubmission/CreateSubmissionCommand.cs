@@ -59,12 +59,14 @@ public record CreateFieldValuesRecord(
     string? StringValue,
     int? IntValue,
     double? DoubleValue,
+    DateTime? DateTimeValue,
     string? PhotoFileName,
     string? PhotoBase64,
     CreateItemValueRecord? ItemValue)
 {
     public CreateFieldValuesRecord() : this(
         Guid.NewGuid(),
+        null,
         null,
         null,
         null,

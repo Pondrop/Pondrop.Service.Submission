@@ -98,6 +98,7 @@ public class CreateSubmissionCommandHandler : DirtyCommandHandler<SubmissionEnti
                             fieldValue.StringValue,
                             fieldValue.IntValue,
                             fieldValue.DoubleValue,
+                            fieldValue.DateTimeValue,
                             url,
                             !string.IsNullOrEmpty(fieldValue.ItemValue?.ItemId)
                             ? new ItemValueRecord(

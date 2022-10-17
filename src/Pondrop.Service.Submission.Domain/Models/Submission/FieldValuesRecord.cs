@@ -7,11 +7,13 @@ public record FieldValuesRecord(
     string? StringValue,
     int? IntValue,
     double? DoubleValue,
+    DateTime? DateTimeValue,
     string? PhotoUrl,
     ItemValueRecord? ItemValue)
 {
     public FieldValuesRecord() : this(
         Guid.NewGuid(),
+        null,
         null,
         null,
         null,
