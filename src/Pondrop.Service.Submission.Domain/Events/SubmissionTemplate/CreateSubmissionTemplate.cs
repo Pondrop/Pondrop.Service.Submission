@@ -7,5 +7,4 @@ public record CreateSubmissionTemplate(
     string Title,
     string Description,
     int IconCodePoint,
-    string IconFontFamily,
-    FieldRecord Summary) : EventPayload;
+    string IconFontFamily) : EventPayload;

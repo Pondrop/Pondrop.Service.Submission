@@ -9,26 +9,26 @@ using Pondrop.Service.Submission.Domain.Models.SubmissionTemplate;
 
 namespace Pondrop.Service.Submission.Application.Queries.SubmissionTemplate.GetAllSubmissionTemplates;
 
-public class GetAllSubmissionTemplatesQueryHandler : IRequestHandler<GetAllSubmissionTemplatesQuery, Result<List<SubmissionTemplateRecord>>>
+public class GetAllSubmissionTemplatesQueryHandler : IRequestHandler<GetAllSubmissionTemplatesQuery, Result<List<SubmissionTemplateViewRecord>>>
 {
-    private readonly ICheckpointRepository<SubmissionTemplateEntity> _checkpointRepository;
+    private readonly IContainerRepository<SubmissionTemplateViewRecord> _containerRepository;
     private readonly IMapper _mapper;
     private readonly IValidator<GetAllSubmissionTemplatesQuery> _validator;
     private readonly ILogger<GetAllSubmissionTemplatesQueryHandler> _logger;
 
     public GetAllSubmissionTemplatesQueryHandler(
-        ICheckpointRepository<SubmissionTemplateEntity> checkpointRepository,
+        IContainerRepository<SubmissionTemplateViewRecord> containerRepository,
         IMapper mapper,
         IValidator<GetAllSubmissionTemplatesQuery> validator,
         ILogger<GetAllSubmissionTemplatesQueryHandler> logger)
     {
-        _checkpointRepository = checkpointRepository;
+        _containerRepository = containerRepository;
         _mapper = mapper;
         _validator = validator;
         _logger = logger;
     }
 
-    public async Task<Result<List<SubmissionTemplateRecord>>> Handle(GetAllSubmissionTemplatesQuery request, CancellationToken cancellationToken)
+    public async Task<Result<List<SubmissionTemplateViewRecord>>> Handle(GetAllSubmissionTemplatesQuery request, CancellationToken cancellationToken)
     {
         var validation = _validator.Validate(request);
 
@@ -36,20 +36,20 @@ public class GetAllSubmissionTemplatesQueryHandler : IRequestHandler<GetAllSubmi
         {
             var errorMessage = $"Get all submissionTemplate templates failed {validation}";
             _logger.LogError(errorMessage);
-            return Result<List<SubmissionTemplateRecord>>.Error(errorMessage);
+            return Result<List<SubmissionTemplateViewRecord>>.Error(errorMessage);
         }
 
-        var result = default(Result<List<SubmissionTemplateRecord>>);
+        var result = default(Result<List<SubmissionTemplateViewRecord>>);
 
         try
         {
-            var entities = await _checkpointRepository.GetAllAsync();
-            result = Result<List<SubmissionTemplateRecord>>.Success(_mapper.Map<List<SubmissionTemplateRecord>>(entities));
+            var entities = await _containerRepository.GetAllAsync();
+            result = Result<List<SubmissionTemplateViewRecord>>.Success(_mapper.Map<List<SubmissionTemplateViewRecord>>(entities));
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, ex.Message);
-            result = Result<List<SubmissionTemplateRecord>>.Error(ex);
+            result = Result<List<SubmissionTemplateViewRecord>>.Error(ex);
         }
 
         return result;

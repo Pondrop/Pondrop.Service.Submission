@@ -14,7 +14,8 @@ public enum SubmissionFieldType
     currency,
     picker,
     search,
-    focus
+    focus,
+    date
 }
 
 internal class SubmissionFieldTypeEnumConverter : StringEnumConverter

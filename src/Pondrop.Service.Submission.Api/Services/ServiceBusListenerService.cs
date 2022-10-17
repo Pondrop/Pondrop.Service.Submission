@@ -100,7 +100,7 @@ public class ServiceBusListenerService : IServiceBusListenerService
                             switch (command)
                             {
                                 case UpdateSubmissionTemplateCheckpointByIdCommand SubmissionTemplate:
-                                    //await mediator!.Send(new UpdateSubmissionViewCommand() { SubmissionTemplateId = SubmissionTemplate.Id });
+                                    await mediator!.Send(new UpdateSubmissionTemplateViewCommand() { SubmissionTemplateId = SubmissionTemplate.Id });
                                     break;
                                 case UpdateSubmissionCheckpointByIdCommand Submission:
                                     //await mediator!.Send(new UpdateSubmissionViewCommand() { SubmissionId = Submission.Id });

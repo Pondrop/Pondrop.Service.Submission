@@ -9,20 +9,20 @@ using Pondrop.Service.Submission.Domain.Models.SubmissionTemplate;
 
 namespace Pondrop.Service.Submission.Application.Commands;
 
-public class RebuildSubmissionTemplateViewCommandHandler : IRequestHandler<RebuildSubmissionTemplateViewCommand, Result<int>>
+public class RebuildSubmissionTemplateStoreViewCommandHandler : IRequestHandler<RebuildSubmissionTemplateStoreViewCommand, Result<int>>
 {
     private readonly ICheckpointRepository<SubmissionTemplateEntity> _submissionTemplateCheckpointRepository;
     private readonly IContainerRepository<SubmissionTemplateViewRecord> _containerRepository;
     private readonly IMapper _mapper;
     private readonly IUserService _userService;
-    private readonly ILogger<RebuildSubmissionTemplateViewCommandHandler> _logger;
+    private readonly ILogger<RebuildSubmissionTemplateStoreViewCommandHandler> _logger;
 
-    public RebuildSubmissionTemplateViewCommandHandler(
+    public RebuildSubmissionTemplateStoreViewCommandHandler(
         ICheckpointRepository<SubmissionTemplateEntity> submissionTemplateCheckpointRepository,
         IContainerRepository<SubmissionTemplateViewRecord> containerRepository,
         IMapper mapper,
         IUserService userService,
-        ILogger<RebuildSubmissionTemplateViewCommandHandler> logger) : base()
+        ILogger<RebuildSubmissionTemplateStoreViewCommandHandler> logger) : base()
     {
         _submissionTemplateCheckpointRepository = submissionTemplateCheckpointRepository;
         _containerRepository = containerRepository;
@@ -31,7 +31,7 @@ public class RebuildSubmissionTemplateViewCommandHandler : IRequestHandler<Rebui
         _logger = logger;
     }
 
-    public async Task<Result<int>> Handle(RebuildSubmissionTemplateViewCommand command, CancellationToken cancellationToken)
+    public async Task<Result<int>> Handle(RebuildSubmissionTemplateStoreViewCommand command, CancellationToken cancellationToken)
     {
         var result = default(Result<int>);
 

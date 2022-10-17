@@ -6,12 +6,11 @@ public record SubmissionTemplateViewRecord(
         string Description,
          int IconCodePoint,
          string IconFontFamily,
-         List<StepRecord> Steps,
+         List<StepViewRecord> Steps,
         string CreatedBy,
         string UpdatedBy,
         DateTime CreatedUtc,
         DateTime UpdatedUtc)
-    : SubmissionTemplateRecord(Id, Title, Description, IconCodePoint, IconFontFamily, Steps, CreatedBy, UpdatedBy, CreatedUtc, UpdatedUtc)
 {
     public SubmissionTemplateViewRecord() : this(
         Guid.Empty,
@@ -19,7 +18,7 @@ public record SubmissionTemplateViewRecord(
         string.Empty,
         int.MinValue,
         string.Empty,
-        new List<StepRecord>(0),
+        new List<StepViewRecord>(0),
         string.Empty,
         string.Empty,
         DateTime.MinValue,

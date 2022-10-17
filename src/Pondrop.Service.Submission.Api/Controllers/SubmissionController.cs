@@ -11,6 +11,10 @@ using Microsoft.Net.Http.Headers;
 using Pondrop.Service.Submission.Api.Services.Interfaces;
 using System.Security.Claims;
 using Pondrop.Service.Submission.Application.Queries.Submission.GetAllSubmissionsWithStore;
+using Pondrop.Service.Submission.Api.Models;
+using Microsoft.Extensions.Options;
+using AspNetCore.Proxy.Options;
+using AspNetCore.Proxy;
 
 namespace Pondrop.Service.Submission.Api.Controllers;
 
@@ -22,37 +26,52 @@ public class SubmissionController : ControllerBase
     private readonly IMediator _mediator;
     private readonly IServiceBusService _serviceBusService;
     private readonly IRebuildCheckpointQueueService _rebuildCheckpointQueueService;
+    private readonly SearchIndexConfiguration _searchIdxConfig;
     private readonly ITokenProvider _jwtTokenProvider;
     private readonly ILogger<SubmissionController> _logger;
+
+    private readonly HttpProxyOptions _searchProxyOptions;
 
     public SubmissionController(
         IMediator mediator,
         ITokenProvider jWTTokenProvider,
         IServiceBusService serviceBusService,
         IRebuildCheckpointQueueService rebuildCheckpointQueueService,
+        IOptions<SearchIndexConfiguration> searchIdxConfig,
         ILogger<SubmissionController> logger)
     {
         _mediator = mediator;
+
+        _searchIdxConfig = searchIdxConfig.Value;
         _serviceBusService = serviceBusService;
         _jwtTokenProvider = jWTTokenProvider;
         _rebuildCheckpointQueueService = rebuildCheckpointQueueService;
         _logger = logger;
+
+
+        _searchProxyOptions = HttpProxyOptionsBuilder
+            .Instance
+            .WithBeforeSend((httpContext, requestMessage) =>
+            {
+                requestMessage.Headers.Add("api-key", _searchIdxConfig.ApiKey);
+                return Task.CompletedTask;
+            }).Build();
     }
 
-    //[HttpGet]
-    //[ProducesResponseType(StatusCodes.Status200OK)]
-    //[ProducesResponseType(StatusCodes.Status400BadRequest)]
-    //public async Task<IActionResult> GetAllSubmissions()
-    //{
-    //    var claimsPrincipal = _jwtTokenProvider.ValidateToken(Request?.Headers[HeaderNames.Authorization] ?? string.Empty);
-    //    if (claimsPrincipal is null)
-    //        return new UnauthorizedResult();
+    [HttpGet]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> GetAllSubmissions()
+    {
+        var claimsPrincipal = _jwtTokenProvider.ValidateToken(Request?.Headers[HeaderNames.Authorization] ?? string.Empty);
+        if (claimsPrincipal is null)
+            return new UnauthorizedResult();
 
-    //    var result = await _mediator.Send(new GetAllSubmissionsQuery());
-    //    return result.Match<IActionResult>(
-    //        i => new OkObjectResult(i),
-    //        (ex, msg) => new BadRequestObjectResult(msg));
-    //}
+        var result = await _mediator.Send(new GetAllSubmissionsQuery());
+        return result.Match<IActionResult>(
+            i => new OkObjectResult(i),
+            (ex, msg) => new BadRequestObjectResult(msg));
+    }
 
     [HttpGet]
     [Route("withstore")]
@@ -130,6 +149,20 @@ public class SubmissionController : ControllerBase
     {
         _rebuildCheckpointQueueService.Queue(new RebuildSubmissionCheckpointCommand());
         return new AcceptedResult();
+    }
+
+    [HttpGet, HttpPost]
+    [Route("search")]
+    public Task ProxySearchCatchAll()
+    {
+        var queryString = this.Request.QueryString.Value?.TrimStart('?') ?? string.Empty;
+        var url = Path.Combine(
+            _searchIdxConfig.BaseUrl,
+            "indexes",
+            _searchIdxConfig.SubmissionIndexName,
+            $"docs?api-version=2021-04-30-Preview&{queryString}");
+
+        return this.HttpProxyAsync(url, _searchProxyOptions);
     }
 
 }

@@ -1,6 +1,6 @@
 ﻿namespace Pondrop.Service.Submission.Domain.Models.SubmissionTemplate;
 
-public record StepRecord(
+public record StepViewRecord(
         Guid Id,
         string Title,
         string Instructions,
@@ -9,14 +9,14 @@ public record StepRecord(
         int InstructionsIconCodePoint,
         string InstructionsIconFontFamily,
         bool IsSummary,
-        List<Guid> FieldIds,
+        List<FieldRecord> Fields,
         string CreatedBy,
         string UpdatedBy,
         DateTime CreatedUtc,
         DateTime UpdatedUtc)
     : AuditRecord(CreatedBy, UpdatedBy, CreatedUtc, UpdatedUtc)
 {
-    public StepRecord() : this(
+    public StepViewRecord() : this(
         Guid.Empty,
         string.Empty,
         string.Empty,
@@ -25,7 +25,7 @@ public record StepRecord(
         int.MinValue,
         string.Empty,
         false,
-        new List<Guid>(),
+        new List<FieldRecord>(),
         string.Empty,
         string.Empty,
         DateTime.MinValue,

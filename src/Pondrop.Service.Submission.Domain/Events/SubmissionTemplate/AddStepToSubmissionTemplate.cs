@@ -12,6 +12,6 @@ public record AddStepToSubmissionTemplate(
     int InstructionsIconCodePoint,
     string InstructionsIconFontFamily,
     bool IsSummary,
-    List<FieldRecord> Fields,
+    List<Guid> FieldIds,
     string CreatedBy,
     string UpdatedBy) : EventPayload;

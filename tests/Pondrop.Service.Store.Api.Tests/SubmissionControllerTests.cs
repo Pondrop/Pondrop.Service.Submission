@@ -18,6 +18,8 @@ using System;
 using System.Linq;
 using System.Security.Claims;
 using Xunit;
+using Pondrop.Service.Submission.Api.Models;
+using Microsoft.Extensions.Options;
 
 namespace Pondrop.Service.Submission.Api.Tests
 {
@@ -28,6 +30,7 @@ namespace Pondrop.Service.Submission.Api.Tests
         private readonly Mock<IServiceBusService> _serviceBusServiceMock;
         private readonly Mock<IRebuildCheckpointQueueService> _rebuildMaterializeViewQueueServiceMock;
         private readonly Mock<ILogger<SubmissionController>> _loggerMock;
+        private readonly Mock<IOptions<SearchIndexConfiguration>> _searchIdxConfigMock;
 
         public SubmissionControllerTests()
         {
@@ -36,6 +39,7 @@ namespace Pondrop.Service.Submission.Api.Tests
             _jwtProviderMock = new Mock<ITokenProvider>();
             _rebuildMaterializeViewQueueServiceMock = new Mock<IRebuildCheckpointQueueService>();
             _loggerMock = new Mock<ILogger<SubmissionController>>();
+            _searchIdxConfigMock = new Mock<IOptions<SearchIndexConfiguration>>();
 
             _jwtProviderMock.Setup(s => s.ValidateToken(It.IsAny<string>())).Returns(new ClaimsPrincipal());
         }
@@ -215,7 +219,8 @@ namespace Pondrop.Service.Submission.Api.Tests
                 _mediatorMock.Object,
                 _jwtProviderMock.Object,
                 _serviceBusServiceMock.Object,
-                _rebuildMaterializeViewQueueServiceMock.Object,
+                _rebuildMaterializeViewQueueServiceMock.Object, 
+                _searchIdxConfigMock.Object,
                 _loggerMock.Object
             );
     }

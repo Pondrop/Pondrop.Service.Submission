@@ -25,6 +25,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using Xunit;
+using Pondrop.Service.Submission.Tests.Faker;
 
 namespace Pondrop.Service.Submission.Api.Tests
 {
@@ -51,10 +52,10 @@ namespace Pondrop.Service.Submission.Api.Tests
         public async void GetAllSubmissions_ShouldReturnOkResult()
         {
             // arrange
-            var items = SubmissionTemplateFaker.GetSubmissionTemplateRecords();
+            var items = SubmissionTemplateFaker.GetSubmissionTemplateViewRecords();
             _mediatorMock
                 .Setup(x => x.Send(It.IsAny<GetAllSubmissionTemplatesQuery>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(Result<List<SubmissionTemplateRecord>>.Success(items));
+                .ReturnsAsync(Result<List<SubmissionTemplateViewRecord>>.Success(items));
             var controller = GetController();
 
             // act
@@ -70,7 +71,7 @@ namespace Pondrop.Service.Submission.Api.Tests
         public async void GetAllSubmissions_ShouldReturnBadResult_WhenFailedResult()
         {
             // arrange
-            var failedResult = Result<List<SubmissionTemplateRecord>>.Error("Invalid result!");
+            var failedResult = Result<List<SubmissionTemplateViewRecord>>.Error("Invalid result!");
             _mediatorMock
                 .Setup(x => x.Send(It.IsAny<GetAllSubmissionTemplatesQuery>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(failedResult);

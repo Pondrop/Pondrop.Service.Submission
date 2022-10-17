@@ -11,6 +11,7 @@ using Newtonsoft.Json.Serialization;
 using Pondrop.Service.Store.Domain.Models;
 using Pondrop.Service.Submission.Api.Configurations.Extensions;
 using Pondrop.Service.Submission.Api.Middleware;
+using Pondrop.Service.Submission.Api.Models;
 using Pondrop.Service.Submission.Api.Services;
 using Pondrop.Service.Submission.Api.Services.Interfaces;
 using Pondrop.Service.Submission.Application.Interfaces;
@@ -150,6 +151,7 @@ services.Configure<CosmosConfiguration>(configuration.GetSection(CosmosConfigura
 services.Configure<StoreCosmosConfiguration>(configuration.GetSection(StoreCosmosConfiguration.Key));
 services.Configure<BlobStorageConfiguration>(configuration.GetSection(BlobStorageConfiguration.Key));
 services.Configure<ServiceBusConfiguration>(configuration.GetSection(ServiceBusConfiguration.Key));
+services.Configure<SearchIndexConfiguration>(configuration.GetSection(SearchIndexConfiguration.Key));
 services.Configure<SubmissionUpdateConfiguration>(configuration.GetSection(DaprEventTopicConfiguration.Key).GetSection(SubmissionUpdateConfiguration.Key));
 
 services.AddHostedService<ServiceBusHostedService>();
@@ -166,6 +168,7 @@ services.AddSingleton<ICheckpointRepository<SubmissionEntity>, CheckpointReposit
 services.AddSingleton<ICheckpointRepository<SubmissionTemplateEntity>, CheckpointRepository<SubmissionTemplateEntity>>();
 services.AddSingleton<IContainerRepository<StoreVisitViewRecord>, ContainerRepository<StoreVisitViewRecord>>();
 services.AddSingleton<ICheckpointRepository<StoreVisitEntity>, CheckpointRepository<StoreVisitEntity>>();
+services.AddSingleton<ICheckpointRepository<FieldEntity>, CheckpointRepository<FieldEntity>>();
 services.AddSingleton<IContainerRepository<SubmissionTemplateViewRecord>, ContainerRepository<SubmissionTemplateViewRecord>>();
 services.AddSingleton<IContainerRepository<SubmissionWithStoreViewRecord>, ContainerRepository<SubmissionWithStoreViewRecord>>();
 services.AddSingleton<IContainerRepository<SubmissionViewRecord>, ContainerRepository<SubmissionViewRecord>>();

@@ -7,8 +7,8 @@ namespace Pondrop.Service.Submission.Domain.Enums.SubmissionTemplate;
 public enum SubmissionFieldItemType
 {
     unknown,
-    products,
-    categories
+    product,
+    category
 }
 
 internal class SubmissionFieldSearchTypeEnumConverter : StringEnumConverter

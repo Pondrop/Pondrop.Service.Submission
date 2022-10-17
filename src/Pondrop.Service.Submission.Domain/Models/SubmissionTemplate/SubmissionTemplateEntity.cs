@@ -25,9 +25,9 @@ public record SubmissionTemplateEntity : EventEntity
         }
     }
 
-    public SubmissionTemplateEntity(string title, string description, int iconCodePoint, string iconFontFamily, FieldRecord summary, string createdBy) : this()
+    public SubmissionTemplateEntity(string title, string description, int iconCodePoint, string iconFontFamily, string createdBy) : this()
     {
-        var create = new CreateSubmissionTemplate(Guid.NewGuid(), title, description, iconCodePoint, iconFontFamily, summary);
+        var create = new CreateSubmissionTemplate(Guid.NewGuid(), title, description, iconCodePoint, iconFontFamily);
         Apply(create, createdBy);
     }
 
@@ -43,8 +43,6 @@ public record SubmissionTemplateEntity : EventEntity
     [JsonProperty("iconFontFamily")]
     public string IconFontFamily { get; private set; }
 
-    [JsonProperty("summary")]
-    public FieldRecord Summary { get; private set; }
 
     [JsonProperty(PropertyName = "steps")]
     public List<StepRecord> Steps { get; private set; }
@@ -90,7 +88,6 @@ public record SubmissionTemplateEntity : EventEntity
         Description = create.Description;
         IconCodePoint = create.IconCodePoint;
         IconFontFamily = create.IconFontFamily;
-        Summary = create.Summary;
         CreatedBy = UpdatedBy = createdBy;
         CreatedUtc = UpdatedUtc = createdUtc;
     }
@@ -106,7 +103,7 @@ public record SubmissionTemplateEntity : EventEntity
             step.InstructionsIconCodePoint,
             step.InstructionsIconFontFamily,
             step.IsSummary,
-            step.Fields,
+            step.FieldIds,
             createdBy,
             createdBy,
             createdUtc,

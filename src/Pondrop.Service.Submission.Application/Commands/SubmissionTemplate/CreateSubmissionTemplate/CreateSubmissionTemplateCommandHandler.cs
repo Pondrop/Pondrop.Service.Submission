@@ -57,7 +57,6 @@ public class CreateSubmissionTemplateCommandHandler : DirtyCommandHandler<Submis
                 command.Description,
                 command.IconCodePoint,
                 command.IconFontFamily,
-                command.Summary,
                 _userService.CurrentUserId()
                );
 
@@ -73,7 +72,7 @@ public class CreateSubmissionTemplateCommandHandler : DirtyCommandHandler<Submis
                     step!.InstructionsIconCodePoint,
                     step!.InstructionsIconFontFamily,
                     step!.IsSummary,
-                    step!.Fields,
+                    step!.FieldIds,
                     _userService.CurrentUserId(),
                     _userService.CurrentUserId()), _userService.CurrentUserId());
             }

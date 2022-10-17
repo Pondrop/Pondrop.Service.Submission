@@ -95,7 +95,6 @@ public class SubmissionTemplateEntityTests
         Description,
         IconCodePoint,
         IconFontFamily,
-        new FieldRecord(Guid.NewGuid(), "TestLabel", false, SubmissionFieldType.text, null, null, new List<string?>()),
         CreatedBy);
 
     private AddStepToSubmissionTemplate GetAddStep(Guid storeId) => new AddStepToSubmissionTemplate(
@@ -108,7 +107,7 @@ public class SubmissionTemplateEntityTests
         1213,
         nameof(AddStepToSubmissionTemplate.InstructionsIconFontFamily),
         false,
-        new List<FieldRecord>(),
+        new List<Guid>(),
         nameof(CreatedBy),
         nameof(UpdatedBy)
     );

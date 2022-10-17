@@ -24,6 +24,7 @@ public class GetSubmissionByIdQueryHandler : IRequestHandler<GetSubmissionByIdQu
     private readonly ICheckpointRepository<SubmissionEntity> _submissionCheckpointRepository;
     private readonly ICheckpointRepository<StoreVisitEntity> _storeVisitCheckpointRepository;
     private readonly ICheckpointRepository<SubmissionTemplateEntity> _submissionTemplateCheckpointRepository;
+    private readonly ICheckpointRepository<FieldEntity> _fieldCheckpointRepository;
     private readonly IContainerRepository<SubmissionWithStoreViewRecord> _containerRepository;
     private readonly IMapper _mapper;
     private readonly IUserService _userService;
@@ -35,6 +36,7 @@ public class GetSubmissionByIdQueryHandler : IRequestHandler<GetSubmissionByIdQu
         ICheckpointRepository<SubmissionEntity> submissionCheckpointRepository,
         ICheckpointRepository<StoreVisitEntity> storeVisitCheckpointRepository,
         ICheckpointRepository<SubmissionTemplateEntity> submissionTemplateCheckpointRepository,
+        ICheckpointRepository<FieldEntity> fieldCheckpointRepository,
         IContainerRepository<StoreViewRecord> storeContainerRepository,
         IContainerRepository<SubmissionWithStoreViewRecord> containerRepository,
         IValidator<GetSubmissionByIdQuery> validator,
@@ -45,6 +47,7 @@ public class GetSubmissionByIdQueryHandler : IRequestHandler<GetSubmissionByIdQu
         _submissionCheckpointRepository = submissionCheckpointRepository;
         _storeVisitCheckpointRepository = storeVisitCheckpointRepository;
         _submissionTemplateCheckpointRepository = submissionTemplateCheckpointRepository;
+        _fieldCheckpointRepository = fieldCheckpointRepository;
         _storeContainerRepository = storeContainerRepository;
         _containerRepository = containerRepository;
         _mapper = mapper;
@@ -104,8 +107,10 @@ public class GetSubmissionByIdQueryHandler : IRequestHandler<GetSubmissionByIdQu
                         if (templateStep != null)
                             foreach (var field in step.Fields)
                             {
-                                var templateField =
-                                    templateStep.Fields.FirstOrDefault(s => s.Id == field.TemplateFieldId);
+                                var templateFieldId =
+                                    templateStep.FieldIds.FirstOrDefault(s => s == field.TemplateFieldId);
+
+                                var templateField = await _fieldCheckpointRepository.GetByIdAsync(templateFieldId);
                                 if (templateField != null)
                                     fields.Add(new SubmissionFieldWithDetailsViewRecord(field.Id, field.TemplateFieldId,
                                         templateField?.Label ?? string.Empty, templateField?.FieldType ?? SubmissionFieldType.unknown,

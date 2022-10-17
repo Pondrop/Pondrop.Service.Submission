@@ -44,7 +44,7 @@ public static class SubmissionTemplateFaker
             .RuleFor(x => x.Description, f => f.PickRandom(Descriptions))
             .RuleFor(x => x.IconCodePoint, f => f.Random.Int())
             .RuleFor(x => x.IconFontFamily, f => f.PickRandom(IconFontFamilies))
-            .RuleFor(x => x.Steps, f => GetStepRecords(1))
+            .RuleFor(x => x.Steps, f => GetStepViewRecords(1))
             .RuleFor(x => x.CreatedBy, f => f.PickRandom(UserNames))
             .RuleFor(x => x.CreatedUtc, f => DateTime.UtcNow.AddSeconds(-1 * f.Random.Int(5000, 10000)))
             .RuleFor(x => x.UpdatedBy, f => f.PickRandom(UserNames))
@@ -56,6 +56,20 @@ public static class SubmissionTemplateFaker
     public static List<Pondrop.Service.Submission.Domain.Models.SubmissionTemplate.StepRecord> GetStepRecords(int count = 1)
     {
         var faker = new Faker<Pondrop.Service.Submission.Domain.Models.SubmissionTemplate.StepRecord>()
+            .RuleFor(x => x.Id, f => Guid.NewGuid())
+            .RuleFor(x => x.Title, f => f.PickRandom(Titles))
+            .RuleFor(x => x.Instructions, f => f.PickRandom(Instructions))
+            .RuleFor(x => x.InstructionsContinueButton, f => f.PickRandom(InstructionButtons))
+            .RuleFor(x => x.InstructionsSkipButton, f => f.PickRandom(InstructionButtons))
+            .RuleFor(x => x.InstructionsIconCodePoint, f => f.Random.Int())
+            .RuleFor(x => x.InstructionsIconFontFamily, f => f.PickRandom(IconFontFamilies))
+            .RuleFor(x => x.FieldIds, f => new List<Guid>() { Guid.NewGuid() });
+
+        return faker.Generate(Math.Max(0, count));
+    }
+    public static List<Pondrop.Service.Submission.Domain.Models.SubmissionTemplate.StepViewRecord> GetStepViewRecords(int count = 1)
+    {
+        var faker = new Faker<Pondrop.Service.Submission.Domain.Models.SubmissionTemplate.StepViewRecord>()
             .RuleFor(x => x.Id, f => Guid.NewGuid())
             .RuleFor(x => x.Title, f => f.PickRandom(Titles))
             .RuleFor(x => x.Instructions, f => f.PickRandom(Instructions))
@@ -103,7 +117,7 @@ public static class SubmissionTemplateFaker
             .RuleFor(x => x.InstructionsIconCodePoint, f => f.Random.Int())
             .RuleFor(x => x.InstructionsIconFontFamily, f => f.PickRandom(IconFontFamilies))
             .RuleFor(x => x.CreatedBy, f => f.PickRandom(UserNames))
-            .RuleFor(x => x.Fields, f => GetFieldRecords(1));
+            .RuleFor(x => x.FieldIds, f => new List<Guid>() { Guid.NewGuid() });
 
         return faker.Generate();
     }
@@ -112,7 +126,7 @@ public static class SubmissionTemplateFaker
     {
         var utcNow = DateTime.UtcNow;
 
-        var faker = new Faker<SubmissionTemplateViewRecord>()
+        var faker = new Faker<SubmissionTemplateRecord>()
             .RuleFor(x => x.Id, f => Guid.NewGuid())
             .RuleFor(x => x.Title, f => f.PickRandom(Titles))
             .RuleFor(x => x.Description, f => f.PickRandom(Descriptions))

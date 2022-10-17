@@ -23,6 +23,6 @@ public class AddStepToSubmissionTemplateCommand : IRequest<Result<SubmissionTemp
 
     public string CreatedBy { get; set; } = string.Empty;
 
-    public List<FieldRecord?> Fields { get; set; } = default;
+    public List<Guid> FieldIds { get; set; } = default;
 
 }

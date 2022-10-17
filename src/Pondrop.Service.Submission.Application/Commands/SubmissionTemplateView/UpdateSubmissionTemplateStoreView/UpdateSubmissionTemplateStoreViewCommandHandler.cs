@@ -10,20 +10,20 @@ using Pondrop.Service.Submission.Domain.Models.SubmissionTemplate;
 
 namespace Pondrop.Service.Submission.Application.Commands;
 
-public class UpdateSubmissionTemplateViewCommandHandler : IRequestHandler<UpdateSubmissionTemplateViewCommand, Result<int>>
+public class UpdateSubmissionTemplateStoreViewCommandHandler : IRequestHandler<UpdateSubmissionTemplateStoreViewCommand, Result<int>>
 {
     private readonly ICheckpointRepository<SubmissionTemplateEntity> _submissionTemplateCheckpointRepository;
     private readonly IContainerRepository<SubmissionTemplateViewRecord> _containerRepository;
     private readonly IMapper _mapper;
     private readonly IUserService _userService;
-    private readonly ILogger<UpdateSubmissionTemplateViewCommandHandler> _logger;
+    private readonly ILogger<UpdateSubmissionTemplateStoreViewCommandHandler> _logger;
 
-    public UpdateSubmissionTemplateViewCommandHandler(
+    public UpdateSubmissionTemplateStoreViewCommandHandler(
         ICheckpointRepository<SubmissionTemplateEntity> submissionTemplateCheckpointRepository,
         IContainerRepository<SubmissionTemplateViewRecord> containerRepository,
         IMapper mapper,
         IUserService userService,
-        ILogger<UpdateSubmissionTemplateViewCommandHandler> logger) : base()
+        ILogger<UpdateSubmissionTemplateStoreViewCommandHandler> logger) : base()
     {
         _submissionTemplateCheckpointRepository = submissionTemplateCheckpointRepository;
         _containerRepository = containerRepository;
@@ -32,7 +32,7 @@ public class UpdateSubmissionTemplateViewCommandHandler : IRequestHandler<Update
         _logger = logger;
     }
 
-    public async Task<Result<int>> Handle(UpdateSubmissionTemplateViewCommand command, CancellationToken cancellationToken)
+    public async Task<Result<int>> Handle(UpdateSubmissionTemplateStoreViewCommand command, CancellationToken cancellationToken)
     {
         if (!command.SubmissionTemplateId.HasValue)
             return Result<int>.Success(0);
@@ -99,6 +99,6 @@ public class UpdateSubmissionTemplateViewCommandHandler : IRequestHandler<Update
         return affectedSubmissions;
     }
 
-    private static string FailedToMessage(UpdateSubmissionTemplateViewCommand command) =>
+    private static string FailedToMessage(UpdateSubmissionTemplateStoreViewCommand command) =>
         $"Failed to update submissionTemplate view '{JsonConvert.SerializeObject(command)}'";
 }
