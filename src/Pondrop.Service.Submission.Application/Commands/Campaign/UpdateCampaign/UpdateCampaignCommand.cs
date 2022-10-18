@@ -26,6 +26,8 @@ public class UpdateCampaignCommand : IRequest<Result<CampaignRecord>>
 
     public Guid? RewardSchemeId { get; init; } = null;
 
+    public DateTime? CampaignPublishedDate { get; init; } = null;
+
     public DateTime? CampaignEndDate { get; init; } = null;
 
     public CampaignStatus? CampaignStatus { get; init; } = null;

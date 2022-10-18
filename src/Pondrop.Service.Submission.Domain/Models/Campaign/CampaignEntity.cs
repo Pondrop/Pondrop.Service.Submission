@@ -41,6 +41,7 @@ public record CampaignEntity : EventEntity
         List<Guid>? storeIds,
         int requiredSubmissions,
         Guid? rewardSchemeId,
+        DateTime? campaignPublishedDate,
         DateTime? campaignEndDate,
         CampaignStatus? campaignStatus,
         string publicationlifecycleId, string createdBy) : this()
@@ -55,6 +56,7 @@ public record CampaignEntity : EventEntity
                                         storeIds,
                                         requiredSubmissions,
                                         rewardSchemeId,
+                                        campaignPublishedDate,
                                         campaignEndDate,
                                         campaignStatus,
                                         publicationlifecycleId);
@@ -87,6 +89,9 @@ public record CampaignEntity : EventEntity
 
     [JsonProperty("rewardSchemeId")]
     public Guid? RewardSchemeId { get; private set; }
+
+    [JsonProperty("campaignPublishedDate")]
+    public DateTime? CampaignPublishedDate { get; private set; }
 
     [JsonProperty("campaignEndDate")]
     public DateTime? CampaignEndDate { get; private set; }
@@ -142,6 +147,7 @@ public record CampaignEntity : EventEntity
         StoreIds = create.StoreIds;
         RequiredSubmissions = create.RequiredSubmissions;
         RewardSchemeId = create.RewardSchemeId;
+        CampaignPublishedDate = create.CampaignPublishedDate;
         CampaignEndDate = create.CampaignEndDate;
         CampaignStatus = create.CampaignStatus;
         PublicationlifecycleId = create.PublicationlifecycleId;
@@ -159,6 +165,7 @@ public record CampaignEntity : EventEntity
             var oldStoreIds = StoreIds;
             var oldRequiredSubmissions = RequiredSubmissions;
             var oldRewardSchemeId = RewardSchemeId;
+            var oldCampaignPublishedDate = CampaignPublishedDate;
             var oldCampaignEndDate = CampaignEndDate;
             var oldCampaignStatus = CampaignStatus;
             var oldPublicationlifecycleId = PublicationlifecycleId;
@@ -172,6 +179,7 @@ public record CampaignEntity : EventEntity
             StoreIds = update.StoreIds;
             RequiredSubmissions = update.RequiredSubmissions;
             RewardSchemeId = update.RewardSchemeId;
+            CampaignPublishedDate = update.CampaignPublishedDate;
             CampaignEndDate = update.CampaignEndDate;
             CampaignStatus = update.CampaignStatus;
             PublicationlifecycleId = update.PublicationlifecycleId;
@@ -186,6 +194,7 @@ public record CampaignEntity : EventEntity
                 oldRequiredSubmissions != RequiredSubmissions ||
                 oldRewardSchemeId != RewardSchemeId ||
                 oldCampaignEndDate != CampaignEndDate ||
+                oldCampaignPublishedDate != CampaignPublishedDate ||
                 oldCampaignStatus != CampaignStatus ||
                 oldPublicationlifecycleId != PublicationlifecycleId)
             {

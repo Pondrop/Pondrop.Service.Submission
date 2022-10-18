@@ -39,6 +39,9 @@ public class RebuildMaterializeViewHostedService : BackgroundService
                     case RebuildSubmissionTemplateCheckpointCommand submissionTemplate:
                         await mediator!.Send(new RebuildSubmissionTemplateViewCommand(), stoppingToken);
                         break;
+                    case RebuildCampaignCheckpointCommand campaign:
+                        await mediator!.Send(new RebuildCampaignViewCommand(), stoppingToken);
+                        break;
                 }
             }
             catch (Exception ex)

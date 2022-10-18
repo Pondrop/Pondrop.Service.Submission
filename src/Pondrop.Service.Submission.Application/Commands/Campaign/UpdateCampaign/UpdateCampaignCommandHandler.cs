@@ -71,6 +71,7 @@ public class UpdateCampaignCommandHandler : DirtyCommandHandler<CampaignEntity, 
                 command.StoreIds,
                 command.RequiredSubmissions,
                 command.RewardSchemeId,
+                command.CampaignPublishedDate,
                 command.CampaignEndDate,
                 command.CampaignStatus,
                 command.PublicationlifecycleId

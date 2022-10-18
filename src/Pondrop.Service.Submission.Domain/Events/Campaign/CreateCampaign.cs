@@ -18,6 +18,7 @@ public record CreateCampaign(
         List<Guid>? StoreIds,
         int RequiredSubmissions,
         Guid? RewardSchemeId,
+        DateTime? CampaignPublishedDate,
         DateTime? CampaignEndDate,
         CampaignStatus? CampaignStatus,
         string PublicationlifecycleId) : EventPayload;
