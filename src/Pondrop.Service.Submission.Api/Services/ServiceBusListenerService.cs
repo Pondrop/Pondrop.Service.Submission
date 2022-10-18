@@ -105,9 +105,13 @@ public class ServiceBusListenerService : IServiceBusListenerService
                                 case UpdateSubmissionCheckpointByIdCommand Submission:
                                     //await mediator!.Send(new UpdateSubmissionViewCommand() { SubmissionId = Submission.Id });
                                     await mediator!.Send(new UpdateSubmissionWithStoreViewCommand() { SubmissionId = Submission.Id });
+                                    await mediator!.Send(new UpdateCampaignViewCommand() { SubmissionId = Submission.Id });
                                     break;
                                 case UpdateStoreVisitCheckpointByIdCommand StoreVisit:
                                     //await mediator!.Send(new UpdateSubmissionViewCommand() { StoreVisitId = StoreVisit.Id });
+                                    break;
+                                case UpdateCampaignCheckpointByIdCommand Campaign:
+                                    await mediator!.Send(new UpdateCampaignViewCommand() { CampaignId = Campaign.Id });
                                     break;
                             }
                         }

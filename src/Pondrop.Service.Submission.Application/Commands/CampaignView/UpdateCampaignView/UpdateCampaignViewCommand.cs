@@ -4,6 +4,8 @@ using Pondrop.Service.Submission.Domain.Models;
 
 namespace Pondrop.Service.Submission.Application.Commands;
 
-public class RebuildStoreVisitViewCommand : IRequest<Result<int>>
+public class UpdateCampaignViewCommand : IRequest<Result<int>>
 {
+    public Guid? CampaignId { get; init; } = null;
+    public Guid? SubmissionId { get; init; } = null;
 }

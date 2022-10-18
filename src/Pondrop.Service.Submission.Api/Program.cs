@@ -174,6 +174,7 @@ services.AddSingleton<ICheckpointRepository<CampaignEntity>, CheckpointRepositor
 services.AddSingleton<IContainerRepository<SubmissionTemplateViewRecord>, ContainerRepository<SubmissionTemplateViewRecord>>();
 services.AddSingleton<IContainerRepository<SubmissionWithStoreViewRecord>, ContainerRepository<SubmissionWithStoreViewRecord>>();
 services.AddSingleton<IContainerRepository<SubmissionViewRecord>, ContainerRepository<SubmissionViewRecord>>();
+services.AddSingleton<IContainerRepository<CampaignViewRecord>, ContainerRepository<CampaignViewRecord>>();
 services.AddSingleton<IContainerRepository<StoreViewRecord>, ContainerRepository<StoreViewRecord>>(provider =>
     new ContainerRepository<StoreViewRecord>(
         Options.Create(new CosmosConfiguration()
