@@ -12,6 +12,8 @@ public class CreateSubmissionCommand : IRequest<Result<SubmissionRecord>>
 
     public Guid SubmissionTemplateId { get; set; }
 
+    public Guid? CampaignId { get; set; } = null;
+
     public double? Latitude { get; set; }
 
     public double? Longitude { get; set; }
@@ -80,12 +82,14 @@ public record CreateFieldValuesRecord(
 public record CreateItemValueRecord(
     string ItemId,
     string ItemName,
-    SubmissionFieldItemType ItemType)
+    SubmissionFieldItemType ItemType,
+    string? ItemBarcode)
 {
     public CreateItemValueRecord() : this(
         string.Empty,
         string.Empty,
-        SubmissionFieldItemType.unknown)
+        SubmissionFieldItemType.unknown,
+        null)
     {
     }
 }

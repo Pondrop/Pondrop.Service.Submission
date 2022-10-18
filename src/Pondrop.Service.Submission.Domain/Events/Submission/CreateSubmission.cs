@@ -6,5 +6,6 @@ public record CreateSubmission(
     Guid Id,
     Guid StoreVisitId,
     Guid SubmissionTemplateId,
+        Guid? CampaignId,
     double Latitude,
     double Longitude) : EventPayload;

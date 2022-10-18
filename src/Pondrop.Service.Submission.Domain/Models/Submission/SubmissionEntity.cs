@@ -17,6 +17,7 @@ public record SubmissionEntity : EventEntity
         Id = Guid.Empty;
         StoreVisitId = Guid.Empty;
         SubmissionTemplateId = Guid.Empty;
+        CampaignId = null;
         Latitude = 0;
         Longitude = 0;
         Steps = new List<SubmissionStepRecord>();
@@ -30,9 +31,9 @@ public record SubmissionEntity : EventEntity
         }
     }
 
-    public SubmissionEntity(Guid storeVisitId, Guid submissionTemplateId, double latitude, double longitude, string createdBy) : this()
+    public SubmissionEntity(Guid storeVisitId, Guid submissionTemplateId, Guid? campaignId, double latitude, double longitude, string createdBy) : this()
     {
-        var create = new CreateSubmission(Guid.NewGuid(), storeVisitId, submissionTemplateId, latitude, longitude);
+        var create = new CreateSubmission(Guid.NewGuid(), storeVisitId, submissionTemplateId, campaignId, latitude, longitude);
         Apply(create, createdBy);
     }
 
@@ -41,6 +42,9 @@ public record SubmissionEntity : EventEntity
 
     [JsonProperty(PropertyName = "submissionTemplateId")]
     public Guid SubmissionTemplateId { get; private set; }
+
+    [JsonProperty(PropertyName = "campaignId")]
+    public Guid? CampaignId { get; private set; }
 
     [JsonProperty("latitude")]
     public double Latitude { get; private set; }
@@ -90,6 +94,7 @@ public record SubmissionEntity : EventEntity
         Id = create.Id;
         StoreVisitId = create.StoreVisitId;
         SubmissionTemplateId = create.SubmissionTemplateId;
+        CampaignId = create.CampaignId;
         Latitude = create.Latitude;
         Longitude = create.Longitude;
         CreatedBy = UpdatedBy = createdBy;

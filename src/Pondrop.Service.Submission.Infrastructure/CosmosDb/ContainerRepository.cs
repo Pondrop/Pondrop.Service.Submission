@@ -67,7 +67,9 @@ public class ContainerRepository<T> : IContainerRepository<T>
 
             if (_database is not null && _container is null)
             {
-                _container = await _database.CreateContainerIfNotExistsAsync(_containerName, "/id");
+                var containerProperties = new ContainerProperties(_containerName, "/id");
+                var autoscaleThroughputProperties = ThroughputProperties.CreateAutoscaleThroughput(1000);
+                _container = await _database.CreateContainerIfNotExistsAsync(containerProperties, autoscaleThroughputProperties);
             }
         }
         catch (Exception ex)
