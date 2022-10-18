@@ -26,12 +26,14 @@ public record FieldValuesRecord(
 public record ItemValueRecord(
     string ItemId,
     string ItemName,
-    SubmissionFieldItemType ItemType)
+    SubmissionFieldItemType ItemType,
+    string? ItemBarcode)
 {
     public ItemValueRecord() : this(
         string.Empty,
         string.Empty,
-        SubmissionFieldItemType.unknown)
+        SubmissionFieldItemType.unknown,
+        null)
     {
     }
 }

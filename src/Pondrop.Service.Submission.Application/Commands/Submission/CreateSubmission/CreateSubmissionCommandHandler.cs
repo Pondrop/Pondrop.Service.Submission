@@ -53,13 +53,14 @@ public class CreateSubmissionCommandHandler : DirtyCommandHandler<SubmissionEnti
         }
 
         var result = default(Result<SubmissionRecord>);
-        
+
 
         try
         {
             var SubmissionEntity = new SubmissionEntity(
                 command.StoreVisitId,
                 command.SubmissionTemplateId,
+                command.CampaignId,
                 command.Latitude ?? 0,
                 command.Longitude ?? 0,
                 _userService.CurrentUserId()
@@ -104,7 +105,8 @@ public class CreateSubmissionCommandHandler : DirtyCommandHandler<SubmissionEnti
                             ? new ItemValueRecord(
                                 fieldValue.ItemValue.ItemId,
                                 fieldValue.ItemValue.ItemName,
-                                fieldValue.ItemValue.ItemType)
+                                fieldValue.ItemValue.ItemType,
+                            fieldValue.ItemValue.ItemBarcode)
                             : null));
                     }
 

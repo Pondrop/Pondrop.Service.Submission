@@ -12,6 +12,7 @@ public class SubmissionEntityTests
 {
     private Guid StoreVisitId = Guid.NewGuid();
     private Guid SubmissionTemplateId = Guid.NewGuid();
+    private Guid CampaignId = Guid.NewGuid();
     private double Latitude = 12.2323;
     private double Longitude = 13.4;
     private const string Description = "Description";
@@ -81,6 +82,7 @@ public class SubmissionEntityTests
     private SubmissionEntity GetNewSubmission() => new SubmissionEntity(
         StoreVisitId,
         SubmissionTemplateId,
+        CampaignId,
         Latitude,
         Longitude,
         CreatedBy);
