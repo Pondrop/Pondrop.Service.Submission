@@ -151,6 +151,10 @@ public record CampaignEntity : EventEntity
         CampaignEndDate = create.CampaignEndDate;
         CampaignStatus = create.CampaignStatus;
         PublicationlifecycleId = create.PublicationlifecycleId;
+        CreatedBy = createdBy;
+        UpdatedBy = createdBy;
+        CreatedUtc = createdUtc;
+        UpdatedUtc = createdUtc;
     }
 
     private void When(UpdateCampaign update, string createdBy, DateTime createdUtc)
