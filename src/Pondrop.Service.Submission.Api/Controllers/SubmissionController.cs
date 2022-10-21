@@ -15,6 +15,8 @@ using Pondrop.Service.Submission.Api.Models;
 using Microsoft.Extensions.Options;
 using AspNetCore.Proxy.Options;
 using AspNetCore.Proxy;
+using Azure.Search.Documents.Indexes;
+using Azure;
 
 namespace Pondrop.Service.Submission.Api.Controllers;
 
@@ -31,6 +33,7 @@ public class SubmissionController : ControllerBase
     private readonly ILogger<SubmissionController> _logger;
 
     private readonly HttpProxyOptions _searchProxyOptions;
+    private readonly SearchIndexerClient _searchIndexerClient;
 
     public SubmissionController(
         IMediator mediator,
@@ -48,6 +51,7 @@ public class SubmissionController : ControllerBase
         _rebuildCheckpointQueueService = rebuildCheckpointQueueService;
         _logger = logger;
 
+        _searchIndexerClient = new SearchIndexerClient(new Uri(_searchIdxConfig.BaseUrl), new AzureKeyCredential(_searchIdxConfig.ManagementKey));
 
         _searchProxyOptions = HttpProxyOptionsBuilder
             .Instance
@@ -123,6 +127,7 @@ public class SubmissionController : ControllerBase
             async i =>
             {
                 await _serviceBusService.SendMessageAsync(new UpdateSubmissionCheckpointByIdCommand() { Id = i!.Id });
+                await _searchIndexerClient.RunIndexerAsync(_searchIdxConfig.SubmissionIndexerName);
                 return StatusCode(StatusCodes.Status201Created, i);
             },
             (ex, msg) => Task.FromResult<IActionResult>(new BadRequestObjectResult(msg)));
@@ -163,6 +168,20 @@ public class SubmissionController : ControllerBase
             $"docs?api-version=2021-04-30-Preview&{queryString}");
 
         return this.HttpProxyAsync(url, _searchProxyOptions);
+    }
+
+    [HttpGet]
+    [Route("indexer/run")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> RunIndexer()
+    {
+        var response = await _searchIndexerClient.RunIndexerAsync(_searchIdxConfig.SubmissionIndexerName);
+
+        if (response.IsError)
+            return new BadRequestObjectResult(response.ReasonPhrase);
+
+        return new AcceptedResult();
     }
 
 }

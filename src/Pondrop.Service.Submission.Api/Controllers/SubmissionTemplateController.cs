@@ -100,6 +100,24 @@ public class SubmissionTemplateController : ControllerBase
             (ex, msg) => Task.FromResult<IActionResult>(new BadRequestObjectResult(msg)));
     }
 
+    //[HttpPut]
+    //[Route("step/update")]
+    //[ProducesResponseType(StatusCodes.Status201Created)]
+    //[ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    //[ProducesResponseType(StatusCodes.Status400BadRequest)]
+    //public async Task<IActionResult> UpdateStepToSubmissionTemplate([FromBody] UpdateStepToSubmissionTemplateCommand command)
+    //{
+
+    //    var result = await _mediator.Send(command);
+    //    return await result.MatchAsync<IActionResult>(
+    //        async i =>
+    //        {
+    //            await _serviceBusService.SendMessageAsync(new UpdateSubmissionTemplateCheckpointByIdCommand() { Id = i!.Id });
+    //            return StatusCode(StatusCodes.Status201Created, i);
+    //        },
+    //        (ex, msg) => Task.FromResult<IActionResult>(new BadRequestObjectResult(msg)));
+    //}
+
 
     [HttpDelete]
     [Route("step/remove")]

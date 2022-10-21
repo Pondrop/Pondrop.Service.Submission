@@ -9,6 +9,12 @@ using Pondrop.Service.Submission.Application.Queries.Campaign.GetAllCampaigns;
 using Pondrop.Service.Submission.Application.Queries.Campaign.GetCampaignById;
 using Pondrop.Service.Submission.Application.Commands.Submission.CreateCampaign;
 using Pondrop.Service.Campaign.Application.Commands;
+using Pondrop.Service.Submission.Api.Models;
+using Microsoft.Extensions.Options;
+using AspNetCore.Proxy.Options;
+using Azure.Search.Documents.Indexes;
+using Azure;
+using AspNetCore.Proxy;
 
 namespace Pondrop.Service.Submission.Api.Controllers;
 
@@ -21,20 +27,36 @@ public class CampaignController : ControllerBase
     private readonly IServiceBusService _serviceBusService;
     private readonly IRebuildCheckpointQueueService _rebuildCheckpointQueueService;
     private readonly ITokenProvider _jwtTokenProvider;
+    private readonly SearchIndexConfiguration _searchIdxConfig;
     private readonly ILogger<CampaignController> _logger;
+
+    private readonly HttpProxyOptions _searchProxyOptions;
+    private readonly SearchIndexerClient _searchIndexerClient;
 
     public CampaignController(
         IMediator mediator,
         ITokenProvider jWTTokenProvider,
         IServiceBusService serviceBusService,
         IRebuildCheckpointQueueService rebuildCheckpointQueueService,
+        IOptions<SearchIndexConfiguration> searchIdxConfig,
         ILogger<CampaignController> logger)
     {
+        _searchIdxConfig = searchIdxConfig.Value;
         _mediator = mediator;
         _serviceBusService = serviceBusService;
         _jwtTokenProvider = jWTTokenProvider;
         _rebuildCheckpointQueueService = rebuildCheckpointQueueService;
         _logger = logger;
+
+        _searchIndexerClient = new SearchIndexerClient(new Uri(_searchIdxConfig.BaseUrl), new AzureKeyCredential(_searchIdxConfig.ManagementKey));
+
+        _searchProxyOptions = HttpProxyOptionsBuilder
+            .Instance
+            .WithBeforeSend((httpContext, requestMessage) =>
+            {
+                requestMessage.Headers.Add("api-key", _searchIdxConfig.ApiKey);
+                return Task.CompletedTask;
+            }).Build();
     }
 
     [HttpGet]
@@ -74,6 +96,7 @@ public class CampaignController : ControllerBase
             async i =>
             {
                 await _serviceBusService.SendMessageAsync(new UpdateCampaignCheckpointByIdCommand() { Id = i!.Id });
+                await _searchIndexerClient.RunIndexerAsync(_searchIdxConfig.CampaignIndexerName);
                 return StatusCode(StatusCodes.Status201Created, i);
             },
             (ex, msg) => Task.FromResult<IActionResult>(new BadRequestObjectResult(msg)));
@@ -91,6 +114,7 @@ public class CampaignController : ControllerBase
             async i =>
             {
                 await _serviceBusService.SendMessageAsync(new UpdateCampaignCheckpointByIdCommand() { Id = i!.Id });
+                await _searchIndexerClient.RunIndexerAsync(_searchIdxConfig.CampaignIndexerName);
                 return StatusCode(StatusCodes.Status201Created, i);
             },
             (ex, msg) => Task.FromResult<IActionResult>(new BadRequestObjectResult(msg)));
@@ -119,4 +143,32 @@ public class CampaignController : ControllerBase
         return new AcceptedResult();
     }
 
+
+    [HttpGet, HttpPost]
+    [Route("search")]
+    public Task ProxySearchCatchAll()
+    {
+        var queryString = this.Request.QueryString.Value?.TrimStart('?') ?? string.Empty;
+        var url = Path.Combine(
+            _searchIdxConfig.BaseUrl,
+            "indexes",
+            _searchIdxConfig.CampaignIndexName,
+            $"docs?api-version=2021-04-30-Preview&{queryString}");
+
+        return this.HttpProxyAsync(url, _searchProxyOptions);
+    }
+
+    [HttpGet]
+    [Route("indexer/run")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> RunIndexer()
+    {
+        var response = await _searchIndexerClient.RunIndexerAsync(_searchIdxConfig.CampaignIndexerName);
+
+        if (response.IsError)
+            return new BadRequestObjectResult(response.ReasonPhrase);
+
+        return new AcceptedResult();
+    }
 }
