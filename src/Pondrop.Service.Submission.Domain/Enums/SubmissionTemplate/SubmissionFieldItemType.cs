@@ -15,10 +15,17 @@ internal class SubmissionFieldSearchTypeEnumConverter : StringEnumConverter
 {
     public override object? ReadJson(JsonReader reader, Type objectType, object? existingValue, JsonSerializer serializer)
     {
-        if (string.IsNullOrEmpty(reader?.Value?.ToString()))
-            return SubmissionFieldItemType.unknown;
+        try
+        {
+            if (string.IsNullOrEmpty(reader?.Value?.ToString()))
+                return SubmissionFieldItemType.unknown;
 
-        return base.ReadJson(reader, objectType, existingValue, serializer);
+            return base.ReadJson(reader, objectType, existingValue, serializer);
+        }
+        catch
+        {
+            return SubmissionFieldItemType.unknown;
+        }
     }
 
     public override void WriteJson(JsonWriter writer, object? value, JsonSerializer serializer)

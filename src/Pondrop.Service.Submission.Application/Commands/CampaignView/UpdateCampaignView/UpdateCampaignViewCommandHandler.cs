@@ -90,12 +90,12 @@ public class UpdateCampaignViewCommandHandler : IRequestHandler<UpdateCampaignVi
                     var campaignView = new CampaignViewRecord(
                         campaign.Id,
                         campaign.Name,
-                        campaign.CampaignType,
+                        campaign.CampaignType.HasValue ? campaign.CampaignType.Value.ToString().FirstCharToUpper() : string.Empty,
                         templateTitles,
                         campaign.StoreIds?.Count ?? 0,
                         completions,
                         campaign.CampaignPublishedDate,
-                        campaign.CampaignStatus
+                        campaign.CampaignStatus.HasValue ? campaign.CampaignStatus.Value.ToString().FirstCharToUpper() : string.Empty
                         );
 
                     var campaignResult = await _containerRepository.UpsertAsync(campaignView);

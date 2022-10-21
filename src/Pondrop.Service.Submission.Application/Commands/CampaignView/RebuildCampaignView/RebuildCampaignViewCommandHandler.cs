@@ -6,6 +6,7 @@ using Pondrop.Service.Submission.Application.Commands;
 using Pondrop.Service.Submission.Application.Interfaces;
 using Pondrop.Service.Submission.Application.Interfaces.Services;
 using Pondrop.Service.Submission.Application.Models;
+using Pondrop.Service.Submission.Domain.Enums.Campaign;
 using Pondrop.Service.Submission.Domain.Models;
 using Pondrop.Service.Submission.Domain.Models.Campaign;
 using Pondrop.Service.Submission.Domain.Models.Submission;
@@ -81,12 +82,12 @@ public class RebuildCampaignViewCommandHandler : IRequestHandler<RebuildCampaign
                         var campaignView = new CampaignViewRecord(
                             i.Id,
                             i.Name,
-                            i.CampaignType,
+                            i.CampaignType.HasValue ? i.CampaignType.Value.ToString().FirstCharToUpper() : string.Empty,
                             templateTitles,
                             i.StoreIds?.Count ?? 0,
                             completions,
                             i.CampaignPublishedDate,
-                            i.CampaignStatus
+                            i.CampaignStatus.HasValue ? i.CampaignStatus.Value.ToString().FirstCharToUpper() : string.Empty
                             );
 
                         var campaignResult = await _containerRepository.UpsertAsync(campaignView);
@@ -157,4 +158,15 @@ public class RebuildCampaignViewCommandHandler : IRequestHandler<RebuildCampaign
         var affectedSubmissionTemplates = await _submissionTemplateCheckpointRepository.QueryAsync(sqlQueryText, parameters);
         return affectedSubmissionTemplates;
     }
+}
+
+public static class StringExtensions
+{
+    public static string FirstCharToUpper(this string input) =>
+        input switch
+        {
+            null => throw new ArgumentNullException(nameof(input)),
+            "" => throw new ArgumentException($"{nameof(input)} cannot be empty", nameof(input)),
+            _ => string.Concat(input[0].ToString().ToUpper(), input.AsSpan(1))
+        };
 }

@@ -4,12 +4,12 @@ namespace Pondrop.Service.Submission.Domain.Models.Campaign;
 public record CampaignViewRecord(
         Guid Id,
         string Name,
-        CampaignType? CampaignType,
+        string CampaignType,
         string SelectedTemplateTitle,
         int NumberOfStores,
         int Completions,
         DateTime? CampaignPublishedDate,
-        CampaignStatus? CampaignStatus)
+        string CampaignStatus)
 {
     public CampaignViewRecord() : this(
         Guid.Empty,
