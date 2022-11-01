@@ -15,7 +15,8 @@ public enum SubmissionFieldType
     picker,
     search,
     focus,
-    date
+    date,
+    barcode,
 }
 
 internal class SubmissionFieldTypeEnumConverter : StringEnumConverter
