@@ -7,4 +7,8 @@ namespace Pondrop.Service.Submission.Application.Queries.Submission.GetAllStoreV
 
 public class GetAllStoreVisitsQuery : IRequest<Result<List<StoreVisitRecord>>>
 {
+    public int Limit { get; set; }
+
+    public int Offset { get; set; }
+
 }

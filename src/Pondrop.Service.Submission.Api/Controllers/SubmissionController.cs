@@ -65,32 +65,42 @@ public class SubmissionController : ControllerBase
     [HttpGet]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> GetAllSubmissions()
+    public async Task<IActionResult> GetAllSubmissions(int offset = 0, int limit = 10)
     {
         var claimsPrincipal = _jwtTokenProvider.ValidateToken(Request?.Headers[HeaderNames.Authorization] ?? string.Empty);
         if (claimsPrincipal is null)
             return new UnauthorizedResult();
 
-        var result = await _mediator.Send(new GetAllSubmissionsQuery());
-        return result.Match<IActionResult>(
-            i => new OkObjectResult(i),
-            (ex, msg) => new BadRequestObjectResult(msg));
+        var result = await _mediator.Send(new GetAllSubmissionsQuery()
+        {
+            Offset = offset,
+            Limit = limit
+        });
+       return result.Match<IActionResult>(
+           i => new OkObjectResult(new { Items = i, Offset = offset, Limit = limit, count = i!.Count() }
+           ),
+           (ex, msg) => new BadRequestObjectResult(msg));
     }
 
     [HttpGet]
     [Route("withstore")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> GetAllSubmissionsWithStore()
+    public async Task<IActionResult> GetAllSubmissionsWithStore(int offset = 0, int limit = 10)
     {
         var claimsPrincipal = _jwtTokenProvider.ValidateToken(Request?.Headers[HeaderNames.Authorization] ?? string.Empty);
         if (claimsPrincipal is null)
             return new UnauthorizedResult();
 
-        var result = await _mediator.Send(new GetAllSubmissionsWithStoreQuery());
-        return result.Match<IActionResult>(
-            i => new OkObjectResult(i),
-            (ex, msg) => new BadRequestObjectResult(msg));
+        var result = await _mediator.Send(new GetAllSubmissionsWithStoreQuery()
+         {
+             Offset = offset,
+             Limit = limit
+         });
+         return result.Match<IActionResult>(
+            i => new OkObjectResult(new { Items = i, Offset = offset, Limit = limit, count = i!.Count() }
+            ),
+             (ex, msg) => new BadRequestObjectResult(msg));
     }
 
     [HttpGet]

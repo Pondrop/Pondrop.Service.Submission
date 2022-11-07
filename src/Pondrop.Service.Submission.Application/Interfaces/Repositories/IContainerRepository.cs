@@ -10,6 +10,7 @@ public interface IContainerRepository<T>
     Task<T?> UpsertAsync(T item);
 
     Task<List<T>> GetAllAsync();
+
     Task<T?> GetByIdAsync(Guid id);
 
     Task<List<T>> QueryAsync(string sqlQueryText, Dictionary<string, string>? parameters = null);

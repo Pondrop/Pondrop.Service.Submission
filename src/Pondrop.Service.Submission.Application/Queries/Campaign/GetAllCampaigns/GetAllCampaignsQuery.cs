@@ -6,4 +6,7 @@ namespace Pondrop.Service.Submission.Application.Queries.Campaign.GetAllCampaign
 
 public class GetAllCampaignsQuery : IRequest<Result<List<CampaignRecord>>>
 {
+    public int Limit { get; set; }
+
+    public int Offset { get; set; }
 }

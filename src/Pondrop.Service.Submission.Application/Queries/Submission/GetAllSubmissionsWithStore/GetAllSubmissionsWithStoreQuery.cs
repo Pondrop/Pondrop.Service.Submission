@@ -6,4 +6,7 @@ namespace Pondrop.Service.Submission.Application.Queries.Submission.GetAllSubmis
 
 public class GetAllSubmissionsWithStoreQuery : IRequest<Result<List<SubmissionWithStoreViewRecord>>>
 {
+    public int Limit { get; set; }
+
+    public int Offset { get; set; }
 }

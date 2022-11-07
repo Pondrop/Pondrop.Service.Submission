@@ -62,12 +62,17 @@ public class CampaignController : ControllerBase
     [HttpGet]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> GetAllCampaigns()
+    public async Task<IActionResult> GetAllCampaigns(int offset = 0, int limit = 10)
     {
-        var result = await _mediator.Send(new GetAllCampaignsQuery());
+        var result = await _mediator.Send(new GetAllCampaignsQuery()
+        {
+            Offset = offset,
+            Limit = limit
+        });
         return result.Match<IActionResult>(
-            i => new OkObjectResult(i),
-            (ex, msg) => new BadRequestObjectResult(msg));
+           i => new OkObjectResult(new { Items = i, Offset = offset, Limit = limit, count = i!.Count() }
+           ),
+           (ex, msg) => new BadRequestObjectResult(msg));
     }
 
     [HttpGet]

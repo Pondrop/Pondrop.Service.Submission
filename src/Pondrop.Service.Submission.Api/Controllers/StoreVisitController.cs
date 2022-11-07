@@ -41,11 +41,16 @@ public class StoreVisitController : ControllerBase
     [HttpGet]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> GetAllStoreVisits()
+    public async Task<IActionResult> GetAllStoreVisits(int offset = 0, int limit = 10)
     {
-        var result = await _mediator.Send(new GetAllStoreVisitsQuery());
+        var result = await _mediator.Send(new GetAllStoreVisitsQuery()
+        {
+            Offset = offset,
+            Limit = limit
+        });
         return result.Match<IActionResult>(
-            i => new OkObjectResult(i),
+            i => new OkObjectResult(new { Items = i, Offset = offset, Limit = limit, count = i!.Count() }
+            ),
             (ex, msg) => new BadRequestObjectResult(msg));
     }
 

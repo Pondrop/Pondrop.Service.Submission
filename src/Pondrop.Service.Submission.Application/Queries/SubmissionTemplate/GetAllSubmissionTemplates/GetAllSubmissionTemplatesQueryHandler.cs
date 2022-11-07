@@ -43,7 +43,7 @@ public class GetAllSubmissionTemplatesQueryHandler : IRequestHandler<GetAllSubmi
 
         try
         {
-            var entities = await _containerRepository.GetAllAsync();
+            var entities = await _containerRepository.QueryAsync($"SELECT * FROM c OFFSET {request.Offset} LIMIT {request.Limit}");
             result = Result<List<SubmissionTemplateViewRecord>>.Success(_mapper.Map<List<SubmissionTemplateViewRecord>>(entities));
         }
         catch (Exception ex)

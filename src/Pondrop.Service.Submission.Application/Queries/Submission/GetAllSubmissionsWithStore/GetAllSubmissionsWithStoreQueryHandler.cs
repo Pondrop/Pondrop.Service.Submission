@@ -55,6 +55,8 @@ public class GetAllSubmissionsWithStoreQueryHandler : IRequestHandler<GetAllSubm
             query += _userService.CurrentUserType() == UserType.Shopper
                 ? $" WHERE c.createdBy = '{_userService.CurrentUserId()}'" : string.Empty;
 
+            query += $"OFFSET {request.Offset} LIMIT {request.Limit}";
+
             var records = await _containerRepository.QueryAsync(query);
 
             result = Result<List<SubmissionWithStoreViewRecord>>.Success(records);

@@ -47,7 +47,8 @@ public class GetAllStoreVisitsQueryHandler : IRequestHandler<GetAllStoreVisitsQu
 
         try
         {
-            var entities = await _checkpointRepository.QueryAsync($"SELECT * FROM c WHERE c.userId = '{_userService.CurrentUserId()}'");
+            var entities = await _checkpointRepository.QueryAsync($"SELECT * FROM c WHERE c.userId = '{_userService.CurrentUserId()}' OFFSET {request.Offset} LIMIT {request.Limit}");
+
             result = Result<List<StoreVisitRecord>>.Success(_mapper.Map<List<StoreVisitRecord>>(entities));
         }
         catch (Exception ex)

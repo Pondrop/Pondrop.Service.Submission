@@ -6,4 +6,8 @@ namespace Pondrop.Service.Submission.Application.Queries.SubmissionTemplate.GetA
 
 public class GetAllSubmissionTemplatesQuery : IRequest<Result<List<SubmissionTemplateViewRecord>>>
 {
+    public int Offset { get; set; }
+
+    public int Limit { get; set; }
+
 }

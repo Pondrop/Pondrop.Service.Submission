@@ -6,4 +6,7 @@ namespace Pondrop.Service.Submission.Application.Queries.Field.GetAllFields;
 
 public class GetAllFieldsQuery : IRequest<Result<List<FieldRecord>>>
 {
+    public int Limit { get; set; }
+
+    public int Offset { get; set; }
 }

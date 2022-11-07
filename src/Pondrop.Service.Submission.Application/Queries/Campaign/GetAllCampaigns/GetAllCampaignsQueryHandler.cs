@@ -44,7 +44,7 @@ public class GetAllCampaignsQueryHandler : IRequestHandler<GetAllCampaignsQuery,
 
         try
         {
-            var entities = await _checkpointRepository.GetAllAsync();
+            var entities = await _checkpointRepository.QueryAsync($"SELECT * FROM c OFFSET {request.Offset} LIMIT {request.Limit}");
             result = Result<List<CampaignRecord>>.Success(_mapper.Map<List<CampaignRecord>>(entities));
         }
         catch (Exception ex)

@@ -42,11 +42,16 @@ public class FieldController : ControllerBase
     [HttpGet]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> GetAllFields()
+    public async Task<IActionResult> GetAllFields(int offset = 0, int limit = 10)
     {
-        var result = await _mediator.Send(new GetAllFieldsQuery());
+        var result = await _mediator.Send(new GetAllFieldsQuery()
+        {
+            Offset = offset,
+            Limit = limit
+        });
         return result.Match<IActionResult>(
-            i => new OkObjectResult(i),
+           i => new OkObjectResult(new { Items = i, Offset = offset, Limit = limit, count = i!.Count() }
+           ),
             (ex, msg) => new BadRequestObjectResult(msg));
     }
 
