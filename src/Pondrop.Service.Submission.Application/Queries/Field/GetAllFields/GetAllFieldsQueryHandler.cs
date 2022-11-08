@@ -43,7 +43,13 @@ public class GetAllFieldsQueryHandler : IRequestHandler<GetAllFieldsQuery, Resul
 
         try
         {
-            var entities = await _checkpointRepository.QueryAsync($"SELECT * FROM c OFFSET {request.Offset} LIMIT {request.Limit}");
+            var query = $"SELECT * FROM c";
+
+            if (request.Offset != -1 && request.Limit != -1)
+            {
+                query += $" OFFSET {request.Offset} LIMIT {request.Limit}";
+            }
+            var entities = await _checkpointRepository.QueryAsync(query);
             result = Result<List<FieldRecord>>.Success(_mapper.Map<List<FieldRecord>>(entities));
         }
         catch (Exception ex)

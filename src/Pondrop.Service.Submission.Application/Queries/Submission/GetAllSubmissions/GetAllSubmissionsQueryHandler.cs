@@ -55,7 +55,11 @@ public class GetAllSubmissionsQueryHandler : IRequestHandler<GetAllSubmissionsQu
             query += _userService.CurrentUserType() == UserType.Shopper
                 ? $" WHERE c.createdBy = '{_userService.CurrentUserId()}'" : string.Empty;
 
-            query += $" OFFSET {request.Offset} LIMIT {request.Limit}";
+            if (request.Offset != -1 && request.Limit != -1)
+            {
+                query += $" OFFSET {request.Offset} LIMIT {request.Limit}";
+            }
+
 
             var records = await _checkpointRepository.QueryAsync(query);
 
