@@ -113,6 +113,8 @@ public class UpdateSubmissionWithStoreViewCommandHandler : IRequestHandler<Updat
                     {
                         StoreName = command.Name ?? store?.Name,
                         RetailerName = command.RetailerName ?? store?.Retailer?.Name,
+                        StoreId = store?.Id ?? Guid.Empty,
+                        CampaignId = i?.CampaignId ?? null,
                         TaskType = submissionTemplate.Title,
                         SubmittedUtc = submittedUtc,
                         Images = string.Join(',', stepsWithImages)
