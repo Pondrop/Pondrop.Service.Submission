@@ -8,6 +8,8 @@ namespace Pondrop.Service.Submission.Domain.Models.Submission;
 public record SubmissionWithStoreViewRecord(
         Guid Id,
         Guid StoreVisitId,
+        Guid StoreId,
+        Guid? CampaignId,
         Guid SubmissionTemplateId,
         string TaskType,
         DateTime? SubmittedUtc,
@@ -18,6 +20,8 @@ public record SubmissionWithStoreViewRecord(
     public SubmissionWithStoreViewRecord() : this(
         Guid.Empty,
         Guid.Empty,
+        Guid.Empty,
+        null,
         Guid.Empty,
         string.Empty,
         DateTime.MinValue,

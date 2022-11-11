@@ -98,6 +98,8 @@ public class RebuildSubmissionWithStoreViewCommandHandler : IRequestHandler<Rebu
                     {
                         StoreName = store?.Name,
                         RetailerName = store?.Retailer?.Name,
+                        StoreId = store?.Id ?? Guid.Empty,
+                        CampaignId = i?.CampaignId ?? null,
                         TaskType = submissionTemplate.Title,
                         SubmittedUtc = submittedUtc,
                         Images = string.Join(',', stepsWithImages)
