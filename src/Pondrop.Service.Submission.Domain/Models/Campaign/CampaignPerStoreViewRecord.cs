@@ -7,10 +7,10 @@ public record CampaignPerStoreViewRecord(
         CampaignType? CampaignType,
         CampaignStatus? CampaignStatus,
         int RequiredSubmissions,
-        List<CampaignCategorySubmissionViewRecord>? CampaignCategorySubmissions,
         Guid? StoreId,
         DateTime? CampaignPublishedDate,
-        DateTime? CampaignEndDate)
+        DateTime? CampaignEndDate,
+int SubmissionCount)
 {
     public CampaignPerStoreViewRecord() : this(
         Guid.Empty,
@@ -19,9 +19,9 @@ public record CampaignPerStoreViewRecord(
         null,
         0,
         null,
-        null,
         DateTime.MinValue,
-        DateTime.MinValue)
+        DateTime.MinValue,
+        0)
     {
     }
 }
