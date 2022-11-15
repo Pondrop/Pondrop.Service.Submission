@@ -103,6 +103,21 @@ public class CampaignController : ControllerBase
             (ex, msg) => new BadRequestObjectResult(msg));
     }
 
+
+    [HttpPost]
+    [Route("category")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> GetActiveCategoryCampaignsByStoreId([FromBody] GetActiveCategoryCampaignsByStoreIdQuery query)
+    {
+        var result = await _mediator.Send(query);
+        return result.Match<IActionResult>(
+            i => i is not null ? new OkObjectResult(i) : new NotFoundResult(),
+            (ex, msg) => new BadRequestObjectResult(msg));
+    }
+
     [HttpPost]
     [Route("create")]
     [ProducesResponseType(StatusCodes.Status201Created)]

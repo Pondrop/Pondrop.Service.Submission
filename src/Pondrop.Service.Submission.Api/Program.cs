@@ -170,6 +170,7 @@ services.AddSingleton<ICheckpointRepository<SubmissionTemplateEntity>, Checkpoin
 services.AddSingleton<IContainerRepository<StoreVisitViewRecord>, ContainerRepository<StoreVisitViewRecord>>();
 services.AddSingleton<ICheckpointRepository<StoreVisitEntity>, CheckpointRepository<StoreVisitEntity>>();
 services.AddSingleton<ICheckpointRepository<FieldEntity>, CheckpointRepository<FieldEntity>>();
+services.AddSingleton<ICheckpointRepository<CategoryEntity>, CheckpointRepository<CategoryEntity>>();
 services.AddSingleton<ICheckpointRepository<CampaignEntity>, CheckpointRepository<CampaignEntity>>();
 services.AddSingleton<IContainerRepository<SubmissionTemplateViewRecord>, ContainerRepository<SubmissionTemplateViewRecord>>();
 services.AddSingleton<IContainerRepository<SubmissionWithStoreViewRecord>, ContainerRepository<SubmissionWithStoreViewRecord>>();
