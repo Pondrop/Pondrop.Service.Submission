@@ -10,6 +10,7 @@ public record SubmissionWithStoreViewRecord(
         Guid StoreVisitId,
         Guid StoreId,
         Guid? CampaignId,
+        Guid? UserId,
         Guid SubmissionTemplateId,
         string TaskType,
         DateTime? SubmittedUtc,
@@ -18,6 +19,7 @@ public record SubmissionWithStoreViewRecord(
         string Images)
 {
     public SubmissionWithStoreViewRecord() : this(
+        Guid.Empty,
         Guid.Empty,
         Guid.Empty,
         Guid.Empty,

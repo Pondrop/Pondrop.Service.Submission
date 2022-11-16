@@ -68,12 +68,14 @@ public class UpdateSubmissionWithStoreViewCommandHandler : IRequestHandler<Updat
                 var success = false;
 
                 Guid storeId = Guid.Empty;
+                Guid userId = Guid.Empty;
                 DateTime submittedUtc = DateTime.MinValue;
 
                 if (affectedStoreVisitLookup.Count > 0)
                 {
                     var storeVisit = affectedStoreVisitLookup[i.StoreVisitId];
                     submittedUtc = i.CreatedUtc;
+                        userId = storeVisit.UserId;
                     storeId = storeVisit.StoreId;
                 }
                 else
@@ -82,6 +84,7 @@ public class UpdateSubmissionWithStoreViewCommandHandler : IRequestHandler<Updat
                     if (storeVisit != null)
                     {
                         storeId = storeVisit.StoreId;
+                        userId = storeVisit.UserId;
                         submittedUtc = i.CreatedUtc;
                     }
                 }
@@ -116,6 +119,7 @@ public class UpdateSubmissionWithStoreViewCommandHandler : IRequestHandler<Updat
                         StoreId = store?.Id ?? Guid.Empty,
                         CampaignId = i?.CampaignId ?? null,
                         TaskType = submissionTemplate.Title,
+                        UserId = userId,
                         SubmittedUtc = submittedUtc,
                         Images = string.Join(',', stepsWithImages)
                     };
