@@ -65,9 +65,9 @@ public class GetSubmissionByIdQueryHandler : IRequestHandler<GetSubmissionByIdQu
         try
         {
             var queryString = $"SELECT * FROM c WHERE c.id = '{query.Id}'";
-            queryString += _userService.CurrentUserType() == UserType.Shopper
-                ? $" AND c.createdBy = '{_userService.CurrentUserId()}'"
-                : string.Empty;
+            //queryString += _userService.CurrentUserType() == UserType.Shopper;
+                //? $" AND c.createdBy = '{_userService.CurrentUserId()}'"
+                //: string.Empty;
 
             queryString += " OFFSET 0 LIMIT 1";
 
