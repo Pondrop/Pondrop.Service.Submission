@@ -148,6 +148,9 @@ services.AddFluentValidation(config =>
 var storeDatabaseName = configuration["StoreCosmosConfiguration:DatabaseName"];
 var storeConnectionString = configuration["StoreCosmosConfiguration:ConnectionString"];
 var storeApplicationName = configuration["StoreCosmosConfiguration:ApplicationName"];
+var productDatabaseName = configuration["ProductCosmosConfiguration:DatabaseName"];
+var productConnectionString = configuration["ProductCosmosConfiguration:ConnectionString"];
+var productApplicationName = configuration["ProductCosmosConfiguration:ApplicationName"];
 
 services.Configure<CosmosConfiguration>(configuration.GetSection(CosmosConfiguration.Key));
 services.Configure<StoreCosmosConfiguration>(configuration.GetSection(StoreCosmosConfiguration.Key));
@@ -174,7 +177,6 @@ services.AddSingleton<ICheckpointRepository<FieldEntity>, CheckpointRepository<F
 services.AddSingleton<ICheckpointRepository<CampaignEntity>, CheckpointRepository<CampaignEntity>>();
 services.AddSingleton<IContainerRepository<SubmissionTemplateViewRecord>, ContainerRepository<SubmissionTemplateViewRecord>>();
 services.AddSingleton<IContainerRepository<SubmissionWithStoreViewRecord>, ContainerRepository<SubmissionWithStoreViewRecord>>();
-services.AddSingleton<IContainerRepository<ProductViewRecord>, ContainerRepository<ProductViewRecord>>();
 services.AddSingleton<IContainerRepository<SubmissionViewRecord>, ContainerRepository<SubmissionViewRecord>>();
 services.AddSingleton<IContainerRepository<CampaignViewRecord>, ContainerRepository<CampaignViewRecord>>();
 services.AddSingleton<IContainerRepository<StoreViewRecord>, ContainerRepository<StoreViewRecord>>(provider =>
@@ -185,17 +187,24 @@ services.AddSingleton<IContainerRepository<StoreViewRecord>, ContainerRepository
             ApplicationName = storeApplicationName,
             DatabaseName = storeDatabaseName
         }), null));
-
-
+services.AddSingleton<IContainerRepository<ProductViewRecord>, ContainerRepository<ProductViewRecord>>(provider =>
+    new ContainerRepository<ProductViewRecord>(
+        Options.Create(new CosmosConfiguration()
+        {
+            ConnectionString = productConnectionString,
+            ApplicationName = productDatabaseName,
+            DatabaseName = productDatabaseName
+        }), null));
 services.AddSingleton<ICheckpointRepository<CategoryEntity>, CheckpointRepository<CategoryEntity>>(provider =>
     new CheckpointRepository<CategoryEntity>(
         null,
         Options.Create(new CosmosConfiguration()
         {
-            ConnectionString = storeConnectionString,
-            ApplicationName = storeApplicationName,
-            DatabaseName = storeDatabaseName
+            ConnectionString = productConnectionString,
+            ApplicationName = productDatabaseName,
+            DatabaseName = productDatabaseName
         }), null));
+
 
 services.AddSingleton<IDaprService, DaprService>();
 services.AddSingleton<IServiceBusService, ServiceBusService>();

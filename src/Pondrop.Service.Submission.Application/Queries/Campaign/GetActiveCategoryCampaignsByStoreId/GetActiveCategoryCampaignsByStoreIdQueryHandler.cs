@@ -110,6 +110,8 @@ public class GetActiveCategoryCampaignsByStoreIdQueryHandler : IRequestHandler<G
                                 CampaignStatus = campaign.CampaignStatus,
                                 StoreId = campaign?.StoreIds?.FirstOrDefault() ?? null,
                                 RequiredSubmissions = campaign?.RequiredSubmissions ?? 0,
+                                SubmissionTemplateId = campaign?.SelectedTemplateIds?.FirstOrDefault() ?? null,
+                                SubmissionCount = submissions?.Count() ?? 0,
                                 CampaignEndDate = campaign.CampaignEndDate,
                                 CampaignPublishedDate = campaign.CampaignPublishedDate,
                                 CampaignType = campaign.CampaignType,

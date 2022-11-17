@@ -6,6 +6,7 @@ public record CampaignPerStoreViewRecord(
         string Name,
         CampaignType? CampaignType,
         CampaignStatus? CampaignStatus,
+        Guid? SubmissionTemplateId,
         int RequiredSubmissions,
         Guid? StoreId,
         DateTime? CampaignPublishedDate,
@@ -15,6 +16,7 @@ int SubmissionCount)
     public CampaignPerStoreViewRecord() : this(
         Guid.Empty,
         string.Empty,
+        null,
         null,
         null,
         0,
