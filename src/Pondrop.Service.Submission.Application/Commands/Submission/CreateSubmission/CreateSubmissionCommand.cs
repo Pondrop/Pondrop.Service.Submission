@@ -1,5 +1,4 @@
-﻿using Google.Protobuf.WellKnownTypes;
-using MediatR;
+﻿using MediatR;
 using Pondrop.Service.Submission.Application.Models;
 using Pondrop.Service.Submission.Domain.Enums.SubmissionTemplate;
 using Pondrop.Service.Submission.Domain.Models.Submission;
@@ -92,4 +91,16 @@ public record CreateItemValueRecord(
         null)
     {
     }
+
+    public bool IsValid() => 
+        ItemType switch
+        {
+            SubmissionFieldItemType.category => Guid.TryParse(ItemId, out _) &&
+                                                !string.IsNullOrEmpty(ItemName),
+            SubmissionFieldItemType.product => (string.IsNullOrEmpty(ItemId) || Guid.TryParse(ItemId, out _)) &&
+                                               !string.IsNullOrEmpty(ItemName) &&
+                                               !string.IsNullOrEmpty(ItemBarcode),
+            SubmissionFieldItemType.unknown => false,
+            _ => throw new NotImplementedException($"Cannot validate item type '{ItemType}'")
+        };
 }

@@ -101,12 +101,12 @@ public class CreateSubmissionCommandHandler : DirtyCommandHandler<SubmissionEnti
                             fieldValue.DoubleValue,
                             fieldValue.DateTimeValue,
                             url,
-                            !string.IsNullOrEmpty(fieldValue.ItemValue?.ItemId)
+                            fieldValue.ItemValue?.IsValid() == true
                             ? new ItemValueRecord(
                                 fieldValue.ItemValue.ItemId,
                                 fieldValue.ItemValue.ItemName,
                                 fieldValue.ItemValue.ItemType,
-                            fieldValue.ItemValue.ItemBarcode)
+                                fieldValue.ItemValue.ItemBarcode)
                             : null));
                     }
 
