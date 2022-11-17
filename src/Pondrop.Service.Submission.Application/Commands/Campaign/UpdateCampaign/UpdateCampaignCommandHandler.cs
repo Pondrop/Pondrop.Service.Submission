@@ -23,14 +23,14 @@ public class UpdateCampaignCommandHandler : DirtyCommandHandler<CampaignEntity, 
     private readonly ILogger<UpdateCampaignCommandHandler> _logger;
 
     public UpdateCampaignCommandHandler(
-        IOptions<SubmissionUpdateConfiguration> storeUpdateConfig,
+        IOptions<SubmissionUpdateConfiguration> campaignUpdateConfig,
         IEventRepository eventRepository,
         ICheckpointRepository<CampaignEntity> campaignCheckpointRepository,
         IDaprService daprService,
         IUserService userService,
         IMapper mapper,
         IValidator<UpdateCampaignCommand> validator,
-        ILogger<UpdateCampaignCommandHandler> logger) : base(eventRepository, storeUpdateConfig.Value, daprService, logger)
+        ILogger<UpdateCampaignCommandHandler> logger) : base(eventRepository, campaignUpdateConfig.Value, daprService, logger)
     {
         _eventRepository = eventRepository;
         _campaignCheckpointRepository = campaignCheckpointRepository;
@@ -46,7 +46,7 @@ public class UpdateCampaignCommandHandler : DirtyCommandHandler<CampaignEntity, 
 
         if (!validation.IsValid)
         {
-            var errorMessage = $"Update store failed, errors on validation {validation}";
+            var errorMessage = $"Update campaign failed, errors on validation {validation}";
             _logger.LogError(errorMessage);
             return Result<CampaignRecord>.Error(errorMessage);
         }
@@ -55,16 +55,23 @@ public class UpdateCampaignCommandHandler : DirtyCommandHandler<CampaignEntity, 
 
         try
         {
-            var storeEntity = await _campaignCheckpointRepository.GetByIdAsync(command.Id);
-            storeEntity ??= await GetFromStreamAsync(command.Id);
+            var campaignEntity = await _campaignCheckpointRepository.GetByIdAsync(command.Id);
+            campaignEntity ??= await GetFromStreamAsync(command.Id);
 
-            if (storeEntity is not null)
+            if (campaignEntity is not null)
             {
+                var campaignPublishedDate = command.CampaignPublishedDate;
+                if (command.CampaignStatus == CampaignStatus.live && campaignEntity.CampaignStatus != CampaignStatus.live)
+                {
+                    if (!campaignEntity.CampaignPublishedDate.HasValue && !command.CampaignPublishedDate.HasValue)
+                        campaignPublishedDate = DateTime.UtcNow;
+                }
+
                 var evtPayload = new UpdateCampaign(
                     command.Id,
-                command.Name,
-                command.CampaignType,
-                command.CampaignTriggerIds,
+                    command.Name,
+                    command.CampaignType,
+                    command.CampaignTriggerIds,
                 command.CampaignFocusCategoryIds,
                 command.CampaignFocusProductIds,
                 command.SelectedTemplateIds,
@@ -79,19 +86,19 @@ public class UpdateCampaignCommandHandler : DirtyCommandHandler<CampaignEntity, 
 
                 var createdBy = _userService.CurrentUserId();
 
-                var success = await UpdateStreamAsync(storeEntity, evtPayload, createdBy);
+                var success = await UpdateStreamAsync(campaignEntity, evtPayload, createdBy);
 
                 if (!success)
                 {
-                    await _campaignCheckpointRepository.FastForwardAsync(storeEntity);
-                    success = await UpdateStreamAsync(storeEntity, evtPayload, createdBy);
+                    await _campaignCheckpointRepository.FastForwardAsync(campaignEntity);
+                    success = await UpdateStreamAsync(campaignEntity, evtPayload, createdBy);
                 }
 
                 await Task.WhenAll(
-                    InvokeDaprMethods(storeEntity.Id, storeEntity.GetEvents(storeEntity.AtSequence)));
+                    InvokeDaprMethods(campaignEntity.Id, campaignEntity.GetEvents(campaignEntity.AtSequence)));
 
                 result = success
-                    ? Result<CampaignRecord>.Success(_mapper.Map<CampaignRecord>(storeEntity))
+                    ? Result<CampaignRecord>.Success(_mapper.Map<CampaignRecord>(campaignEntity))
                     : Result<CampaignRecord>.Error(FailedToCreateMessage(command));
             }
             else

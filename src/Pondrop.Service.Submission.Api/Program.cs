@@ -171,7 +171,6 @@ services.AddSingleton<ICheckpointRepository<SubmissionTemplateEntity>, Checkpoin
 services.AddSingleton<IContainerRepository<StoreVisitViewRecord>, ContainerRepository<StoreVisitViewRecord>>();
 services.AddSingleton<ICheckpointRepository<StoreVisitEntity>, CheckpointRepository<StoreVisitEntity>>();
 services.AddSingleton<ICheckpointRepository<FieldEntity>, CheckpointRepository<FieldEntity>>();
-services.AddSingleton<ICheckpointRepository<CategoryEntity>, CheckpointRepository<CategoryEntity>>();
 services.AddSingleton<ICheckpointRepository<CampaignEntity>, CheckpointRepository<CampaignEntity>>();
 services.AddSingleton<IContainerRepository<SubmissionTemplateViewRecord>, ContainerRepository<SubmissionTemplateViewRecord>>();
 services.AddSingleton<IContainerRepository<SubmissionWithStoreViewRecord>, ContainerRepository<SubmissionWithStoreViewRecord>>();
@@ -180,6 +179,17 @@ services.AddSingleton<IContainerRepository<SubmissionViewRecord>, ContainerRepos
 services.AddSingleton<IContainerRepository<CampaignViewRecord>, ContainerRepository<CampaignViewRecord>>();
 services.AddSingleton<IContainerRepository<StoreViewRecord>, ContainerRepository<StoreViewRecord>>(provider =>
     new ContainerRepository<StoreViewRecord>(
+        Options.Create(new CosmosConfiguration()
+        {
+            ConnectionString = storeConnectionString,
+            ApplicationName = storeApplicationName,
+            DatabaseName = storeDatabaseName
+        }), null));
+
+
+services.AddSingleton<ICheckpointRepository<CategoryEntity>, CheckpointRepository<CategoryEntity>>(provider =>
+    new CheckpointRepository<CategoryEntity>(
+        null,
         Options.Create(new CosmosConfiguration()
         {
             ConnectionString = storeConnectionString,

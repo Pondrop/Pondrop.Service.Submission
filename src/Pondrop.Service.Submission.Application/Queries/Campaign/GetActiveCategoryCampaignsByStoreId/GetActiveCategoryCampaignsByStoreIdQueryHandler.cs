@@ -72,7 +72,7 @@ public class GetActiveCategoryCampaignsByStoreIdQueryHandler : IRequestHandler<G
             var activeCampaigns = new List<CampaignCategoryPerStoreViewRecord>();
             var submissionsFromAllCampaigns = await GetSubmissionsByCampaignIds(campaigns.Select(s => s.Id).ToList());
 
-            foreach (var campaign in campaigns)
+             foreach (var campaign in campaigns)
             {
                 if (campaign != null && campaign.CampaignFocusCategoryIds != null)
                 {
