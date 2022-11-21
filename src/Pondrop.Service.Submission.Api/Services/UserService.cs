@@ -1,6 +1,6 @@
-using Pondrop.Service.Submission.Application.Interfaces.Services;
-using Pondrop.Service.Submission.Domain.Enums.User;
-using Pondrop.Service.Submission.Domain.Models;
+using Pondrop.Service.Interfaces.Services;
+using Pondrop.Service.Models;
+using Pondrop.Service.Models.User;
 
 namespace Pondrop.Service.Submission.Api.Services;
 
@@ -17,14 +17,14 @@ public class UserService : IUserService
     {
         UserId = "admin";
         UserName = "admin";
-        UserType = Domain.Enums.User.UserType.Shopper;
+        UserType = UserType.Shopper;
     }
 
     public string CurrentUserId() => UserId;
     public string CurrentUserName() => UserName;
     public UserType CurrentUserType() => UserType;
 
-    public bool SetCurrentUser(UserModel user)
+    public bool SetCurrentUser(Service.Models.User.UserModel user)
     {
         if (user is null)
             return false;

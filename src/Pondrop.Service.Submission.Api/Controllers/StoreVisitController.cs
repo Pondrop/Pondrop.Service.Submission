@@ -6,10 +6,10 @@ using Pondrop.Service.Submission.Api.Services;
 using Pondrop.Service.Submission.Api.Services.Interfaces;
 using Pondrop.Service.Submission.Application.Commands;
 using Pondrop.Service.Submission.Application.Commands.Submission.CreateStoreVisit;
-using Pondrop.Service.Submission.Application.Interfaces;
 using Pondrop.Service.Submission.Application.Queries.Submission.GetAllStoreVisits;
 using Pondrop.Service.Submission.Application.Queries.Submission.GetStoreVisitById;
 using Pondrop.Service.Submission.Application.Queries.Submission.GetStoreVisitByStoreId;
+using Pondrop.Service.Interfaces;
 
 namespace Pondrop.Service.StoreVisit.Api.Controllers;
 

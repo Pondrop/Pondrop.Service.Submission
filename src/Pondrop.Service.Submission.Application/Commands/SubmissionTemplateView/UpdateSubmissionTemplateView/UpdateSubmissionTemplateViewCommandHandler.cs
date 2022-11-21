@@ -2,8 +2,8 @@
 using MediatR;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
-using Pondrop.Service.Submission.Application.Interfaces;
-using Pondrop.Service.Submission.Application.Interfaces.Services;
+using Pondrop.Service.Interfaces;
+using Pondrop.Service.Interfaces.Services;
 using Pondrop.Service.Submission.Application.Models;
 using Pondrop.Service.Submission.Domain.Models;
 using Pondrop.Service.Submission.Domain.Models.SubmissionTemplate;
@@ -91,19 +91,20 @@ public class UpdateSubmissionTemplateViewCommandHandler : IRequestHandler<Update
                                                                         step.CreatedBy,
                                                                         step.UpdatedBy,
                                                                         step.CreatedUtc,
-                                                                        step.UpdatedUtc));
+                                                                        step.UpdatedUtc,
+                                                                        step.DeletedUtc));
                     }
 
-                var view = await _containerRepository.UpsertAsync(submissionTemplateView);
-                success = result != null;
+                    var view = await _containerRepository.UpsertAsync(submissionTemplateView);
+                    success = result != null;
+                }
             }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Failed to update submissionTemplate view for '{command.SubmissionTemplateId}'");
             }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, $"Failed to update submissionTemplate view for '{command.SubmissionTemplateId}'");
-        }
 
-    }
+        }
         catch (Exception ex)
         {
             _logger.LogError(ex, FailedToMessage(command));
@@ -114,28 +115,28 @@ public class UpdateSubmissionTemplateViewCommandHandler : IRequestHandler<Update
     }
 
     private async Task<List<SubmissionTemplateEntity>> GetAffectedSubmissionsAsync(Guid? submissionTemplateId)
-{
-    const string submissionTemplateIdKey = "@submissionTemplateId";
-
-    var conditions = new List<string>();
-    var parameters = new Dictionary<string, string>();
-
-
-    if (submissionTemplateId.HasValue)
     {
-        conditions.Add($"c.id = {submissionTemplateIdKey}");
-        parameters.Add(submissionTemplateIdKey, submissionTemplateId.Value.ToString());
+        const string submissionTemplateIdKey = "@submissionTemplateId";
+
+        var conditions = new List<string>();
+        var parameters = new Dictionary<string, string>();
+
+
+        if (submissionTemplateId.HasValue)
+        {
+            conditions.Add($"c.id = {submissionTemplateIdKey}");
+            parameters.Add(submissionTemplateIdKey, submissionTemplateId.Value.ToString());
+        }
+
+        if (!conditions.Any())
+            return new List<SubmissionTemplateEntity>(0);
+
+        var sqlQueryText = $"SELECT * FROM c WHERE {string.Join(" AND ", conditions)}";
+
+        var affectedSubmissions = await _submissionTemplateCheckpointRepository.QueryAsync(sqlQueryText, parameters);
+        return affectedSubmissions;
     }
 
-    if (!conditions.Any())
-        return new List<SubmissionTemplateEntity>(0);
-
-    var sqlQueryText = $"SELECT * FROM c WHERE {string.Join(" AND ", conditions)}";
-
-    var affectedSubmissions = await _submissionTemplateCheckpointRepository.QueryAsync(sqlQueryText, parameters);
-    return affectedSubmissions;
-}
-
-private static string FailedToMessage(UpdateSubmissionTemplateViewCommand command) =>
-    $"Failed to update submissionTemplate view '{JsonConvert.SerializeObject(command)}'";
+    private static string FailedToMessage(UpdateSubmissionTemplateViewCommand command) =>
+        $"Failed to update submissionTemplate view '{JsonConvert.SerializeObject(command)}'";
 }

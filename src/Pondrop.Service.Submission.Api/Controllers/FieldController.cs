@@ -2,15 +2,12 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Pondrop.Service.Submission.Api.Services;
 using Pondrop.Service.Submission.Application.Commands;
-using Pondrop.Service.Submission.Application.Commands.Field.AddStepToSubmission;
-using Pondrop.Service.Submission.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.Net.Http.Headers;
 using Pondrop.Service.Submission.Api.Services.Interfaces;
-using System.Security.Claims;
 using Pondrop.Service.Submission.Application.Queries.Field.GetAllFields;
 using Pondrop.Service.Submission.Application.Queries.Field.GetFieldById;
 using Pondrop.Service.Submission.Application.Commands.SubmissionTemplate.AddStepToSubmission;
+using Pondrop.Service.Interfaces;
 
 namespace Pondrop.Service.Submission.Api.Controllers;
 

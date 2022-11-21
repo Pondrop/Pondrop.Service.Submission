@@ -11,7 +11,6 @@ using Pondrop.Service.Submission.Api.Services.Interfaces;
 using Pondrop.Service.Submission.Api.Tests.Faker;
 using Pondrop.Service.Submission.Application.Commands;
 using Pondrop.Service.Submission.Application.Commands.Submission.CreateCampaign;
-using Pondrop.Service.Submission.Application.Interfaces;
 using Pondrop.Service.Submission.Domain.Models.Campaign;
 using System;
 using System.Collections.Generic;
@@ -20,6 +19,7 @@ using System.Security.Claims;
 using Xunit;
 using Pondrop.Service.Submission.Application.Queries.Campaign.GetAllCampaigns;
 using Pondrop.Service.Submission.Application.Queries.Campaign.GetCampaignById;
+using Pondrop.Service.Interfaces;
 
 namespace Pondrop.Service.Submission.Api.Tests
 {

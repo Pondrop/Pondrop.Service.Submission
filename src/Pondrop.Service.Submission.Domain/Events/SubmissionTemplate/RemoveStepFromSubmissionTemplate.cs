@@ -1,4 +1,4 @@
-using Pondrop.Service.Submission.Domain.Models.SubmissionTemplate;
+using Pondrop.Service.Events;
 
 namespace Pondrop.Service.Submission.Domain.Events.SubmissionTemplate;
 

@@ -1,4 +1,5 @@
-﻿using Pondrop.Service.Submission.Domain.Models;
+﻿using Pondrop.Service.Models;
+using Pondrop.Service.Submission.Domain.Models;
 
 namespace Pondrop.Service.Store.Domain.Models;
 
@@ -9,10 +10,11 @@ public record RetailerRecord(
         string CreatedBy,
         string UpdatedBy,
         DateTime CreatedUtc,
-        DateTime UpdatedUtc)
-    : AuditRecord(CreatedBy, UpdatedBy, CreatedUtc, UpdatedUtc)
+        DateTime UpdatedUtc,
+        DateTime? DeletedUtc)
+    : AuditRecord(CreatedBy, UpdatedBy, CreatedUtc, UpdatedUtc, DeletedUtc)
 {
-    public RetailerRecord() : this(Guid.Empty, string.Empty, string.Empty, string.Empty, string.Empty, DateTime.MinValue, DateTime.MinValue)
+    public RetailerRecord() : this(Guid.Empty, string.Empty, string.Empty, string.Empty, string.Empty, DateTime.MinValue, DateTime.MinValue, null)
     {
     }
 }

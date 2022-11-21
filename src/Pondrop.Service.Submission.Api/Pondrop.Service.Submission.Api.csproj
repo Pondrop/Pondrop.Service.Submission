@@ -11,7 +11,8 @@
 
   <ItemGroup>
     <PackageReference Include="AspNetCore.Proxy" Version="4.4.0" />
-    <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="11.0.0" />
+    <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.0" />
+    <PackageReference Include="Azure.Messaging.EventGrid" Version="4.12.0" />
     <PackageReference Include="Azure.Search.Documents" Version="11.4.0" />
     <PackageReference Include="FluentValidation.AspNetCore" Version="11.1.2" />
     <PackageReference Include="MediatR" Version="10.0.1" />
@@ -19,13 +20,14 @@
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="6.0.8" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Versioning" Version="5.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Versioning.ApiExplorer" Version="5.0.0" />
+    <PackageReference Include="Microsoft.Azure.EventGrid" Version="3.2.1" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.16.1" />
+    <PackageReference Include="Pondrop.Service.Infrastructure" Version="1.0.6" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Pondrop.Service.Submission.Application\Pondrop.Service.Submission.Application.csproj" />
     <ProjectReference Include="..\Pondrop.Service.Submission.Domain\Pondrop.Service.Submission.Domain.csproj" />
-    <ProjectReference Include="..\Pondrop.Service.Submission.Infrastructure\Pondrop.Service.Submission.Infrastructure.csproj" />
   </ItemGroup>
 </Project>

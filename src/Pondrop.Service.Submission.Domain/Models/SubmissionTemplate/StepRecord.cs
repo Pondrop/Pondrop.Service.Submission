@@ -1,4 +1,6 @@
-﻿namespace Pondrop.Service.Submission.Domain.Models.SubmissionTemplate;
+﻿using Pondrop.Service.Models;
+
+namespace Pondrop.Service.Submission.Domain.Models.SubmissionTemplate;
 
 public record StepRecord(
         Guid Id,
@@ -13,8 +15,9 @@ public record StepRecord(
         string CreatedBy,
         string UpdatedBy,
         DateTime CreatedUtc,
-        DateTime UpdatedUtc)
-    : AuditRecord(CreatedBy, UpdatedBy, CreatedUtc, UpdatedUtc)
+        DateTime UpdatedUtc,
+        DateTime? DeletedUtc)
+    : AuditRecord(CreatedBy, UpdatedBy, CreatedUtc, UpdatedUtc, DeletedUtc)
 {
     public StepRecord() : this(
         Guid.Empty,
@@ -29,7 +32,8 @@ public record StepRecord(
         string.Empty,
         string.Empty,
         DateTime.MinValue,
-        DateTime.MinValue)
+        DateTime.MinValue,
+         null)
     {
     }
 }

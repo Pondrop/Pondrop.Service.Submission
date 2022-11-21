@@ -1,5 +1,6 @@
 ﻿using Microsoft.IdentityModel.Tokens;
-using Pondrop.Service.Submission.Application.Interfaces.Services;
+using Pondrop.Service.Interfaces.Services;
+using Pondrop.Service.Models.User;
 using Pondrop.Service.Submission.Domain.Models;
 using System.IdentityModel.Tokens.Jwt;
 using System.Text;

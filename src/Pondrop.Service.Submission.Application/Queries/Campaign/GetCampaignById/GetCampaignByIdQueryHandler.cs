@@ -2,12 +2,10 @@
 using FluentValidation;
 using MediatR;
 using Microsoft.Extensions.Logging;
-using Pondrop.Service.Submission.Application.Interfaces;
+using Pondrop.Service.Interfaces;
 using Pondrop.Service.Submission.Application.Models;
 using Pondrop.Service.Submission.Application.Queries.Campaign.GetCampaignById;
-using Pondrop.Service.Submission.Domain.Models;
 using Pondrop.Service.Submission.Domain.Models.Campaign;
-using Pondrop.Service.Submission.Domain.Models.SubmissionTemplate;
 
 namespace Pondrop.Service.Submission.Application.Queries;
 

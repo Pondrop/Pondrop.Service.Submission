@@ -1,11 +1,11 @@
 using Azure.Messaging.ServiceBus;
 using MediatR;
-using Microsoft.Azure.EventGrid.Models;
 using Microsoft.Extensions.Options;
+using Microsoft.Azure.EventGrid.Models;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Pondrop.Service.Product.Application.Models;
 using Pondrop.Service.Submission.Application.Commands;
-using Pondrop.Service.Submission.Application.Models;
 using System.Text;
 
 namespace Pondrop.Service.Submission.Api.Services;

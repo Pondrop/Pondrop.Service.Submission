@@ -1,8 +1,8 @@
 ﻿using Newtonsoft.Json;
+using Pondrop.Service.Events;
+using Pondrop.Service.Models;
 using Pondrop.Service.Submission.Domain.Enums.SubmissionTemplate;
-using Pondrop.Service.Submission.Domain.Events;
 using Pondrop.Service.Submission.Domain.Events.Field;
-using Pondrop.Service.Submission.Domain.Events.SubmissionTemplate;
 
 namespace Pondrop.Service.Submission.Domain.Models;
 

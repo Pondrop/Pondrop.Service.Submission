@@ -11,7 +11,6 @@ using Pondrop.Service.Submission.Api.Services.Interfaces;
 using Pondrop.Service.Submission.Api.Tests.Faker;
 using Pondrop.Service.Submission.Application.Commands;
 using Pondrop.Service.Submission.Application.Commands.Submission.CreateSubmission;
-using Pondrop.Service.Submission.Application.Interfaces;
 using Pondrop.Service.Submission.Application.Queries.Submission.GetSubmissionById;
 using Pondrop.Service.Submission.Domain.Models.Submission;
 using System;
@@ -20,6 +19,7 @@ using System.Security.Claims;
 using Xunit;
 using Pondrop.Service.Submission.Api.Models;
 using Microsoft.Extensions.Options;
+using Pondrop.Service.Interfaces;
 
 namespace Pondrop.Service.Submission.Api.Tests
 {

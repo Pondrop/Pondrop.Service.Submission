@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Options;
+﻿using Pondrop.Service.Models;
 
 namespace Pondrop.Service.Submission.Application.Models;
 

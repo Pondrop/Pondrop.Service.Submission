@@ -1,9 +1,5 @@
-﻿using Pondrop.Service.Submission.Domain.Enums.Campaign;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Pondrop.Service.Events;
+using Pondrop.Service.Submission.Domain.Enums.Campaign;
 
 namespace Pondrop.Service.Submission.Domain.Events.Campaign;
 

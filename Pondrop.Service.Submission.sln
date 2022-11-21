@@ -14,8 +14,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{562E9EBD
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pondrop.Service.Submission.Application.Tests", "tests\Pondrop.Service.Store.Application.Tests\Pondrop.Service.Submission.Application.Tests.csproj", "{0B60A47D-BD9B-4D1B-939A-E6C73325BC09}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pondrop.Service.Submission.Infrastructure.Tests", "tests\Pondrop.Service.Store.Infrastructure.Tests\Pondrop.Service.Submission.Infrastructure.Tests.csproj", "{EE3EA980-5C7B-4035-BB42-ED1C4BAEFDA8}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pondrop.Service.Submission.Domain.Tests", "tests\Pondrop.Service.Store.Domain.Tests\Pondrop.Service.Submission.Domain.Tests.csproj", "{2527BE8F-3221-43E8-B954-87AF06EC3EB0}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pondrop.Service.Submission.Api", "src\Pondrop.Service.Submission.Api\Pondrop.Service.Submission.Api.csproj", "{EDF0C659-A0A4-4AB9-9ED5-F012C7245FD0}"
@@ -23,8 +21,6 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pondrop.Service.Submission.Application", "src\Pondrop.Service.Submission.Application\Pondrop.Service.Submission.Application.csproj", "{CC14E778-3916-42EC-90E0-D3079B80DB3A}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pondrop.Service.Submission.Domain", "src\Pondrop.Service.Submission.Domain\Pondrop.Service.Submission.Domain.csproj", "{CF8CD0C0-FF62-405B-801D-F5E31E9E05DA}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pondrop.Service.Submission.Infrastructure", "src\Pondrop.Service.Submission.Infrastructure\Pondrop.Service.Submission.Infrastructure.csproj", "{3385123A-6736-4398-B1EB-257B8E8E563A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -40,10 +36,6 @@ Global
 		{0B60A47D-BD9B-4D1B-939A-E6C73325BC09}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0B60A47D-BD9B-4D1B-939A-E6C73325BC09}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0B60A47D-BD9B-4D1B-939A-E6C73325BC09}.Release|Any CPU.Build.0 = Release|Any CPU
-		{EE3EA980-5C7B-4035-BB42-ED1C4BAEFDA8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{EE3EA980-5C7B-4035-BB42-ED1C4BAEFDA8}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{EE3EA980-5C7B-4035-BB42-ED1C4BAEFDA8}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{EE3EA980-5C7B-4035-BB42-ED1C4BAEFDA8}.Release|Any CPU.Build.0 = Release|Any CPU
 		{2527BE8F-3221-43E8-B954-87AF06EC3EB0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{2527BE8F-3221-43E8-B954-87AF06EC3EB0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2527BE8F-3221-43E8-B954-87AF06EC3EB0}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -60,10 +52,6 @@ Global
 		{CF8CD0C0-FF62-405B-801D-F5E31E9E05DA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CF8CD0C0-FF62-405B-801D-F5E31E9E05DA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CF8CD0C0-FF62-405B-801D-F5E31E9E05DA}.Release|Any CPU.Build.0 = Release|Any CPU
-		{3385123A-6736-4398-B1EB-257B8E8E563A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{3385123A-6736-4398-B1EB-257B8E8E563A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{3385123A-6736-4398-B1EB-257B8E8E563A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{3385123A-6736-4398-B1EB-257B8E8E563A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -71,7 +59,6 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{AC2FE504-A159-4285-B439-C182E999DF2A} = {562E9EBD-E544-4620-A7DA-478856114F15}
 		{0B60A47D-BD9B-4D1B-939A-E6C73325BC09} = {562E9EBD-E544-4620-A7DA-478856114F15}
-		{EE3EA980-5C7B-4035-BB42-ED1C4BAEFDA8} = {562E9EBD-E544-4620-A7DA-478856114F15}
 		{2527BE8F-3221-43E8-B954-87AF06EC3EB0} = {562E9EBD-E544-4620-A7DA-478856114F15}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution

@@ -8,16 +8,22 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
+using Pondrop.Service.Events;
+using Pondrop.Service.Infrastructure.CosmosDb;
+using Pondrop.Service.Infrastructure.Dapr;
+using Pondrop.Service.Infrastructure.ServiceBus;
+using Pondrop.Service.Interfaces;
+using Pondrop.Service.Interfaces.Services;
+using Pondrop.Service.Models;
+using Pondrop.Service.Product.Application.Models;
 using Pondrop.Service.Store.Domain.Models;
 using Pondrop.Service.Submission.Api.Configurations.Extensions;
 using Pondrop.Service.Submission.Api.Middleware;
 using Pondrop.Service.Submission.Api.Models;
 using Pondrop.Service.Submission.Api.Services;
 using Pondrop.Service.Submission.Api.Services.Interfaces;
-using Pondrop.Service.Submission.Application.Interfaces;
-using Pondrop.Service.Submission.Application.Interfaces.BlobStorage;
-using Pondrop.Service.Submission.Application.Interfaces.Services;
 using Pondrop.Service.Submission.Application.Models;
+using Pondrop.Service.Submission.Domain.Events.Submission;
 using Pondrop.Service.Submission.Domain.Models;
 using Pondrop.Service.Submission.Domain.Models.Campaign;
 using Pondrop.Service.Submission.Domain.Models.Product;
@@ -25,9 +31,6 @@ using Pondrop.Service.Submission.Domain.Models.StoreVisit;
 using Pondrop.Service.Submission.Domain.Models.Submission;
 using Pondrop.Service.Submission.Domain.Models.SubmissionTemplate;
 using Pondrop.Service.Submission.Infrastructure.BlobStorage;
-using Pondrop.Service.Submission.Infrastructure.CosmosDb;
-using Pondrop.Service.Submission.Infrastructure.Dapr;
-using Pondrop.Service.Submission.Infrastructure.ServiceBus;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -137,7 +140,8 @@ services.AddSwaggerGen(c =>
 services.AddAutoMapper(
     typeof(Result<>),
     typeof(EventEntity),
-    typeof(EventRepository));
+    typeof(EventRepository),
+    typeof(CreateSubmission));
 services.AddMediatR(
     typeof(Result<>));
 services.AddFluentValidation(config =>
@@ -209,6 +213,8 @@ services.AddSingleton<ICheckpointRepository<CategoryEntity>, CheckpointRepositor
 services.AddSingleton<IDaprService, DaprService>();
 services.AddSingleton<IServiceBusService, ServiceBusService>();
 services.AddSingleton<ITokenProvider, JWTTokenProvider>();
+
+DefaultEventTypePayloadResolver.Init(typeof(CreateSubmission).Assembly);
 
 var app = builder.Build();
 var provider = app.Services.GetRequiredService<IApiVersionDescriptionProvider>();

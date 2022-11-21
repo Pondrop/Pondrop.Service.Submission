@@ -3,13 +3,11 @@ using Microsoft.AspNetCore.Mvc;
 using Pondrop.Service.Submission.Api.Services;
 using Pondrop.Service.Submission.Application.Commands;
 using Pondrop.Service.Submission.Application.Commands.Submission.CreateSubmission;
-using Pondrop.Service.Submission.Application.Interfaces;
 using Pondrop.Service.Submission.Application.Queries.Submission.GetAllSubmissions;
 using Pondrop.Service.Submission.Application.Queries.Submission.GetSubmissionById;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Net.Http.Headers;
 using Pondrop.Service.Submission.Api.Services.Interfaces;
-using System.Security.Claims;
 using Pondrop.Service.Submission.Application.Queries.Submission.GetAllSubmissionsWithStore;
 using Pondrop.Service.Submission.Api.Models;
 using Microsoft.Extensions.Options;
@@ -17,6 +15,7 @@ using AspNetCore.Proxy.Options;
 using AspNetCore.Proxy;
 using Azure.Search.Documents.Indexes;
 using Azure;
+using Pondrop.Service.Interfaces;
 
 namespace Pondrop.Service.Submission.Api.Controllers;
 

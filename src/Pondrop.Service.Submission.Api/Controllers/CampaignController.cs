@@ -2,7 +2,6 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Pondrop.Service.Submission.Api.Services;
 using Pondrop.Service.Submission.Application.Commands;
-using Pondrop.Service.Submission.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Pondrop.Service.Submission.Api.Services.Interfaces;
 using Pondrop.Service.Submission.Application.Queries.Campaign.GetAllCampaigns;
@@ -15,6 +14,7 @@ using AspNetCore.Proxy.Options;
 using Azure.Search.Documents.Indexes;
 using Azure;
 using AspNetCore.Proxy;
+using Pondrop.Service.Interfaces;
 
 namespace Pondrop.Service.Submission.Api.Controllers;
 

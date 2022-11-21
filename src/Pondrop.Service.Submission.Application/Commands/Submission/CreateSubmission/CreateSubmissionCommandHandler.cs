@@ -1,15 +1,11 @@
 ﻿using AutoMapper;
 using FluentValidation;
-using Google.Protobuf.WellKnownTypes;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
-using Pondrop.Service.Submission.Application.Interfaces;
-using Pondrop.Service.Submission.Application.Interfaces.BlobStorage;
-using Pondrop.Service.Submission.Application.Interfaces.Services;
+using Pondrop.Service.Interfaces;
+using Pondrop.Service.Interfaces.Services;
 using Pondrop.Service.Submission.Application.Models;
-using Pondrop.Service.Submission.Domain.Events.Submission;
-using Pondrop.Service.Submission.Domain.Models;
 using Pondrop.Service.Submission.Domain.Models.Submission;
 
 namespace Pondrop.Service.Submission.Application.Commands.Submission.CreateSubmission;

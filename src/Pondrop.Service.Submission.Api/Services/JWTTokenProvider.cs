@@ -1,6 +1,5 @@
 ﻿using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.Rest;
 using Pondrop.Service.Submission.Api.Models;
 using Pondrop.Service.Submission.Api.Services.Interfaces;
 using System.IdentityModel.Tokens.Jwt;

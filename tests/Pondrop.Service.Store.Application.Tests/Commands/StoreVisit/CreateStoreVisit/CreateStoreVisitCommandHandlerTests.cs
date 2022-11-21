@@ -4,25 +4,17 @@ using FluentValidation.Results;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Moq;
+using Pondrop.Service.Events;
+using Pondrop.Service.Interfaces;
+using Pondrop.Service.Interfaces.Services;
 using Pondrop.Service.StoreVisit.Application.Commands.StoreVisit.CreateStoreVisit;
 using Pondrop.Service.Submission.Api.Tests.Faker;
-using Pondrop.Service.Submission.Application.Commands;
 using Pondrop.Service.Submission.Application.Commands.Submission.CreateStoreVisit;
-using Pondrop.Service.Submission.Application.Commands.Submission.CreateSubmission;
-using Pondrop.Service.Submission.Application.Commands.Submission.CreateSubmission;
-using Pondrop.Service.Submission.Application.Interfaces;
-using Pondrop.Service.Submission.Application.Interfaces.BlobStorage;
-using Pondrop.Service.Submission.Application.Interfaces.Services;
 using Pondrop.Service.Submission.Application.Models;
-using Pondrop.Service.Submission.Domain.Events;
-using Pondrop.Service.Submission.Domain.Models;
 using Pondrop.Service.Submission.Domain.Models.StoreVisit;
 using Pondrop.Service.Submission.Domain.Models.Submission;
-using Pondrop.Service.Submission.Domain.Models.Submission;
-using Pondrop.Service.Submission.Tests.Faker;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
@@ -61,7 +53,7 @@ public class CreateStoreVisitCommandHandlerTests
             .Setup(x => x.UploadImageAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
             .ReturnsAsync("test/user");
     }
-    
+
     //[Fact]
     //public async void CreateStoreVisitCommand_ShouldSucceed()
     //{
@@ -78,10 +70,10 @@ public class CreateStoreVisitCommandHandlerTests
     //        .Setup(x => x.Map<StoreVisitRecord>(It.IsAny<SubmissionEntity>()))
     //        .Returns(item);
     //    var handler = GetCommandHandler();
-        
+
     //    // act
     //    var result = await handler.Handle(cmd, CancellationToken.None);
-        
+
     //    // assert
     //    Assert.True(result.IsSuccess);
     //    Assert.Equal(item, result.Value);
@@ -95,7 +87,7 @@ public class CreateStoreVisitCommandHandlerTests
     //        x => x.Map<StoreVisitRecord>(It.IsAny<SubmissionEntity>()),
     //        Times.Once);
     //}
-    
+
     [Fact]
     public async void CreateStoreVisitCommand_WhenInvalid_ShouldFail()
     {
@@ -104,12 +96,12 @@ public class CreateStoreVisitCommandHandlerTests
         var item = StoreVisitFaker.GetStoreVisitRecord(cmd);
         _validatorMock
             .Setup(x => x.Validate(cmd))
-            .Returns(new ValidationResult(new [] { new ValidationFailure() }));
+            .Returns(new ValidationResult(new[] { new ValidationFailure() }));
         var handler = GetCommandHandler();
-        
+
         // act
         var result = await handler.Handle(cmd, CancellationToken.None);
-        
+
         // assert
         Assert.False(result.IsSuccess);
         _validatorMock.Verify(
@@ -139,10 +131,10 @@ public class CreateStoreVisitCommandHandlerTests
             .Setup(x => x.Map<StoreVisitRecord>(It.IsAny<SubmissionEntity>()))
             .Returns(item);
         var handler = GetCommandHandler();
-        
+
         // act
         var result = await handler.Handle(cmd, CancellationToken.None);
-        
+
         // assert
         Assert.False(result.IsSuccess);
         _validatorMock.Verify(
@@ -155,7 +147,7 @@ public class CreateStoreVisitCommandHandlerTests
             x => x.Map<StoreVisitRecord>(It.IsAny<SubmissionEntity>()),
             Times.Never);
     }
-    
+
     [Fact]
     public async void CreateStoreVisitCommand_WhenException_ShouldFail()
     {
@@ -172,10 +164,10 @@ public class CreateStoreVisitCommandHandlerTests
             .Setup(x => x.Map<StoreVisitRecord>(It.IsAny<SubmissionEntity>()))
             .Returns(item);
         var handler = GetCommandHandler();
-        
+
         // act
         var result = await handler.Handle(cmd, CancellationToken.None);
-        
+
         // assert
         Assert.False(result.IsSuccess);
         _validatorMock.Verify(
@@ -188,7 +180,7 @@ public class CreateStoreVisitCommandHandlerTests
             x => x.Map<StoreVisitRecord>(It.IsAny<SubmissionEntity>()),
             Times.Never);
     }
-    
+
     [Fact]
     public async void CreateStoreVisitCommand_WhenRetailerNotFound_ShouldFail()
     {
@@ -205,10 +197,10 @@ public class CreateStoreVisitCommandHandlerTests
             .Setup(x => x.Map<StoreVisitRecord>(It.IsAny<SubmissionEntity>()))
             .Returns(item);
         var handler = GetCommandHandler();
-        
+
         // act
         var result = await handler.Handle(cmd, CancellationToken.None);
-        
+
         // assert
         Assert.False(result.IsSuccess);
         _validatorMock.Verify(
@@ -221,7 +213,7 @@ public class CreateStoreVisitCommandHandlerTests
             x => x.Map<StoreVisitRecord>(It.IsAny<SubmissionEntity>()),
             Times.Never());
     }
-    
+
     [Fact]
     public async void CreateStoreVisitCommand_WhenSubmissionTypeNotFound_ShouldFail()
     {
@@ -238,10 +230,10 @@ public class CreateStoreVisitCommandHandlerTests
             .Setup(x => x.Map<StoreVisitRecord>(It.IsAny<SubmissionEntity>()))
             .Returns(item);
         var handler = GetCommandHandler();
-        
+
         // act
         var result = await handler.Handle(cmd, CancellationToken.None);
-        
+
         // assert
         Assert.False(result.IsSuccess);
         _validatorMock.Verify(
@@ -254,7 +246,7 @@ public class CreateStoreVisitCommandHandlerTests
             x => x.Map<StoreVisitRecord>(It.IsAny<SubmissionEntity>()),
             Times.Never());
     }
-    
+
     private CreateStoreVisitCommandHandler GetCommandHandler() =>
         new CreateStoreVisitCommandHandler(
             _SubmissionUpdateConfigMock.Object,

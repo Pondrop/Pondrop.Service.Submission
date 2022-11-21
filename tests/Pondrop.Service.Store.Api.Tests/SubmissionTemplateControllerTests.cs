@@ -4,21 +4,16 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Pondrop.Service.Submission.Application.Models;
-using Pondrop.Service.Submission.Domain.Models;
 using Moq;
 using Pondrop.Service.Submission.Api.Controllers;
 using Pondrop.Service.Submission.Api.Services;
 using Pondrop.Service.Submission.Api.Services.Interfaces;
-using Pondrop.Service.Submission.Api.Tests.Faker;
 using Pondrop.Service.Submission.Application.Commands;
 using Pondrop.Service.Submission.Application.Commands.SubmissionTemplate.AddStepToSubmission;
 using Pondrop.Service.Submission.Application.Commands.SubmissionTemplate.CreateSubmissionTemplate;
 using Pondrop.Service.Submission.Application.Commands.SubmissionTemplate.RemoveStepFromSubmission;
-using Pondrop.Service.Submission.Application.Interfaces;
-using Pondrop.Service.Submission.Application.Queries;
 using Pondrop.Service.Submission.Application.Queries.SubmissionTemplate.GetAllSubmissionTemplates;
 using Pondrop.Service.Submission.Application.Queries.SubmissionTemplate.GetSubmissionTemplateById;
-using Pondrop.Service.Submission.Domain.Events.SubmissionTemplate;
 using Pondrop.Service.Submission.Domain.Models.SubmissionTemplate;
 using System;
 using System.Collections.Generic;
@@ -26,6 +21,7 @@ using System.Linq;
 using System.Security.Claims;
 using Xunit;
 using Pondrop.Service.Submission.Tests.Faker;
+using Pondrop.Service.Interfaces;
 
 namespace Pondrop.Service.Submission.Api.Tests
 {

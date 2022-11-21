@@ -1,4 +1,6 @@
 ﻿using Newtonsoft.Json;
+using Pondrop.Service.Events;
+using Pondrop.Service.Models;
 using Pondrop.Service.Submission.Domain.Enums.Campaign;
 using Pondrop.Service.Submission.Domain.Events;
 using Pondrop.Service.Submission.Domain.Events.Campaign;

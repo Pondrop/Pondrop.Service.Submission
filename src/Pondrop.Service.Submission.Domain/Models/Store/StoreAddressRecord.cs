@@ -1,4 +1,5 @@
 ﻿using Microsoft.Azure.Cosmos.Spatial;
+using Pondrop.Service.Models;
 using Pondrop.Service.Submission.Domain.Models;
 
 namespace Pondrop.Service.Store.Domain.Models;
@@ -18,8 +19,9 @@ public record StoreAddressRecord(
         string CreatedBy,
         string UpdatedBy,
         DateTime CreatedUtc,
-        DateTime UpdatedUtc)
-    : AuditRecord(CreatedBy, UpdatedBy, CreatedUtc, UpdatedUtc)
+        DateTime UpdatedUtc,
+        DateTime? DeletedUtc)
+    : AuditRecord(CreatedBy, UpdatedBy, CreatedUtc, UpdatedUtc, DeletedUtc)
 {
     public StoreAddressRecord() : this(
         Guid.Empty,
@@ -36,7 +38,8 @@ public record StoreAddressRecord(
         string.Empty,
         string.Empty,
         DateTime.MinValue,
-        DateTime.MinValue)
+        DateTime.MinValue,
+        null)
     {
     }
 }

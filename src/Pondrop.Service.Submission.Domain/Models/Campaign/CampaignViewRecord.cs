@@ -1,6 +1,4 @@
-﻿using Pondrop.Service.Submission.Domain.Enums.Campaign;
-
-namespace Pondrop.Service.Submission.Domain.Models.Campaign;
+﻿namespace Pondrop.Service.Submission.Domain.Models.Campaign;
 public record CampaignViewRecord(
         Guid Id,
         string Name,

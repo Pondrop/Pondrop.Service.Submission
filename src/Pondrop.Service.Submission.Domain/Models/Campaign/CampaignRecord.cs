@@ -1,4 +1,5 @@
-﻿using Pondrop.Service.Submission.Domain.Enums.Campaign;
+﻿using Pondrop.Service.Models;
+using Pondrop.Service.Submission.Domain.Enums.Campaign;
 
 namespace Pondrop.Service.Submission.Domain.Models.Campaign;
 public record CampaignRecord(
@@ -19,8 +20,9 @@ public record CampaignRecord(
         string CreatedBy,
         string UpdatedBy,
         DateTime CreatedUtc,
-        DateTime UpdatedUtc)
-    : AuditRecord(CreatedBy, UpdatedBy, CreatedUtc, UpdatedUtc)
+        DateTime UpdatedUtc,
+        DateTime? DeletedUtc)
+    : AuditRecord(CreatedBy, UpdatedBy, CreatedUtc, UpdatedUtc, DeletedUtc)
 {
     public CampaignRecord() : this(
         Guid.Empty,
@@ -40,7 +42,8 @@ public record CampaignRecord(
         string.Empty,
         string.Empty,
         DateTime.MinValue,
-        DateTime.MinValue)
+        DateTime.MinValue,
+        null)
     {
     }
 }

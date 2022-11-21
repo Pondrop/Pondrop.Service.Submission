@@ -1,4 +1,5 @@
-﻿using Pondrop.Service.Store.Domain.Models;
+﻿using Pondrop.Service.Models;
+using Pondrop.Service.Store.Domain.Models;
 using Pondrop.Service.Submission.Domain.Enums.StoreVisit;
 
 namespace Pondrop.Service.Submission.Domain.Models.StoreVisit;
@@ -13,8 +14,9 @@ public record StoreVisitViewRecord(
         string CreatedBy,
         string UpdatedBy,
         DateTime CreatedUtc,
-        DateTime UpdatedUtc)
-    : AuditRecord(CreatedBy, UpdatedBy, CreatedUtc, UpdatedUtc)
+        DateTime UpdatedUtc,
+        DateTime? DeletedUtc)
+    : AuditRecord(CreatedBy, UpdatedBy, CreatedUtc, UpdatedUtc, DeletedUtc)
 {
     public StoreVisitViewRecord() : this(
         Guid.Empty,
@@ -27,7 +29,8 @@ public record StoreVisitViewRecord(
         string.Empty,
         string.Empty,
         DateTime.MinValue,
-        DateTime.MinValue)
+        DateTime.MinValue,
+        null)
     {
     }
 }

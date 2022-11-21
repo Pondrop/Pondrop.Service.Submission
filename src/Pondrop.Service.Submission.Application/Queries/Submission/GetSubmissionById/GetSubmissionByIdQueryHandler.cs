@@ -2,19 +2,16 @@
 using FluentValidation;
 using MediatR;
 using Microsoft.Extensions.Logging;
+using Pondrop.Service.Interfaces;
+using Pondrop.Service.Interfaces.Services;
 using Pondrop.Service.Store.Domain.Models;
-using Pondrop.Service.Submission.Application.Interfaces;
-using Pondrop.Service.Submission.Application.Interfaces.Services;
 using Pondrop.Service.Submission.Application.Models;
-using Pondrop.Service.Submission.Application.Queries.Submission.GetAllSubmissions;
 using Pondrop.Service.Submission.Application.Queries.Submission.GetSubmissionById;
 using Pondrop.Service.Submission.Domain.Enums.SubmissionTemplate;
-using Pondrop.Service.Submission.Domain.Enums.User;
 using Pondrop.Service.Submission.Domain.Models;
 using Pondrop.Service.Submission.Domain.Models.StoreVisit;
 using Pondrop.Service.Submission.Domain.Models.Submission;
 using Pondrop.Service.Submission.Domain.Models.SubmissionTemplate;
-using System.Runtime.CompilerServices;
 
 namespace Pondrop.Service.Submission.Application.Queries;
 
@@ -125,7 +122,7 @@ public class GetSubmissionByIdQueryHandler : IRequestHandler<GetSubmissionByIdQu
                         submissionEntity.SubmissionTemplateId, storeVisit.StoreId, submissionTemplate.Title, submissionEntity.CreatedUtc, store.Name,
                         store.Retailer.Name, submissionEntity.Latitude, submissionEntity.Longitude, steps,
                         submissionEntity.CreatedBy, submissionEntity.UpdatedBy, submissionEntity.CreatedUtc,
-                        submissionEntity.UpdatedUtc);
+                        submissionEntity.UpdatedUtc, submissionEntity.DeletedUtc);;
 
 
                     result = submissionView is not null

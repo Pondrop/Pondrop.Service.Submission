@@ -2,14 +2,11 @@
 using FluentValidation;
 using MediatR;
 using Microsoft.Extensions.Logging;
-using Pondrop.Service.Store.Domain.Models;
-using Pondrop.Service.Submission.Application.Interfaces;
-using Pondrop.Service.Submission.Application.Interfaces.Services;
+using Pondrop.Service.Interfaces;
+using Pondrop.Service.Interfaces.Services;
+using Pondrop.Service.Models.User;
 using Pondrop.Service.Submission.Application.Models;
-using Pondrop.Service.Submission.Domain.Enums.User;
-using Pondrop.Service.Submission.Domain.Models.StoreVisit;
 using Pondrop.Service.Submission.Domain.Models.Submission;
-using System.Net.Http.Headers;
 
 namespace Pondrop.Service.Submission.Application.Queries.Submission.GetAllSubmissions;
 

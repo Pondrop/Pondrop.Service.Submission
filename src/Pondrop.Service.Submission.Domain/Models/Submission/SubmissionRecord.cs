@@ -1,4 +1,6 @@
-﻿namespace Pondrop.Service.Submission.Domain.Models.Submission;
+﻿using Pondrop.Service.Models;
+
+namespace Pondrop.Service.Submission.Domain.Models.Submission;
 public record SubmissionRecord(
         Guid Id,
         Guid StoreVisitId,
@@ -10,8 +12,9 @@ public record SubmissionRecord(
         string CreatedBy,
         string UpdatedBy,
         DateTime CreatedUtc,
-        DateTime UpdatedUtc)
-    : AuditRecord(CreatedBy, UpdatedBy, CreatedUtc, UpdatedUtc)
+        DateTime UpdatedUtc,
+        DateTime? DeletedUtc)
+    : AuditRecord(CreatedBy, UpdatedBy, CreatedUtc, UpdatedUtc, DeletedUtc)
 {
     public SubmissionRecord() : this(
         Guid.Empty,
@@ -24,7 +27,8 @@ public record SubmissionRecord(
         string.Empty,
         string.Empty,
         DateTime.MinValue,
-        DateTime.MinValue)
+        DateTime.MinValue,
+        null)
     {
     }
 }

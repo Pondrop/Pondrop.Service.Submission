@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
-using Pondrop.Service.Submission.Domain.Events;
+using Pondrop.Service.Events;
+using Pondrop.Service.Models;
 using Pondrop.Service.Submission.Domain.Events.SubmissionTemplate;
 using Pondrop.Service.Submission.Domain.Models.SubmissionTemplate;
 
@@ -107,7 +108,8 @@ public record SubmissionTemplateEntity : EventEntity
             createdBy,
             createdBy,
             createdUtc,
-            createdUtc));
+            createdUtc,
+            null));
 
         UpdatedBy = createdBy;
         UpdatedUtc = createdUtc;

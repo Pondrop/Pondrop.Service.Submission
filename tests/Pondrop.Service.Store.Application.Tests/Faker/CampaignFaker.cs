@@ -72,10 +72,10 @@ public static class CampaignFaker
     {
         var faker = new Faker<CampaignViewRecord>()
            .RuleFor(x => x.Name, f => f.PickRandom(Names))
-            .RuleFor(x => x.CampaignType, f => f.PickRandom(CampaignTypes))
+            //.RuleFor(x => x.CampaignType, f => f.PickRandom(CampaignTypes))
             .RuleFor(x => x.NumberOfStores, f => f.Random.Int())
             .RuleFor(x => x.SelectedTemplateTitle, f => f.PickRandom(TemplateTitles))
-            .RuleFor(x => x.CampaignStatus, f => f.PickRandom(CampaignStatuses))
+            //.RuleFor(x => x.CampaignStatus, f => f.PickRandom(CampaignStatuses))
             .RuleFor(x => x.Completions, f => f.Random.Int())
             .RuleFor(x => x.CampaignPublishedDate, f => DateTime.UtcNow.AddSeconds(-1 * f.Random.Int(5000, 10000)));
 
