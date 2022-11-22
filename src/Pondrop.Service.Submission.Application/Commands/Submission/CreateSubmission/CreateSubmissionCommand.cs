@@ -97,9 +97,8 @@ public record CreateItemValueRecord(
         {
             SubmissionFieldItemType.category => Guid.TryParse(ItemId, out _) &&
                                                 !string.IsNullOrEmpty(ItemName),
-            SubmissionFieldItemType.product => (string.IsNullOrEmpty(ItemId) || Guid.TryParse(ItemId, out _)) &&
-                                               !string.IsNullOrEmpty(ItemName) &&
-                                               !string.IsNullOrEmpty(ItemBarcode),
+            SubmissionFieldItemType.product => (Guid.TryParse(ItemId, out _) || !string.IsNullOrEmpty(ItemBarcode)) &&
+                                               !string.IsNullOrEmpty(ItemName),
             SubmissionFieldItemType.unknown => false,
             _ => throw new NotImplementedException($"Cannot validate item type '{ItemType}'")
         };
