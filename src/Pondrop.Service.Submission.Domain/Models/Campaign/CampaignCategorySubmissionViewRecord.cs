@@ -1,4 +1,6 @@
-﻿namespace Pondrop.Service.Submission.Domain.Models.Campaign;
+﻿using Pondrop.Service.Submission.Domain.Models.Submission;
+
+namespace Pondrop.Service.Submission.Domain.Models.Campaign;
 public record CampaignCategorySubmissionViewRecord(
        Guid SubmissionId,
        Guid CampaignId,
@@ -10,7 +12,7 @@ public record CampaignCategorySubmissionViewRecord(
        string? Aisle,
        string? Section,
        string? Shelf,
-       List<Guid>? Products,
+       List<ItemValueRecord>? Products,
        string? Issue,
        string? Comments)
 {

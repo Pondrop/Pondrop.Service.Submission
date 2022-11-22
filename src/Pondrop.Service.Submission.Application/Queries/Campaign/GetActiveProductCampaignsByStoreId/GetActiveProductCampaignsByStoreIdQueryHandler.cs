@@ -14,6 +14,7 @@ namespace Pondrop.Service.Submission.Application.Queries.Campaign.GetAllCampaign
 public class GetActiveProductCampaignsByStoreIdQueryHandler : IRequestHandler<GetActiveProductCampaignsByStoreIdQuery, Result<List<CampaignProductPerStoreViewRecord>>>
 {
     private readonly ICheckpointRepository<CampaignEntity> _checkpointRepository;
+    private readonly ICheckpointRepository<SubmissionEntity> _submissionChekpointRepository;
     private readonly IContainerRepository<SubmissionWithStoreViewRecord> _submissionWithStoreContainerRepository;
     private readonly IContainerRepository<ProductViewRecord> _productContainerRepository;
     private readonly IMapper _mapper;
@@ -24,6 +25,7 @@ public class GetActiveProductCampaignsByStoreIdQueryHandler : IRequestHandler<Ge
     public GetActiveProductCampaignsByStoreIdQueryHandler(
         ICheckpointRepository<CampaignEntity> checkpointRepository,
         IContainerRepository<SubmissionWithStoreViewRecord> submissionWithStoreContainerRepository,
+        ICheckpointRepository<SubmissionEntity> submissionChekpointRepository,
         IContainerRepository<ProductViewRecord> productContainerRepository,
         IMapper mapper,
         IUserService userService,
@@ -32,6 +34,7 @@ public class GetActiveProductCampaignsByStoreIdQueryHandler : IRequestHandler<Ge
     {
         _checkpointRepository = checkpointRepository;
         _submissionWithStoreContainerRepository = submissionWithStoreContainerRepository;
+        _submissionChekpointRepository = submissionChekpointRepository;
         _productContainerRepository = productContainerRepository;
         _mapper = mapper;
         _validator = validator;
@@ -75,7 +78,7 @@ public class GetActiveProductCampaignsByStoreIdQueryHandler : IRequestHandler<Ge
             {
                 if (campaign != null && campaign.CampaignFocusProductIds != null)
                 {
-                    var submissions = submissionsFromAllCampaigns.Where(s => s.CampaignId == campaign.Id && s.UserId?.ToString() != _userService.CurrentUserId());
+                    var submissions = submissionsFromAllCampaigns.Where(s => s.CampaignId == campaign.Id);
                     var categories = await GetProductsByIds(campaign.CampaignFocusProductIds);
 
                     foreach (var focusProduct in campaign.CampaignFocusProductIds)

@@ -14,6 +14,7 @@ namespace Pondrop.Service.Submission.Application.Queries.Campaign.GetAllCampaign
 public class GetActiveCategoryCampaignsByStoreIdQueryHandler : IRequestHandler<GetActiveCategoryCampaignsByStoreIdQuery, Result<List<CampaignCategoryPerStoreViewRecord>>>
 {
     private readonly ICheckpointRepository<CampaignEntity> _checkpointRepository;
+    private readonly ICheckpointRepository<SubmissionEntity> _submissionChekpointRepository;
     private readonly IContainerRepository<SubmissionWithStoreViewRecord> _submissionWithStoreContainerRepository;
     private readonly ICheckpointRepository<CategoryEntity> _categoryCheckpointRepository;
     private readonly IMapper _mapper;
@@ -24,6 +25,7 @@ public class GetActiveCategoryCampaignsByStoreIdQueryHandler : IRequestHandler<G
     public GetActiveCategoryCampaignsByStoreIdQueryHandler(
         ICheckpointRepository<CampaignEntity> checkpointRepository,
         IContainerRepository<SubmissionWithStoreViewRecord> submissionWithStoreContainerRepository,
+        ICheckpointRepository<SubmissionEntity> submissionChekpointRepository,
         ICheckpointRepository<CategoryEntity> categoryContainerRepository,
         IMapper mapper,
         IUserService userService,
@@ -33,6 +35,7 @@ public class GetActiveCategoryCampaignsByStoreIdQueryHandler : IRequestHandler<G
         _checkpointRepository = checkpointRepository;
         _submissionWithStoreContainerRepository = submissionWithStoreContainerRepository;
         _categoryCheckpointRepository = categoryContainerRepository;
+        _submissionChekpointRepository = submissionChekpointRepository;
         _mapper = mapper;
         _validator = validator;
         _logger = logger;
@@ -71,11 +74,15 @@ public class GetActiveCategoryCampaignsByStoreIdQueryHandler : IRequestHandler<G
             var activeCampaigns = new List<CampaignCategoryPerStoreViewRecord>();
             var submissionsFromAllCampaigns = await GetSubmissionsByCampaignIds(campaigns.Select(s => s.Id).ToList());
 
-             foreach (var campaign in campaigns)
+            foreach (var campaign in campaigns)
             {
                 if (campaign != null && campaign.CampaignFocusCategoryIds != null)
                 {
-                    var submissions = submissionsFromAllCampaigns.Where(s => s.CampaignId == campaign.Id && s.UserId?.ToString() != _userService.CurrentUserId());
+                    var submissions = submissionsFromAllCampaigns.Where(s => s.CampaignId == campaign.Id);
+
+                    if (submissions.Any(s => s.UserId?.ToString() == _userService.CurrentUserId()))
+                        continue;
+
                     var categories = await GetCategoriesByIds(campaign.CampaignFocusCategoryIds);
 
                     foreach (var focusCategory in campaign.CampaignFocusCategoryIds)
@@ -87,8 +94,29 @@ public class GetActiveCategoryCampaignsByStoreIdQueryHandler : IRequestHandler<G
 
                             if (submissions != null)
                             {
+
                                 foreach (var submission in submissions)
                                 {
+                                    var submissionFull = await _submissionChekpointRepository.GetByIdAsync(submission.Id);
+                                    var products = new List<ItemValueRecord>();
+
+                                    if (submissionFull != null)
+                                    {
+                                        Guid productListFieldGuid = Guid.Parse("3995d781-e3c4-4407-a1ac-fe613b5c487d");
+                                        Guid productFieldGuid = Guid.Parse("2ec0bcdf-340e-4876-89f3-799e6f00e7bb");
+
+                                        foreach (var step in submissionFull.Steps)
+                                        {
+                                            foreach (var field in step.Fields.Where(f => f?.TemplateFieldId == productFieldGuid || f?.TemplateFieldId == productListFieldGuid))
+                                            {
+                                                foreach (var itemValue in field?.Values)
+                                                {
+                                                    products.Add(itemValue?.ItemValue ?? new ItemValueRecord());
+                                                }
+                                            }
+                                        }
+                                    }
+
                                     categorySubmissions.Add(new CampaignCategorySubmissionViewRecord()
                                     {
                                         CampaignId = campaign.Id,
@@ -97,7 +125,8 @@ public class GetActiveCategoryCampaignsByStoreIdQueryHandler : IRequestHandler<G
                                         UserId = submission.UserId,
                                         SubmissionId = submission.Id,
                                         FocusCategoryId = focusCategory,
-                                        FocusCategoryName = category?.Name ?? string.Empty
+                                        FocusCategoryName = category?.Name ?? string.Empty,
+                                        Products = products
                                     });
                                 }
                             }
