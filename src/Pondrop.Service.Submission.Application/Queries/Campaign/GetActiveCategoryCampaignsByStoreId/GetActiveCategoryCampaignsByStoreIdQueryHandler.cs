@@ -159,8 +159,9 @@ public class GetActiveCategoryCampaignsByStoreIdQueryHandler : IRequestHandler<G
                     }
             }
 
-            return Result<List<CampaignCategoryPerStoreViewRecord>>.Success(activeCampaigns);
+            var response = request?.StoreIds != null && request?.StoreIds.Count() > 0 ? activeCampaigns?.Where(c => request.StoreIds.Any(s => s == c.StoreId.Value)) : activeCampaigns;
 
+            return Result<List<CampaignCategoryPerStoreViewRecord>>.Success(response?.ToList());
         }
         catch (Exception ex)
         {
