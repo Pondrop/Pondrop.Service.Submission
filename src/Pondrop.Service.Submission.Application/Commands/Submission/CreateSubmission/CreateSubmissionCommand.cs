@@ -92,7 +92,7 @@ public record CreateItemValueRecord(
     {
     }
 
-    public bool IsValid() => 
+    public bool IsValid() =>
         ItemType switch
         {
             SubmissionFieldItemType.category => Guid.TryParse(ItemId, out _) &&
