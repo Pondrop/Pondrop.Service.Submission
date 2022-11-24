@@ -20,6 +20,8 @@ using Xunit;
 using Pondrop.Service.Submission.Application.Queries.Campaign.GetAllCampaigns;
 using Pondrop.Service.Submission.Application.Queries.Campaign.GetCampaignById;
 using Pondrop.Service.Interfaces;
+using Microsoft.Extensions.Options;
+using Pondrop.Service.Submission.Api.Models;
 
 namespace Pondrop.Service.Submission.Api.Tests
 {
@@ -29,6 +31,7 @@ namespace Pondrop.Service.Submission.Api.Tests
         private readonly Mock<ITokenProvider> _jwtProviderMock;
         private readonly Mock<IServiceBusService> _serviceBusServiceMock;
         private readonly Mock<IRebuildCheckpointQueueService> _rebuildMaterializeViewQueueServiceMock;
+        private readonly Mock<IOptions<SearchIndexConfiguration>> _searchIdxConfigMock;
         private readonly Mock<ILogger<CampaignController>> _loggerMock;
 
         public CampaignControllerTests()
@@ -37,6 +40,7 @@ namespace Pondrop.Service.Submission.Api.Tests
             _serviceBusServiceMock = new Mock<IServiceBusService>();
             _jwtProviderMock = new Mock<ITokenProvider>();
             _rebuildMaterializeViewQueueServiceMock = new Mock<IRebuildCheckpointQueueService>();
+            _searchIdxConfigMock = new Mock<IOptions<SearchIndexConfiguration>>();
             _loggerMock = new Mock<ILogger<CampaignController>>();
 
             _jwtProviderMock.Setup(s => s.ValidateToken(It.IsAny<string>())).Returns(new ClaimsPrincipal());
@@ -218,6 +222,7 @@ namespace Pondrop.Service.Submission.Api.Tests
                 _jwtProviderMock.Object,
                 _serviceBusServiceMock.Object,
                 _rebuildMaterializeViewQueueServiceMock.Object,
+                _searchIdxConfigMock.Object,
                 _loggerMock.Object
             );
     }

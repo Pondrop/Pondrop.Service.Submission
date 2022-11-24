@@ -160,7 +160,7 @@ public class SubmissionTemplateController : ControllerBase
     [ProducesResponseType(StatusCodes.Status202Accepted)]
     public IActionResult RebuildCheckpoint()
     {
-        _rebuildCheckpointQueueService.Queue(new RebuildSubmissionCheckpointCommand());
+        _rebuildCheckpointQueueService.Queue(new RebuildSubmissionTemplateCheckpointCommand());
         return new AcceptedResult();
     }
 

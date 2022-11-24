@@ -67,6 +67,7 @@ public class CreateSubmissionTemplateCommandHandler : DirtyCommandHandler<Submis
                     SubmissionTemplateEntity.Id,
                     step!.Title,
                     step!.Instructions,
+                    step!.InstructionsStep,
                     step!.InstructionsContinueButton,
                     step!.InstructionsSkipButton,
                     step!.InstructionsIconCodePoint,

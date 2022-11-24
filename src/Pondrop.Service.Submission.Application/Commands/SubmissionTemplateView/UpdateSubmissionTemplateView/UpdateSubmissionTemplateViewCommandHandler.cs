@@ -82,6 +82,7 @@ public class UpdateSubmissionTemplateViewCommandHandler : IRequestHandler<Update
                         submissionTemplateView.Steps.Add(new StepViewRecord(step.Id,
                                                                         step.Title,
                                                                         step.Instructions,
+                                                                        step.InstructionsStep,
                                                                         step.InstructionsContinueButton,
                                                                         step.InstructionsSkipButton,
                                                                         step.InstructionsIconCodePoint,

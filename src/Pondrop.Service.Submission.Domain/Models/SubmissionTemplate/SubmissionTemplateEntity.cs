@@ -99,6 +99,7 @@ public record SubmissionTemplateEntity : EventEntity
             step.Id,
             step.Title,
             step.Instructions,
+            step.InstructionsStep,
             step.InstructionsContinueButton,
             step.InstructionsSkipButton,
             step.InstructionsIconCodePoint,

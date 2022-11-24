@@ -7,6 +7,7 @@ public record AddStepToSubmissionTemplate(
     Guid SubmissionTemplateId,
     string Title,
     string Instructions,
+    List<string> InstructionsStep,
     string InstructionsContinueButton,
     string InstructionsSkipButton,
     int InstructionsIconCodePoint,

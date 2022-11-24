@@ -102,6 +102,7 @@ public class SubmissionTemplateEntityTests
         storeId,
         Guid.NewGuid().ToString(),
         nameof(AddStepToSubmissionTemplate.Instructions),
+        new List<string>(),
         nameof(AddStepToSubmissionTemplate.InstructionsContinueButton),
         nameof(AddStepToSubmissionTemplate.InstructionsSkipButton),
         1213,

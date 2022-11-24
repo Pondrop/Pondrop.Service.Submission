@@ -12,6 +12,8 @@ public class AddStepToSubmissionTemplateCommand : IRequest<Result<SubmissionTemp
 
     public string Instructions { get; init; } = string.Empty;
 
+    public List<string> InstructionsStep { get; init; } = new List<string>();
+
     public string InstructionsContinueButton { get; init; } = string.Empty;
 
     public string InstructionsSkipButton { get; init; } = string.Empty;
