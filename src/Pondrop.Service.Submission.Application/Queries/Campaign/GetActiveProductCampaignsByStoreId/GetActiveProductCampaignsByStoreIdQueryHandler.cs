@@ -76,59 +76,64 @@ public class GetActiveProductCampaignsByStoreIdQueryHandler : IRequestHandler<Ge
 
             foreach (var campaign in campaigns)
             {
-                if (campaign != null && campaign.CampaignFocusProductIds != null)
-                {
-                    var submissions = submissionsFromAllCampaigns.Where(s => s.CampaignId == campaign.Id);
-                    var categories = await GetProductsByIds(campaign.CampaignFocusProductIds);
-
-                    foreach (var focusProduct in campaign.CampaignFocusProductIds)
+                if (campaign.StoreIds != null)
+                    foreach (var storeCampaign in campaign.StoreIds)
                     {
-                        if (submissions == null || campaign.RequiredSubmissions > submissions.Count())
+                        if (campaign != null && campaign.CampaignFocusProductIds != null)
                         {
-                            var product = categories.FirstOrDefault(s => s.Id == focusProduct);
-                            var productSubmissions = new List<CampaignProductSubmissionViewRecord>();
+                            var submissions = submissionsFromAllCampaigns.Where(s => s.CampaignId == campaign.Id);
+                            var categories = await GetProductsByIds(campaign.CampaignFocusProductIds);
 
-                            if (submissions != null)
+                            foreach (var focusProduct in campaign.CampaignFocusProductIds)
                             {
-                                foreach (var submission in submissions)
+                                if (submissions == null || campaign.RequiredSubmissions > submissions.Count())
                                 {
-                                    productSubmissions.Add(new CampaignProductSubmissionViewRecord()
+                                    var product = categories.FirstOrDefault(s => s.Id == focusProduct);
+                                    var productSubmissions = new List<CampaignProductSubmissionViewRecord>();
+
+                                    if (submissions != null)
                                     {
-                                        CampaignId = campaign.Id,
-                                        StoreId = submission.StoreId,
-                                        StoreName = submission.StoreName ?? string.Empty,
-                                        UserId = submission.UserId,
-                                        SubmissionId = submission.Id,
+                                        foreach (var submission in submissions)
+                                        {
+                                            productSubmissions.Add(new CampaignProductSubmissionViewRecord()
+                                            {
+                                                CampaignId = campaign.Id,
+                                                StoreId = submission.StoreId,
+                                                StoreName = submission.StoreName ?? string.Empty,
+                                                UserId = submission.UserId,
+                                                SubmissionId = submission.Id,
+                                                FocusProductId = focusProduct,
+                                                FocusProductName = product?.Name ?? string.Empty
+                                            });
+                                        }
+                                    }
+
+                                    var campaignToBeAdded = new CampaignProductPerStoreViewRecord()
+                                    {
+                                        Id = campaign.Id,
+                                        Name = campaign.Name,
+                                        CampaignStatus = campaign.CampaignStatus,
+                                        StoreId = storeCampaign,
+                                        SubmissionCount = submissions?.Count() ?? 0,
+                                        SubmissionTemplateId = campaign?.SelectedTemplateIds?.FirstOrDefault() ?? null,
+                                        RequiredSubmissions = campaign?.RequiredSubmissions ?? 0,
+                                        CampaignEndDate = campaign?.CampaignEndDate,
+                                        CampaignPublishedDate = campaign?.CampaignPublishedDate,
+                                        CampaignType = campaign?.CampaignType,
                                         FocusProductId = focusProduct,
-                                        FocusProductName = product?.Name ?? string.Empty
-                                    });
+                                        FocusProductName = product?.Name ?? string.Empty,
+                                        CampaignProductSubmissions = productSubmissions
+                                    };
+
+                                    activeCampaigns.Add(campaignToBeAdded);
                                 }
                             }
-
-                            var campaignToBeAdded = new CampaignProductPerStoreViewRecord()
-                            {
-                                Id = campaign.Id,
-                                Name = campaign.Name,
-                                CampaignStatus = campaign.CampaignStatus,
-                                StoreId = campaign?.StoreIds?.FirstOrDefault() ?? null,
-                                SubmissionCount = submissions?.Count() ?? 0,
-                                SubmissionTemplateId = campaign?.SelectedTemplateIds?.FirstOrDefault() ?? null,
-                                RequiredSubmissions = campaign?.RequiredSubmissions ?? 0,
-                                CampaignEndDate = campaign?.CampaignEndDate,
-                                CampaignPublishedDate = campaign?.CampaignPublishedDate,
-                                CampaignType = campaign?.CampaignType,
-                                FocusProductId = focusProduct,
-                                FocusProductName = product?.Name ?? string.Empty,
-                                CampaignProductSubmissions = productSubmissions
-                            };
-
-                            activeCampaigns.Add(campaignToBeAdded);
                         }
                     }
-                }
             }
+            var response = request?.StoreIds != null && request?.StoreIds.Count() > 0 ? activeCampaigns?.Where(c => request.StoreIds.Any(s => s == c.StoreId.Value)) : activeCampaigns;
 
-            return Result<List<CampaignProductPerStoreViewRecord>>.Success(activeCampaigns);
+            return Result<List<CampaignProductPerStoreViewRecord>>.Success(response?.ToList());
 
         }
         catch (Exception ex)
