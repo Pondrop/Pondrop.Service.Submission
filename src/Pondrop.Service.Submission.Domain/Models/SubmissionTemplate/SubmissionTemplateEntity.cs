@@ -105,7 +105,7 @@ public record SubmissionTemplateEntity : EventEntity
             step.InstructionsIconCodePoint,
             step.InstructionsIconFontFamily,
             step.IsSummary,
-            step.FieldIds,
+            step.FieldDefinitions,
             createdBy,
             createdBy,
             createdUtc,

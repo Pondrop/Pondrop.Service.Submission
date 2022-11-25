@@ -73,7 +73,7 @@ public class CreateSubmissionTemplateCommandHandler : DirtyCommandHandler<Submis
                     step!.InstructionsIconCodePoint,
                     step!.InstructionsIconFontFamily,
                     step!.IsSummary,
-                    step!.FieldIds,
+                    step!.FieldDefinitions,
                     _userService.CurrentUserId(),
                     _userService.CurrentUserId()), _userService.CurrentUserId());
             }

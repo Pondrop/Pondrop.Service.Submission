@@ -70,7 +70,7 @@ public class AddStepToSubmissionTemplateCommandHandler : DirtyCommandHandler<Sub
                     command!.InstructionsIconCodePoint,
                     command!.InstructionsIconFontFamily,
                     command!.IsSummary,
-                    command!.FieldIds,
+                    command!.FieldDefinitions,
                     _userService.CurrentUserId(),
                     _userService.CurrentUserId());
 

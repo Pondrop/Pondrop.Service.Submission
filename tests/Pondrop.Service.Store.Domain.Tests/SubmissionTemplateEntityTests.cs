@@ -108,7 +108,7 @@ public class SubmissionTemplateEntityTests
         1213,
         nameof(AddStepToSubmissionTemplate.InstructionsIconFontFamily),
         false,
-        new List<Guid>(),
+        new List<SubmissionTemplateFieldRecord>(),
         nameof(CreatedBy),
         nameof(UpdatedBy)
     );

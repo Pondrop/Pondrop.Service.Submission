@@ -70,12 +70,19 @@ public class UpdateSubmissionTemplateViewCommandHandler : IRequestHandler<Update
                     foreach (var step in submissionTemplate.Steps)
                     {
                         var fields = new List<FieldRecord>();
-                        foreach (var field in step.FieldIds)
+                        foreach (var field in step.FieldDefinitions)
                         {
-                            var retrievedField = await _fieldCheckpointRepository.GetByIdAsync(field);
+                            var retrievedField = await _fieldCheckpointRepository.GetByIdAsync(field.Id);
                             if (retrievedField != null)
                             {
-                                fields.Add(_mapper.Map<FieldRecord>(retrievedField));
+                                var fieldRecord = _mapper.Map<FieldRecord>(retrievedField) with
+                                {
+                                    Label = field.Label ?? retrievedField.Label,
+                                    MaxValue = field.MaxValue ?? retrievedField.MaxValue,
+                                    Mandatory = field.Mandatory ?? retrievedField.Mandatory,
+                                };
+
+                                fields.Add(fieldRecord);
                             }
                         }
 

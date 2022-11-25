@@ -29,7 +29,7 @@ public record StepRecord(
     int InstructionsIconCodePoint,
     string InstructionsIconFontFamily,
     bool IsSummary,
-    List<Guid> FieldIds,
+    List<SubmissionTemplateFieldRecord> FieldDefinitions,
     string CreatedBy)
 {
     public StepRecord() : this(
@@ -42,10 +42,8 @@ public record StepRecord(
         int.MinValue,
         string.Empty,
         false,
-        new List<Guid>(),
+        new List<SubmissionTemplateFieldRecord>(),
         string.Empty)
     {
     }
 }
-
-

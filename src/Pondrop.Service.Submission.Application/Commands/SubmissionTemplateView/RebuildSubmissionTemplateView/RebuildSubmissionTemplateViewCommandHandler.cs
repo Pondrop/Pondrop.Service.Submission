@@ -54,20 +54,50 @@ public class RebuildSubmissionTemplateViewCommandHandler : IRequestHandler<Rebui
                     if (submissionTemplatesTask.Result != null)
                     {
                         var submissionTemplate = i;
-                        var submissionTemplateView = _mapper.Map<SubmissionTemplateViewRecord>(i);
+                        var submissionTemplateView = new SubmissionTemplateViewRecord(i.Id,
+                                                                                      i.Title,
+                                                                                      i.Description,
+                                                                                      i.IconCodePoint,
+                                                                                      i.IconFontFamily,
+                                                                                      new List<StepViewRecord>(),
+                                                                                      i.CreatedBy,
+                                                                                      i.UpdatedBy,
+                                                                                      i.CreatedUtc,
+                                                                                      i.UpdatedUtc); ;
 
                         foreach (var step in submissionTemplate.Steps)
                         {
                             var fields = new List<FieldRecord>();
-                            foreach (var field in step.FieldIds)
+                            foreach (var field in step.FieldDefinitions)
                             {
-                                var retrievedField = await _fieldCheckpointRepository.GetByIdAsync(field);
+                                var retrievedField = await _fieldCheckpointRepository.GetByIdAsync(field.Id);
                                 if (retrievedField != null)
                                 {
-                                    fields.Add(_mapper.Map<FieldRecord>(retrievedField));
+                                    var fieldRecord = _mapper.Map<FieldRecord>(retrievedField) with
+                                    {
+                                        Label = field.Label ?? retrievedField.Label,
+                                        MaxValue = field.MaxValue ?? retrievedField.MaxValue,
+                                        Mandatory = field.Mandatory ?? retrievedField.Mandatory,
+                                    };
+
+                                    fields.Add(fieldRecord);
                                 }
 
-                                submissionTemplateView.Steps.Where(s => s.Id == step.Id).Select(w => { w.Fields.AddRange(fields); return w; });
+                                submissionTemplateView.Steps.Add(new StepViewRecord(step.Id,
+                                                 step.Title,
+                                                 step.Instructions,
+                                                 step.InstructionsStep,
+                                                 step.InstructionsContinueButton,
+                                                 step.InstructionsSkipButton,
+                                                 step.InstructionsIconCodePoint,
+                                                 step.InstructionsIconFontFamily,
+                                                 step.IsSummary,
+                                                 fields,
+                                                 step.CreatedBy,
+                                                 step.UpdatedBy,
+                                                 step.CreatedUtc,
+                                                 step.UpdatedUtc,
+                                                 step.DeletedUtc));
                             }
                         }
 

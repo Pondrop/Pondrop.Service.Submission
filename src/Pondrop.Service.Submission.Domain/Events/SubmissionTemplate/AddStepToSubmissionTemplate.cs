@@ -1,4 +1,5 @@
 using Pondrop.Service.Events;
+using Pondrop.Service.Submission.Domain.Models.SubmissionTemplate;
 
 namespace Pondrop.Service.Submission.Domain.Events.SubmissionTemplate;
 
@@ -13,6 +14,6 @@ public record AddStepToSubmissionTemplate(
     int InstructionsIconCodePoint,
     string InstructionsIconFontFamily,
     bool IsSummary,
-    List<Guid> FieldIds,
+    List<SubmissionTemplateFieldRecord> FieldDefinitions,
     string CreatedBy,
     string UpdatedBy) : EventPayload;

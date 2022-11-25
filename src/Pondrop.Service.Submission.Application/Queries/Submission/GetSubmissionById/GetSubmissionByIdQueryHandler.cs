@@ -105,9 +105,9 @@ public class GetSubmissionByIdQueryHandler : IRequestHandler<GetSubmissionByIdQu
                             foreach (var field in step.Fields)
                             {
                                 var templateFieldId =
-                                    templateStep.FieldIds.FirstOrDefault(s => s == field.TemplateFieldId);
+                                    templateStep.FieldDefinitions.FirstOrDefault(s => s.Id == field.TemplateFieldId)?.Id;
 
-                                var templateField = await _fieldCheckpointRepository.GetByIdAsync(templateFieldId);
+                                var templateField = await _fieldCheckpointRepository.GetByIdAsync(templateFieldId.Value);
                                 if (templateField != null)
                                     fields.Add(new SubmissionFieldWithDetailsViewRecord(field.Id, field.TemplateFieldId,
                                         templateField?.Label ?? string.Empty, templateField?.FieldType ?? SubmissionFieldType.unknown,
