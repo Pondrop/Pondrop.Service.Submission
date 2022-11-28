@@ -82,23 +82,23 @@ public class RebuildSubmissionTemplateViewCommandHandler : IRequestHandler<Rebui
 
                                     fields.Add(fieldRecord);
                                 }
-
-                                submissionTemplateView.Steps.Add(new StepViewRecord(step.Id,
-                                                 step.Title,
-                                                 step.Instructions,
-                                                 step.InstructionsStep,
-                                                 step.InstructionsContinueButton,
-                                                 step.InstructionsSkipButton,
-                                                 step.InstructionsIconCodePoint,
-                                                 step.InstructionsIconFontFamily,
-                                                 step.IsSummary,
-                                                 fields,
-                                                 step.CreatedBy,
-                                                 step.UpdatedBy,
-                                                 step.CreatedUtc,
-                                                 step.UpdatedUtc,
-                                                 step.DeletedUtc));
                             }
+
+                            submissionTemplateView.Steps.Add(new StepViewRecord(step.Id,
+                                             step.Title,
+                                             step.Instructions,
+                                             step.InstructionsStep,
+                                             step.InstructionsContinueButton,
+                                             step.InstructionsSkipButton,
+                                             step.InstructionsIconCodePoint,
+                                             step.InstructionsIconFontFamily,
+                                             step.IsSummary,
+                                             fields,
+                                             step.CreatedBy,
+                                             step.UpdatedBy,
+                                             step.CreatedUtc,
+                                             step.UpdatedUtc,
+                                             step.DeletedUtc));
                         }
 
                         var view = await _containerRepository.UpsertAsync(submissionTemplateView);
