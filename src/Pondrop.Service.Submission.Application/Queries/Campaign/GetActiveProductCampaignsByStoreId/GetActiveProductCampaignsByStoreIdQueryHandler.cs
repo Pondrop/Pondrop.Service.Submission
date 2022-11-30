@@ -79,59 +79,80 @@ public class GetActiveProductCampaignsByStoreIdQueryHandler : IRequestHandler<Ge
                 if (campaign.StoreIds != null)
                     foreach (var storeCampaign in campaign.StoreIds)
                     {
-                        if (campaign != null && campaign.CampaignFocusProductIds != null)
+                        if (campaign != null && campaign.CampaignFocusProductIds != null && campaign.CampaignFocusProductIds.Count() > 0)
                         {
                             var submissions = submissionsFromAllCampaigns.Where(s => s.CampaignId == campaign.Id);
                             var categories = await GetProductsByIds(campaign.CampaignFocusProductIds);
 
                             foreach (var focusProduct in campaign.CampaignFocusProductIds)
                             {
-                                if (submissions == null || campaign.RequiredSubmissions > submissions.Count())
+                                var product = categories.FirstOrDefault(s => s.Id == focusProduct);
+                                var productSubmissions = new List<CampaignProductSubmissionViewRecord>();
+
+                                if (submissions != null)
                                 {
-                                    var product = categories.FirstOrDefault(s => s.Id == focusProduct);
-                                    var productSubmissions = new List<CampaignProductSubmissionViewRecord>();
-
-                                    if (submissions != null)
+                                    foreach (var submission in submissions)
                                     {
-                                        foreach (var submission in submissions)
+                                        var submissionFull = await _submissionChekpointRepository.GetByIdAsync(submission.Id);
+                                        var products = new List<ItemValueRecord>();
+
+                                        if (submissionFull != null)
                                         {
-                                            productSubmissions.Add(new CampaignProductSubmissionViewRecord()
+                                            Guid productListFieldGuid = Guid.Parse("3995d781-e3c4-4407-a1ac-fe613b5c487d");
+                                            Guid productFieldGuid = Guid.Parse("2ec0bcdf-340e-4876-89f3-799e6f00e7bb");
+
+                                            foreach (var step in submissionFull.Steps)
                                             {
-                                                CampaignId = campaign.Id,
-                                                StoreId = submission.StoreId,
-                                                StoreName = submission.StoreName ?? string.Empty,
-                                                UserId = submission.UserId,
-                                                SubmissionId = submission.Id,
-                                                FocusProductId = focusProduct,
-                                                FocusProductName = product?.Name ?? string.Empty
-                                            });
+                                                foreach (var field in step.Fields.Where(f => f?.TemplateFieldId == productFieldGuid || f?.TemplateFieldId == productListFieldGuid))
+                                                {
+                                                    foreach (var itemValue in field?.Values)
+                                                    {
+                                                        products.Add(itemValue?.ItemValue ?? new ItemValueRecord());
+                                                    }
+                                                }
+                                            }
                                         }
+
+                                        if (campaign.RequiredSubmissions <= products.Where(p => p.ItemId == focusProduct.ToString() || p.ItemName == product?.Name).Count())
+                                            continue;
+
+                                        productSubmissions.Add(new CampaignProductSubmissionViewRecord()
+                                        {
+                                            CampaignId = campaign.Id,
+                                            StoreId = submission.StoreId,
+                                            StoreName = submission.StoreName ?? string.Empty,
+                                            UserId = submission.UserId,
+                                            SubmissionId = submission.Id,
+                                            FocusProductId = focusProduct,
+                                            FocusProductName = product?.Name ?? string.Empty
+                                        });
                                     }
-
-                                    var campaignToBeAdded = new CampaignProductPerStoreViewRecord()
-                                    {
-                                        Id = campaign.Id,
-                                        Name = campaign.Name,
-                                        CampaignStatus = campaign.CampaignStatus,
-                                        StoreId = storeCampaign,
-                                        SubmissionCount = submissions?.Count() ?? 0,
-                                        SubmissionTemplateId = campaign?.SelectedTemplateIds?.FirstOrDefault() ?? null,
-                                        RequiredSubmissions = campaign?.RequiredSubmissions ?? 0,
-                                        CampaignEndDate = campaign?.CampaignEndDate,
-                                        CampaignPublishedDate = campaign?.CampaignPublishedDate,
-                                        CampaignType = campaign?.CampaignType,
-                                        FocusProductId = focusProduct,
-                                        FocusProductName = product?.Name ?? string.Empty,
-                                        CampaignProductSubmissions = productSubmissions
-                                    };
-
-                                    activeCampaigns.Add(campaignToBeAdded);
                                 }
+
+                                var campaignToBeAdded = new CampaignProductPerStoreViewRecord()
+                                {
+                                    Id = campaign.Id,
+                                    Name = campaign.Name,
+                                    CampaignStatus = campaign.CampaignStatus,
+                                    StoreId = storeCampaign,
+                                    SubmissionCount = productSubmissions.Count(),
+                                    SubmissionTemplateId = campaign?.SelectedTemplateIds?.FirstOrDefault() ?? null,
+                                    RequiredSubmissions = campaign?.RequiredSubmissions ?? 0,
+                                    CampaignEndDate = campaign?.CampaignEndDate,
+                                    CampaignPublishedDate = campaign?.CampaignPublishedDate,
+                                    CampaignType = campaign?.CampaignType,
+                                    FocusProductId = focusProduct,
+                                    FocusProductName = product?.Name ?? string.Empty,
+                                    CampaignProductSubmissions = productSubmissions
+                                };
+
+                                activeCampaigns.Add(campaignToBeAdded);
                             }
+                            //}
                         }
                     }
             }
-            var response = request?.StoreIds != null && request?.StoreIds.Count() > 0 ? activeCampaigns?.Where(c => request.StoreIds.Any(s => s == c.StoreId.Value)) : activeCampaigns;
+            var response = request?.StoreIds != null && request?.StoreIds.Count() > 0 ? activeCampaigns?.Where(c => c.RequiredSubmissions > c.SubmissionCount && request.StoreIds.Any(s => s == c.StoreId.Value)) : activeCampaigns?.Where(c => c.RequiredSubmissions > c.SubmissionCount);
 
             return Result<List<CampaignProductPerStoreViewRecord>>.Success(response?.ToList());
 
