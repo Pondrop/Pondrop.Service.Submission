@@ -75,10 +75,10 @@ public class SubmissionController : ControllerBase
             Offset = offset,
             Limit = limit
         });
-       return result.Match<IActionResult>(
-           i => new OkObjectResult(new { Items = i, Offset = offset, Limit = limit, count = i!.Count() }
-           ),
-           (ex, msg) => new BadRequestObjectResult(msg));
+        return result.Match<IActionResult>(
+            i => new OkObjectResult(new { Items = i, Offset = offset, Limit = limit, count = i!.Count() }
+            ),
+            (ex, msg) => new BadRequestObjectResult(msg));
     }
 
     [HttpGet]
@@ -92,14 +92,14 @@ public class SubmissionController : ControllerBase
             return new UnauthorizedResult();
 
         var result = await _mediator.Send(new GetAllSubmissionsWithStoreQuery()
-         {
-             Offset = offset,
-             Limit = limit
-         });
-         return result.Match<IActionResult>(
-            i => new OkObjectResult(new { Items = i, Offset = offset, Limit = limit, count = i!.Count() }
-            ),
-             (ex, msg) => new BadRequestObjectResult(msg));
+        {
+            Offset = offset,
+            Limit = limit
+        });
+        return result.Match<IActionResult>(
+           i => new OkObjectResult(new { Items = i, Offset = offset, Limit = limit, count = i!.Count() }
+           ),
+            (ex, msg) => new BadRequestObjectResult(msg));
     }
 
     [HttpGet]
@@ -164,6 +164,18 @@ public class SubmissionController : ControllerBase
         _rebuildCheckpointQueueService.Queue(new RebuildSubmissionCheckpointCommand());
         return new AcceptedResult();
     }
+
+    [AllowAnonymous]
+    [HttpPost]
+    [Route("rebuild/reporting/view")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> RebuildReportingView()
+    {
+        await _mediator.Send(new RebuildFocusedProductSubmissionViewCommand());
+        return new AcceptedResult();
+    }
+
 
     [HttpGet, HttpPost]
     [Route("search")]

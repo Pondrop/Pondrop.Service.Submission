@@ -157,11 +157,15 @@ var productConnectionString = configuration["ProductCosmosConfiguration:Connecti
 var productApplicationName = configuration["ProductCosmosConfiguration:ApplicationName"];
 
 services.Configure<CosmosConfiguration>(configuration.GetSection(CosmosConfiguration.Key));
+services.Configure<CosmosConfiguration>(configuration.GetSection(CosmosConfiguration.Key));
 services.Configure<StoreCosmosConfiguration>(configuration.GetSection(StoreCosmosConfiguration.Key));
 services.Configure<BlobStorageConfiguration>(configuration.GetSection(BlobStorageConfiguration.Key));
 services.Configure<ServiceBusConfiguration>(configuration.GetSection(ServiceBusConfiguration.Key));
 services.Configure<SearchIndexConfiguration>(configuration.GetSection(SearchIndexConfiguration.Key));
 services.Configure<SubmissionUpdateConfiguration>(configuration.GetSection(DaprEventTopicConfiguration.Key).GetSection(SubmissionUpdateConfiguration.Key));
+services.Configure<PriceTemplateConfig>(configuration.GetSection(PriceTemplateConfig.Key));
+services.Configure<QuickPriceAndQuantityTemplateConfig>(configuration.GetSection(QuickPriceAndQuantityTemplateConfig.Key));
+services.Configure<ShelfStockLevelsTemplateConfig>(configuration.GetSection(ShelfStockLevelsTemplateConfig.Key));
 
 services.AddHostedService<ServiceBusHostedService>();
 services.AddSingleton<IServiceBusListenerService, ServiceBusListenerService>();
@@ -183,6 +187,7 @@ services.AddSingleton<IContainerRepository<SubmissionTemplateViewRecord>, Contai
 services.AddSingleton<IContainerRepository<SubmissionWithStoreViewRecord>, ContainerRepository<SubmissionWithStoreViewRecord>>();
 services.AddSingleton<IContainerRepository<SubmissionViewRecord>, ContainerRepository<SubmissionViewRecord>>();
 services.AddSingleton<IContainerRepository<CampaignViewRecord>, ContainerRepository<CampaignViewRecord>>();
+services.AddSingleton<IContainerRepository<FocusedProductSubmissionViewRecord>, ContainerRepository<FocusedProductSubmissionViewRecord>>();
 services.AddSingleton<IContainerRepository<StoreViewRecord>, ContainerRepository<StoreViewRecord>>(provider =>
     new ContainerRepository<StoreViewRecord>(
         Options.Create(new CosmosConfiguration()
