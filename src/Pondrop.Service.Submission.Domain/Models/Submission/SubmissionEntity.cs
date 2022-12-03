@@ -50,13 +50,13 @@ public record SubmissionEntity : EventEntity
     [JsonProperty(PropertyName = "steps")]
     public List<SubmissionStepRecord> Steps { get; private set; }
     
-    public T? GetFirstResultByTemplateFieldId<T>(Guid templateFieldId, SubmissionFieldType fieldType)
+    public T? FirstOrDefaultResultByTemplateFieldId<T>(Guid templateFieldId, SubmissionFieldType fieldType)
     {
-        var results = GetResultsByTemplateFieldId(templateFieldId, fieldType);
+        var results = ResultsByTemplateFieldId(templateFieldId, fieldType);
         return results.OfType<T>().FirstOrDefault();
     }
     
-    public List<object> GetResultsByTemplateFieldId(Guid templateFieldId, SubmissionFieldType fieldType)
+    public List<object> ResultsByTemplateFieldId(Guid templateFieldId, SubmissionFieldType fieldType)
     {
         return
             (from step in Steps

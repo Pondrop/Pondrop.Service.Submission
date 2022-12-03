@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Pondrop.Service.Interfaces;
 using Pondrop.Service.Interfaces.Services;
+using Pondrop.Service.Submission.Application.Extensions;
 using Pondrop.Service.Submission.Application.Models;
 using Pondrop.Service.Submission.Domain.Enums.SubmissionTemplate;
 using Pondrop.Service.Submission.Domain.Models;
@@ -70,12 +71,8 @@ public class GetActiveCategoryCampaignsByStoreIdQueryHandler : IRequestHandler<G
 
         try
         {
-            var storeIdsString = request.StoreIds?.Any() == true
-                ? string.Join(',', request.StoreIds.Select(s => $"'{s}'"))
-                : string.Empty;
-            var campaignIdsString = request.CampaignIds?.Any() == true
-                ? string.Join(',', request.CampaignIds.Select(s => $"'{s}'"))
-                : string.Empty;
+            var storeIdsString = request.StoreIds.ToIdQueryString();
+            var campaignIdsString = request.CampaignIds.ToIdQueryString();
 
             var utcNow = DateTime.UtcNow;
 
@@ -84,6 +81,8 @@ public class GetActiveCategoryCampaignsByStoreIdQueryHandler : IRequestHandler<G
                 $" WHERE c.campaignStatus = 'live'" +
                 $" AND c.campaignFocusCategoryIds != null" +
                 $" AND ARRAY_LENGTH(c.campaignFocusCategoryIds) > 0" +
+                $" AND c.selectedTemplateIds != null" +
+                $" AND ARRAY_LENGTH(c.selectedTemplateIds) > 0" +
                 $" AND c.campaignPublishedDate <= '{utcNow:O}'" +
                 $" AND c.campaignEndDate > '{utcNow:O}'";
 
@@ -115,8 +114,10 @@ public class GetActiveCategoryCampaignsByStoreIdQueryHandler : IRequestHandler<G
 
             foreach (var campaign in campaigns)
             {
+                // Per store
                 foreach (var storeId in campaign.StoreIds!)
                 {
+                    // Per category
                     foreach (var categoryId in
                              campaign.CampaignFocusCategoryIds!.Where(i => categoriesLookup.ContainsKey(i)))
                     {
@@ -136,7 +137,7 @@ public class GetActiveCategoryCampaignsByStoreIdQueryHandler : IRequestHandler<G
                                 CampaignStatus = campaign.CampaignStatus,
                                 StoreId = storeId,
                                 SubmissionCount = submissions.Count,
-                                SubmissionTemplateId = campaign.SelectedTemplateIds?.FirstOrDefault() ?? Guid.Empty,
+                                SubmissionTemplateId = campaign.SelectedTemplateIds!.First(),
                                 RequiredSubmissions = campaign.RequiredSubmissions,
                                 CampaignEndDate = campaign.CampaignEndDate,
                                 CampaignPublishedDate = campaign.CampaignPublishedDate,
@@ -180,7 +181,7 @@ public class GetActiveCategoryCampaignsByStoreIdQueryHandler : IRequestHandler<G
         {
             if (fullSubmissions.FirstOrDefault(i => i.Id == camSub.Id) is { } fullSub)
             {
-                var focusCategory = fullSub.GetFirstResultByTemplateFieldId<ItemValueRecord>(
+                var focusCategory = fullSub.FirstOrDefaultResultByTemplateFieldId<ItemValueRecord>(
                     _campaignCategorySubmissionFieldConfiguration.CategoryFocusFieldId, SubmissionFieldType.focus);
 
                 if (Guid.TryParse(focusCategory?.ItemId, out var categoryId))
@@ -195,28 +196,28 @@ public class GetActiveCategoryCampaignsByStoreIdQueryHandler : IRequestHandler<G
                         FocusCategoryId = categoryId,
                         FocusCategoryName = focusCategory.ItemName,
                         Aisle =
-                            fullSub.GetFirstResultByTemplateFieldId<string>(
+                            fullSub.FirstOrDefaultResultByTemplateFieldId<string>(
                                 _campaignCategorySubmissionFieldConfiguration.AisleFieldId,
                                 SubmissionFieldType.picker),
                         Section =
-                            fullSub.GetFirstResultByTemplateFieldId<string>(
+                            fullSub.FirstOrDefaultResultByTemplateFieldId<string>(
                                 _campaignCategorySubmissionFieldConfiguration.ShelfSectionFieldId,
                                 SubmissionFieldType.picker),
                         Shelf =
-                            fullSub.GetFirstResultByTemplateFieldId<string>(
+                            fullSub.FirstOrDefaultResultByTemplateFieldId<string>(
                                 _campaignCategorySubmissionFieldConfiguration.ShelfLabelFieldId,
                                 SubmissionFieldType.picker),
                         Products =
-                            fullSub.GetResultsByTemplateFieldId(
+                            fullSub.ResultsByTemplateFieldId(
                                     _campaignCategorySubmissionFieldConfiguration.ProductsFieldId,
                                     SubmissionFieldType.search)
                                 .OfType<ItemValueRecord>().ToList(),
                         Issue =
-                            fullSub.GetFirstResultByTemplateFieldId<string>(
+                            fullSub.FirstOrDefaultResultByTemplateFieldId<string>(
                                 _campaignCategorySubmissionFieldConfiguration.ShelfIssueFieldId,
                                 SubmissionFieldType.picker),
                         Comments = fullSub
-                            .GetFirstResultByTemplateFieldId<string>(
+                            .FirstOrDefaultResultByTemplateFieldId<string>(
                                 _campaignCategorySubmissionFieldConfiguration.CommentsFieldId,
                                 SubmissionFieldType.text),
                     };
@@ -241,13 +242,12 @@ public class GetActiveCategoryCampaignsByStoreIdQueryHandler : IRequestHandler<G
         if (!campaignIds.Any())
             return new List<SubmissionWithStoreViewRecord>(0);
 
-        var campaignIdsString = string.Join(',', campaignIds.Select(s => $"'{s}'"));
-
+        var campaignIdsString = campaignIds.ToIdQueryString();
         var sqlQueryText = $"SELECT * FROM c WHERE c.campaignId IN ({campaignIdsString})";
 
         if (storeIds.Any())
         {
-            var storeIdsString = string.Join(',', storeIds.Select(s => $"'{s}'"));
+            var storeIdsString = storeIds.ToIdQueryString();
             sqlQueryText += $" AND c.storeId IN ({storeIdsString})";
         }
 
@@ -260,7 +260,7 @@ public class GetActiveCategoryCampaignsByStoreIdQueryHandler : IRequestHandler<G
         if (!submissionIds.Any())
             return new List<SubmissionEntity>(0);
 
-        var submissionIdsString = string.Join(',', submissionIds.Select(s => $"'{s}'"));
+        var submissionIdsString = submissionIds.ToIdQueryString();
         var sqlQueryText = $"SELECT * FROM c WHERE c.id IN ({submissionIdsString})";
 
         var result = await _submissionCheckpointRepository.QueryAsync(sqlQueryText);
@@ -272,7 +272,7 @@ public class GetActiveCategoryCampaignsByStoreIdQueryHandler : IRequestHandler<G
         if (!categoryIds.Any())
             return new List<CategoryEntity>(0);
 
-        var categoryIdString = string.Join(',', categoryIds.Select(s => $"'{s}'"));
+        var categoryIdString = categoryIds.ToIdQueryString();
         var sqlQueryText = $"SELECT * FROM c WHERE c.id IN ({categoryIdString})";
 
         var result = await _categoryCheckpointRepository.QueryAsync(sqlQueryText);

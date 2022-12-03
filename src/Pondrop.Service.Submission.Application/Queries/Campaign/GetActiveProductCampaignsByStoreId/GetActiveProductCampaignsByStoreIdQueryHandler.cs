@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Pondrop.Service.Interfaces;
 using Pondrop.Service.Interfaces.Services;
+using Pondrop.Service.Submission.Application.Extensions;
 using Pondrop.Service.Submission.Application.Models;
 using Pondrop.Service.Submission.Domain.Enums.SubmissionTemplate;
 using Pondrop.Service.Submission.Domain.Models.Campaign;
@@ -70,12 +71,8 @@ public class GetActiveProductCampaignsByStoreIdQueryHandler : IRequestHandler<Ge
 
         try
         {
-            var storeIdsString = request.StoreIds?.Any() == true
-                ? string.Join(',', request.StoreIds.Select(s => $"'{s}'"))
-                : string.Empty;
-            var campaignIdsString = request.CampaignIds?.Any() == true
-                ? string.Join(',', request.CampaignIds.Select(s => $"'{s}'"))
-                : string.Empty;
+            var storeIdsString = request.StoreIds.ToIdQueryString();
+            var campaignIdsString = request.CampaignIds.ToIdQueryString();
 
             var utcNow = DateTime.UtcNow;
 
@@ -84,11 +81,14 @@ public class GetActiveProductCampaignsByStoreIdQueryHandler : IRequestHandler<Ge
                 $" WHERE c.campaignStatus = 'live'" +
                 $" AND c.campaignFocusProductIds != null" +
                 $" AND ARRAY_LENGTH(c.campaignFocusProductIds) > 0" +
+                $" AND c.selectedTemplateIds != null" +
+                $" AND ARRAY_LENGTH(c.selectedTemplateIds) > 0" +
                 $" AND c.campaignPublishedDate <= '{utcNow:O}'" +
                 $" AND c.campaignEndDate > '{utcNow:O}'";
 
             if (!string.IsNullOrEmpty(storeIdsString))
-                query += $" AND (c.storeIds = null OR ARRAY_LENGTH(c.storeIds) = 0 OR ARRAY_CONTAINS(c.storeIds, {storeIdsString}))";
+                query +=
+                    $" AND (c.storeIds = null OR ARRAY_LENGTH(c.storeIds) = 0 OR ARRAY_CONTAINS(c.storeIds, {storeIdsString}))";
             if (!string.IsNullOrEmpty(campaignIdsString))
                 query += $" AND c.id in ({campaignIdsString})";
 
@@ -114,8 +114,10 @@ public class GetActiveProductCampaignsByStoreIdQueryHandler : IRequestHandler<Ge
 
             foreach (var campaign in campaigns)
             {
+                // Per store
                 foreach (var storeId in campaign.StoreIds!)
                 {
+                    // Per product
                     foreach (var productId in
                              campaign.CampaignFocusProductIds!.Where(i => productsLookup.ContainsKey(i)))
                     {
@@ -135,7 +137,7 @@ public class GetActiveProductCampaignsByStoreIdQueryHandler : IRequestHandler<Ge
                                 CampaignStatus = campaign.CampaignStatus,
                                 StoreId = storeId,
                                 SubmissionCount = submissions.Count,
-                                SubmissionTemplateId = campaign.SelectedTemplateIds?.FirstOrDefault() ?? Guid.Empty,
+                                SubmissionTemplateId = campaign.SelectedTemplateIds!.First(),
                                 RequiredSubmissions = campaign.RequiredSubmissions,
                                 CampaignEndDate = campaign.CampaignEndDate,
                                 CampaignPublishedDate = campaign.CampaignPublishedDate,
@@ -179,7 +181,7 @@ public class GetActiveProductCampaignsByStoreIdQueryHandler : IRequestHandler<Ge
         {
             if (fullSubmissions.FirstOrDefault(i => i.Id == camSub.Id) is { } fullSub)
             {
-                var focusProduct = fullSub.GetFirstResultByTemplateFieldId<ItemValueRecord>(
+                var focusProduct = fullSub.FirstOrDefaultResultByTemplateFieldId<ItemValueRecord>(
                     _campaignProductSubmissionFieldConfiguration.ProductFocusFieldId, SubmissionFieldType.focus);
 
                 if (Guid.TryParse(focusProduct?.ItemId, out var productId))
@@ -194,35 +196,35 @@ public class GetActiveProductCampaignsByStoreIdQueryHandler : IRequestHandler<Ge
                         FocusProductId = productId,
                         FocusProductName = focusProduct.ItemName,
                         Aisle =
-                            fullSub.GetFirstResultByTemplateFieldId<string>(
+                            fullSub.FirstOrDefaultResultByTemplateFieldId<string>(
                                 _campaignProductSubmissionFieldConfiguration.AisleFieldId,
                                 SubmissionFieldType.picker),
                         Section =
-                            fullSub.GetFirstResultByTemplateFieldId<string>(
+                            fullSub.FirstOrDefaultResultByTemplateFieldId<string>(
                                 _campaignProductSubmissionFieldConfiguration.ShelfSectionFieldId,
                                 SubmissionFieldType.picker),
                         Shelf =
-                            fullSub.GetFirstResultByTemplateFieldId<string>(
+                            fullSub.FirstOrDefaultResultByTemplateFieldId<string>(
                                 _campaignProductSubmissionFieldConfiguration.ShelfLabelFieldId,
                                 SubmissionFieldType.picker),
                         Price =
-                            fullSub.GetFirstResultByTemplateFieldId<double?>(
+                            fullSub.FirstOrDefaultResultByTemplateFieldId<double?>(
                                 _campaignProductSubmissionFieldConfiguration.ProductPriceFieldId,
                                 SubmissionFieldType.currency),
                         Quantity =
-                            fullSub.GetFirstResultByTemplateFieldId<int?>(
+                            fullSub.FirstOrDefaultResultByTemplateFieldId<int?>(
                                 _campaignProductSubmissionFieldConfiguration.QuantityFieldId,
                                 SubmissionFieldType.integer),
                         NearestUseByDate =
-                            fullSub.GetFirstResultByTemplateFieldId<DateTime?>(
+                            fullSub.FirstOrDefaultResultByTemplateFieldId<DateTime?>(
                                 _campaignProductSubmissionFieldConfiguration.NearestUseByDateFieldId,
                                 SubmissionFieldType.date),
                         Issue =
-                            fullSub.GetFirstResultByTemplateFieldId<string>(
+                            fullSub.FirstOrDefaultResultByTemplateFieldId<string>(
                                 _campaignProductSubmissionFieldConfiguration.ShelfIssueFieldId,
                                 SubmissionFieldType.picker),
                         Comments = fullSub
-                            .GetFirstResultByTemplateFieldId<string>(
+                            .FirstOrDefaultResultByTemplateFieldId<string>(
                                 _campaignProductSubmissionFieldConfiguration.CommentsFieldId,
                                 SubmissionFieldType.text),
                     };
@@ -247,13 +249,12 @@ public class GetActiveProductCampaignsByStoreIdQueryHandler : IRequestHandler<Ge
         if (!campaignIds.Any())
             return new List<SubmissionWithStoreViewRecord>(0);
 
-        var campaignIdsString = string.Join(',', campaignIds.Select(s => $"'{s}'"));
-
+        var campaignIdsString = campaignIds.ToIdQueryString();
         var sqlQueryText = $"SELECT * FROM c WHERE c.campaignId IN ({campaignIdsString})";
 
         if (storeIds.Any())
         {
-            var storeIdsString = string.Join(',', storeIds.Select(s => $"'{s}'"));
+            var storeIdsString = storeIds.ToIdQueryString();
             sqlQueryText += $" AND c.storeId IN ({storeIdsString})";
         }
 
@@ -266,7 +267,7 @@ public class GetActiveProductCampaignsByStoreIdQueryHandler : IRequestHandler<Ge
         if (!submissionIds.Any())
             return new List<SubmissionEntity>(0);
 
-        var submissionIdsString = string.Join(',', submissionIds.Select(s => $"'{s}'"));
+        var submissionIdsString = submissionIds.ToIdQueryString();
         var sqlQueryText = $"SELECT * FROM c WHERE c.id IN ({submissionIdsString})";
 
         var result = await _submissionChekpointRepository.QueryAsync(sqlQueryText);
@@ -278,7 +279,7 @@ public class GetActiveProductCampaignsByStoreIdQueryHandler : IRequestHandler<Ge
         if (!productIds.Any())
             return new List<ProductViewRecord>(0);
 
-        var productIdString = string.Join(',', productIds.Select(s => $"'{s}'"));
+        var productIdString = productIds.ToIdQueryString();
         var sqlQueryText = $"SELECT * FROM c WHERE c.id IN ({productIdString})";
 
         var result = await _productContainerRepository.QueryAsync(sqlQueryText);
