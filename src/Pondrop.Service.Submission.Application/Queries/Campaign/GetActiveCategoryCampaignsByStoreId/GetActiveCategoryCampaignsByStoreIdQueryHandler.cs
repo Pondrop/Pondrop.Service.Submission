@@ -2,19 +2,24 @@
 using FluentValidation;
 using MediatR;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Pondrop.Service.Interfaces;
 using Pondrop.Service.Interfaces.Services;
 using Pondrop.Service.Submission.Application.Models;
+using Pondrop.Service.Submission.Domain.Enums.SubmissionTemplate;
 using Pondrop.Service.Submission.Domain.Models;
 using Pondrop.Service.Submission.Domain.Models.Campaign;
 using Pondrop.Service.Submission.Domain.Models.Submission;
 
 namespace Pondrop.Service.Submission.Application.Queries.Campaign.GetAllCampaigns;
 
-public class GetActiveCategoryCampaignsByStoreIdQueryHandler : IRequestHandler<GetActiveCategoryCampaignsByStoreIdQuery, Result<List<CampaignCategoryPerStoreViewRecord>>>
+public class GetActiveCategoryCampaignsByStoreIdQueryHandler : IRequestHandler<GetActiveCategoryCampaignsByStoreIdQuery,
+    Result<List<CampaignCategoryPerStoreViewRecord>>>
 {
+    private CampaignCategorySubmissionFieldConfiguration _campaignCategorySubmissionFieldConfiguration;
+
     private readonly ICheckpointRepository<CampaignEntity> _checkpointRepository;
-    private readonly ICheckpointRepository<SubmissionEntity> _submissionChekpointRepository;
+    private readonly ICheckpointRepository<SubmissionEntity> _submissionCheckpointRepository;
     private readonly IContainerRepository<SubmissionWithStoreViewRecord> _submissionWithStoreContainerRepository;
     private readonly ICheckpointRepository<CategoryEntity> _categoryCheckpointRepository;
     private readonly IMapper _mapper;
@@ -23,26 +28,30 @@ public class GetActiveCategoryCampaignsByStoreIdQueryHandler : IRequestHandler<G
     private readonly IUserService _userService;
 
     public GetActiveCategoryCampaignsByStoreIdQueryHandler(
+        IOptions<CampaignCategorySubmissionFieldConfiguration> campaignCategorySubmissionFieldConfiguration,
         ICheckpointRepository<CampaignEntity> checkpointRepository,
         IContainerRepository<SubmissionWithStoreViewRecord> submissionWithStoreContainerRepository,
-        ICheckpointRepository<SubmissionEntity> submissionChekpointRepository,
-        ICheckpointRepository<CategoryEntity> categoryContainerRepository,
+        ICheckpointRepository<SubmissionEntity> submissionCheckpointRepository,
+        ICheckpointRepository<CategoryEntity> categoryCheckpointRepository,
         IMapper mapper,
         IUserService userService,
         IValidator<GetActiveCategoryCampaignsByStoreIdQuery> validator,
         ILogger<GetActiveCategoryCampaignsByStoreIdQueryHandler> logger)
     {
+        _campaignCategorySubmissionFieldConfiguration = campaignCategorySubmissionFieldConfiguration.Value;
+
         _checkpointRepository = checkpointRepository;
         _submissionWithStoreContainerRepository = submissionWithStoreContainerRepository;
-        _categoryCheckpointRepository = categoryContainerRepository;
-        _submissionChekpointRepository = submissionChekpointRepository;
+        _categoryCheckpointRepository = categoryCheckpointRepository;
+        _submissionCheckpointRepository = submissionCheckpointRepository;
         _mapper = mapper;
         _validator = validator;
         _logger = logger;
         _userService = userService;
     }
 
-    public async Task<Result<List<CampaignCategoryPerStoreViewRecord>>> Handle(GetActiveCategoryCampaignsByStoreIdQuery request, CancellationToken cancellationToken)
+    public async Task<Result<List<CampaignCategoryPerStoreViewRecord>>> Handle(
+        GetActiveCategoryCampaignsByStoreIdQuery request, CancellationToken cancellationToken)
     {
         var validation = _validator.Validate(request);
 
@@ -53,124 +62,97 @@ public class GetActiveCategoryCampaignsByStoreIdQueryHandler : IRequestHandler<G
             return Result<List<CampaignCategoryPerStoreViewRecord>>.Error(errorMessage);
         }
 
-        var result = default(Result<List<CampaignCategoryPerStoreViewRecord>>);
+        if (request.StoreIds is not { Count: > 0 } && request.CampaignIds is not { Count: > 0 })
+            return Result<List<CampaignCategoryPerStoreViewRecord>>.Success(
+                new List<CampaignCategoryPerStoreViewRecord>(0));
 
-        if ((request.StoreIds == null || request.StoreIds.Count <= 0) && (request.CampaignIds == null || request.CampaignIds.Count <= 0))
-            return result;
+        var result = default(Result<List<CampaignCategoryPerStoreViewRecord>>);
 
         try
         {
-            var storeIdsString = request.StoreIds != null ? string.Join(',', request.StoreIds.Select(s => $"'{s}'")) : string.Empty;
-            var categoryIdsString = request.CampaignIds != null ? string.Join(',', request.CampaignIds.Select(s => $"'{s}'")) : string.Empty;
-            var query = $"SELECT * FROM c WHERE c.campaignStatus = 'live' AND c.campaignFocusCategoryIds != null";
+            var storeIdsString = request.StoreIds?.Any() == true
+                ? string.Join(',', request.StoreIds.Select(s => $"'{s}'"))
+                : string.Empty;
+            var campaignIdsString = request.CampaignIds?.Any() == true
+                ? string.Join(',', request.CampaignIds.Select(s => $"'{s}'"))
+                : string.Empty;
+
+            var utcNow = DateTime.UtcNow;
+
+            var query =
+                $"SELECT * FROM c" +
+                $" WHERE c.campaignStatus = 'live'" +
+                $" AND c.campaignFocusCategoryIds != null" +
+                $" AND ARRAY_LENGTH(c.campaignFocusCategoryIds) > 0" +
+                $" AND c.campaignPublishedDate <= '{utcNow:O}'" +
+                $" AND c.campaignEndDate > '{utcNow:O}'";
+
             if (!string.IsNullOrEmpty(storeIdsString))
-                query += $" AND (ARRAY_CONTAINS(c.storeIds, {storeIdsString}) OR c.storeIds = null)";
-            if (!string.IsNullOrEmpty(categoryIdsString))
-                query += $" AND c.id in ({categoryIdsString})";
+                query +=
+                    $" AND (c.storeIds = null OR ARRAY_LENGTH(c.storeIds) = 0 OR ARRAY_CONTAINS(c.storeIds, {storeIdsString}))";
+            if (!string.IsNullOrEmpty(campaignIdsString))
+                query += $" AND c.id in ({campaignIdsString})";
 
             var entities = await _checkpointRepository.QueryAsync(query);
-            var campaigns = _mapper.Map<List<CampaignRecord>>(entities.Where(s => s.CampaignEndDate > DateTime.UtcNow));
+            var campaigns = _mapper.Map<List<CampaignRecord>>(entities);
 
+            // To get category names
+            var categoryIds = campaigns.SelectMany(i => i.CampaignFocusCategoryIds!).Distinct().ToList();
+            var categoriesTask = GetCategoriesByIds(categoryIds);
+
+            var categorySubmissionsTask =
+                GetCampaignCategorySubmissions(
+                    campaigns.Select(s => s.Id).ToList(),
+                    request.StoreIds ?? new List<Guid>(0));
+
+            await Task.WhenAll(categoriesTask, categorySubmissionsTask);
+
+            var categoriesLookup = (await categoriesTask).ToDictionary(i => i.Id, i => i);
+            var categorySubmissionsLookup = await categorySubmissionsTask;
+
+            var currentUserId = Guid.Parse(_userService.CurrentUserId());
             var activeCampaigns = new List<CampaignCategoryPerStoreViewRecord>();
-            var submissionsFromAllCampaigns = await GetSubmissionsByCampaignIds(campaigns.Select(s => s.Id).ToList());
-
 
             foreach (var campaign in campaigns)
             {
-                if (campaign.StoreIds != null)
-                    foreach (var storeCampaign in campaign.StoreIds)
+                foreach (var storeId in campaign.StoreIds!)
+                {
+                    foreach (var categoryId in
+                             campaign.CampaignFocusCategoryIds!.Where(i => categoriesLookup.ContainsKey(i)))
                     {
-                        if (campaign != null && campaign.CampaignFocusCategoryIds != null && campaign.CampaignFocusCategoryIds.Count() > 0)
+                        var key = (campaign.Id, storeId, categoryId);
+                        categorySubmissionsLookup.TryGetValue(key, out var submissions);
+                        submissions ??= new List<CampaignCategorySubmissionViewRecord>(0);
+
+                        // Exclude campaigns with required submissions
+                        // Or if have been completed by current user
+                        if (submissions.Count < campaign.RequiredSubmissions &&
+                            submissions.All(i => i.UserId != currentUserId))
                         {
-                            var submissions = submissionsFromAllCampaigns.Where(s => s.CampaignId == campaign.Id && s.StoreId == storeCampaign);
-
-                            if (submissions.Any(s => s.UserId?.ToString() == _userService.CurrentUserId()))
-                                continue;
-
-                            var categoriesById = await GetCategoriesByIds(campaign.CampaignFocusCategoryIds);
-
-                            foreach (var focusCategory in campaign.CampaignFocusCategoryIds)
+                            var campaignToBeAdded = new CampaignCategoryPerStoreViewRecord()
                             {
-                                var category = categoriesById.FirstOrDefault(s => s.Id == focusCategory);
-                                var categorySubmissions = new List<CampaignCategorySubmissionViewRecord>();
+                                Id = campaign.Id,
+                                Name = campaign.Name,
+                                CampaignStatus = campaign.CampaignStatus,
+                                StoreId = storeId,
+                                SubmissionCount = submissions.Count,
+                                SubmissionTemplateId = campaign.SelectedTemplateIds?.FirstOrDefault() ?? Guid.Empty,
+                                RequiredSubmissions = campaign.RequiredSubmissions,
+                                CampaignEndDate = campaign.CampaignEndDate,
+                                CampaignPublishedDate = campaign.CampaignPublishedDate,
+                                CampaignType = campaign.CampaignType,
+                                FocusCategoryId = categoryId,
+                                FocusCategoryName = categoriesLookup[categoryId].Name,
+                                CampaignCategorySubmissions = submissions
+                            };
 
-                                if (submissions != null)
-                                {
-                                    foreach (var submission in submissions)
-                                    {
-                                        var submissionFull = await _submissionChekpointRepository.GetByIdAsync(submission.Id);
-                                        var products = new List<ItemValueRecord>();
-                                        var categories = new List<ItemValueRecord>();
-
-                                        if (submissionFull != null)
-                                        {
-                                            Guid productListFieldGuid = Guid.Parse("3995d781-e3c4-4407-a1ac-fe613b5c487d");
-                                            Guid productFieldGuid = Guid.Parse("2ec0bcdf-340e-4876-89f3-799e6f00e7bb");
-                                            Guid categoryFieldGuid = Guid.Parse("bc6eafe0-4272-47c9-95a8-2cb0a6d8a535");
-
-                                            foreach (var step in submissionFull.Steps)
-                                            {
-                                                foreach (var field in step.Fields.Where(f => f?.TemplateFieldId == productFieldGuid || f?.TemplateFieldId == productListFieldGuid))
-                                                {
-                                                    foreach (var itemValue in field?.Values)
-                                                    {
-                                                        products.Add(itemValue?.ItemValue ?? new ItemValueRecord());
-                                                    }
-                                                }
-
-                                                foreach (var field in step.Fields.Where(f => f?.TemplateFieldId == categoryFieldGuid))
-                                                {
-                                                    foreach (var itemValue in field?.Values)
-                                                    {
-                                                        categories.Add(itemValue?.ItemValue ?? new ItemValueRecord());
-                                                    }
-                                                }
-                                            }
-                                        }
-
-                                        if (campaign.RequiredSubmissions <= categories.Where(p => p.ItemId == focusCategory.ToString() || p.ItemName == category?.Name).Count())
-                                            continue;
-
-                                        categorySubmissions.Add(new CampaignCategorySubmissionViewRecord()
-                                        {
-                                            CampaignId = campaign.Id,
-                                            StoreId = submission.StoreId,
-                                            StoreName = submission.StoreName ?? string.Empty,
-                                            UserId = submission.UserId,
-                                            SubmissionId = submission.Id,
-                                            FocusCategoryId = focusCategory,
-                                            FocusCategoryName = category?.Name ?? string.Empty,
-                                            Products = products
-                                        });
-                                    }
-                                }
-
-                                var campaignToBeAdded = new CampaignCategoryPerStoreViewRecord()
-                                {
-                                    Id = campaign.Id,
-                                    Name = campaign.Name,
-                                    CampaignStatus = campaign.CampaignStatus,
-                                    StoreId = storeCampaign,
-                                    RequiredSubmissions = campaign?.RequiredSubmissions ?? 0,
-                                    SubmissionTemplateId = campaign?.SelectedTemplateIds?.FirstOrDefault() ?? null,
-                                    SubmissionCount = categorySubmissions.Count(),
-                                    CampaignEndDate = campaign.CampaignEndDate,
-                                    CampaignPublishedDate = campaign.CampaignPublishedDate,
-                                    CampaignType = campaign.CampaignType,
-                                    FocusCategoryId = focusCategory,
-                                    FocusCategoryName = category?.Name ?? string.Empty,
-                                    CampaignCategorySubmissions = categorySubmissions
-                                };
-
-                                activeCampaigns.Add(campaignToBeAdded);
-                            }
+                            activeCampaigns.Add(campaignToBeAdded);
                         }
                     }
+                }
             }
 
-            var response = request?.StoreIds != null && request?.StoreIds.Count() > 0 ? activeCampaigns?.Where(c => c.RequiredSubmissions > c.SubmissionCount && request.StoreIds.Any(s => s == c.StoreId.Value)) : activeCampaigns?.Where(c => c.RequiredSubmissions > c.SubmissionCount);
-
-            return Result<List<CampaignCategoryPerStoreViewRecord>>.Success(response?.ToList());
+            return Result<List<CampaignCategoryPerStoreViewRecord>>.Success(activeCampaigns);
         }
         catch (Exception ex)
         {
@@ -181,47 +163,119 @@ public class GetActiveCategoryCampaignsByStoreIdQueryHandler : IRequestHandler<G
         return result;
     }
 
-
-    private async Task<List<SubmissionWithStoreViewRecord>> GetSubmissionsByCampaignIds(List<Guid>? campaignIds)
+    private async
+        Task<Dictionary<(Guid campaignId, Guid storeId, Guid categoryId), List<CampaignCategorySubmissionViewRecord>>>
+        GetCampaignCategorySubmissions(List<Guid> campaignIds, List<Guid> storeIds)
     {
-        const string campaignIdKey = "@campaignId";
+        // Get related campaign submissions
+        var campaignSubmissions = await GetSubmissionsWithStore(campaignIds, storeIds);
+        var fullSubmissions = await GetSubmissionsWithResults(campaignSubmissions.Select(i => i.Id).ToList());
 
-        var conditions = new List<string>();
-        //var parameters = new Dictionary<string, string>();
+        var submissionLookup =
+            new Dictionary<(Guid campaignId, Guid storeId, Guid categoryId),
+                List<CampaignCategorySubmissionViewRecord>>();
 
-        if (campaignIds != null && campaignIds.Count > 0)
+        // Process campaign submissions
+        foreach (var camSub in campaignSubmissions)
         {
-            var campaignIdsString = string.Join(',', campaignIds.Select(s => $"'{s}'"));
-            conditions.Add($"c.campaignId IN ({campaignIdsString})");
+            if (fullSubmissions.FirstOrDefault(i => i.Id == camSub.Id) is { } fullSub)
+            {
+                var focusCategory = fullSub.GetFirstResultByTemplateFieldId<ItemValueRecord>(
+                    _campaignCategorySubmissionFieldConfiguration.CategoryFocusFieldId, SubmissionFieldType.focus);
+
+                if (Guid.TryParse(focusCategory?.ItemId, out var categoryId))
+                {
+                    var catSub = new CampaignCategorySubmissionViewRecord()
+                    {
+                        CampaignId = camSub.CampaignId!.Value,
+                        StoreId = camSub.StoreId,
+                        StoreName = camSub.StoreName ?? string.Empty,
+                        UserId = camSub.UserId,
+                        SubmissionId = camSub.Id,
+                        FocusCategoryId = categoryId,
+                        FocusCategoryName = focusCategory.ItemName,
+                        Aisle =
+                            fullSub.GetFirstResultByTemplateFieldId<string>(
+                                _campaignCategorySubmissionFieldConfiguration.AisleFieldId,
+                                SubmissionFieldType.picker),
+                        Section =
+                            fullSub.GetFirstResultByTemplateFieldId<string>(
+                                _campaignCategorySubmissionFieldConfiguration.ShelfSectionFieldId,
+                                SubmissionFieldType.picker),
+                        Shelf =
+                            fullSub.GetFirstResultByTemplateFieldId<string>(
+                                _campaignCategorySubmissionFieldConfiguration.ShelfLabelFieldId,
+                                SubmissionFieldType.picker),
+                        Products =
+                            fullSub.GetResultsByTemplateFieldId(
+                                    _campaignCategorySubmissionFieldConfiguration.ProductsFieldId,
+                                    SubmissionFieldType.search)
+                                .OfType<ItemValueRecord>().ToList(),
+                        Issue =
+                            fullSub.GetFirstResultByTemplateFieldId<string>(
+                                _campaignCategorySubmissionFieldConfiguration.ShelfIssueFieldId,
+                                SubmissionFieldType.picker),
+                        Comments = fullSub
+                            .GetFirstResultByTemplateFieldId<string>(
+                                _campaignCategorySubmissionFieldConfiguration.CommentsFieldId,
+                                SubmissionFieldType.text),
+                    };
+
+                    var key = (catSub.CampaignId, catSub.StoreId, catSub.FocusCategoryId);
+                    if (!submissionLookup.ContainsKey(key))
+                    {
+                        submissionLookup[key] = new List<CampaignCategorySubmissionViewRecord>();
+                    }
+
+                    submissionLookup[key].Add(catSub);
+                }
+            }
         }
 
-        if (!conditions.Any())
+        return submissionLookup;
+    }
+
+    private async Task<List<SubmissionWithStoreViewRecord>> GetSubmissionsWithStore(List<Guid> campaignIds,
+        List<Guid> storeIds)
+    {
+        if (!campaignIds.Any())
             return new List<SubmissionWithStoreViewRecord>(0);
 
-        var sqlQueryText = $"SELECT * FROM c WHERE {string.Join(" AND ", conditions)}";
+        var campaignIdsString = string.Join(',', campaignIds.Select(s => $"'{s}'"));
 
-        var affected = await _submissionWithStoreContainerRepository.QueryAsync(sqlQueryText);
-        return affected;
-    }
-    private async Task<List<CategoryEntity>> GetCategoriesByIds(List<Guid>? categoryIds)
-    {
-        const string categoryIdKey = "@categoryId";
+        var sqlQueryText = $"SELECT * FROM c WHERE c.campaignId IN ({campaignIdsString})";
 
-        var conditions = new List<string>();
-        //var parameters = new Dictionary<string, string>();
-
-        if (categoryIds != null && categoryIds.Count > 0)
+        if (storeIds.Any())
         {
-            var categoryIdString = string.Join(',', categoryIds.Select(s => $"'{s}'"));
-            conditions.Add($"c.id IN ({categoryIdString})");
+            var storeIdsString = string.Join(',', storeIds.Select(s => $"'{s}'"));
+            sqlQueryText += $" AND c.storeId IN ({storeIdsString})";
         }
 
-        if (!conditions.Any())
+        var result = await _submissionWithStoreContainerRepository.QueryAsync(sqlQueryText);
+        return result;
+    }
+
+    private async Task<List<SubmissionEntity>> GetSubmissionsWithResults(List<Guid> submissionIds)
+    {
+        if (!submissionIds.Any())
+            return new List<SubmissionEntity>(0);
+
+        var submissionIdsString = string.Join(',', submissionIds.Select(s => $"'{s}'"));
+        var sqlQueryText = $"SELECT * FROM c WHERE c.id IN ({submissionIdsString})";
+
+        var result = await _submissionCheckpointRepository.QueryAsync(sqlQueryText);
+        return result;
+    }
+
+    private async Task<List<CategoryEntity>> GetCategoriesByIds(List<Guid> categoryIds)
+    {
+        if (!categoryIds.Any())
             return new List<CategoryEntity>(0);
 
-        var sqlQueryText = $"SELECT * FROM c WHERE {string.Join(" AND ", conditions)}";
+        var categoryIdString = string.Join(',', categoryIds.Select(s => $"'{s}'"));
+        var sqlQueryText = $"SELECT * FROM c WHERE c.id IN ({categoryIdString})";
 
-        var affected = await _categoryCheckpointRepository.QueryAsync(sqlQueryText);
-        return affected;
+        var result = await _categoryCheckpointRepository.QueryAsync(sqlQueryText);
+        return result;
     }
 }

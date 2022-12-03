@@ -6,25 +6,26 @@ namespace Pondrop.Service.Submission.Application.Models;
 public class QuickPriceAndQuantityTemplateConfig
 {
     public const string Key = nameof(QuickPriceAndQuantityTemplateConfig);
-    public string? Id { get; set; }
+    
+    public Guid Id { get; set; } = Guid.Empty;
 
-    public string? SearchProductFieldId { get; set; }
+    public Guid SearchProductFieldId { get; set; } = Guid.Empty;
 
-    public string? AisleFieldId { get; set; }
+    public Guid AisleFieldId { get; set; } = Guid.Empty;
 
-    public string? ShelfSectionFieldId { get; set; }
+    public Guid ShelfSectionFieldId { get; set; } = Guid.Empty;
 
-    public string? ShelfNumberFieldId { get; set; }
+    public Guid ShelfNumberFieldId { get; set; } = Guid.Empty;
 
-    public string? ShelfLabelFieldId { get; set; }
+    public Guid ShelfLabelFieldId { get; set; } = Guid.Empty;
 
-    public string? PhotoFieldId { get; set; }
+    public Guid PhotoFieldId { get; set; } = Guid.Empty;
 
-    public string? ProductPriceFieldId { get; set; }
+    public Guid ProductPriceFieldId { get; set; } = Guid.Empty;
 
-    public string? QuanityFieldId { get; set; }
+    public Guid QuantityFieldId { get; set; } = Guid.Empty;
 
-    public string? ShelfIssueFieldId { get; set; }
+    public Guid ShelfIssueFieldId { get; set; } = Guid.Empty;
 
-    public string? CommentFieldId { get; set; }
+    public Guid CommentFieldId { get; set; } = Guid.Empty;
 }
