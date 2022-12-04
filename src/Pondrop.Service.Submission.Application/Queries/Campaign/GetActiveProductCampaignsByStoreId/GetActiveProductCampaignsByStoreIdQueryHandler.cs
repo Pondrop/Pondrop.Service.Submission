@@ -17,7 +17,7 @@ namespace Pondrop.Service.Submission.Application.Queries.Campaign.GetAllCampaign
 public class GetActiveProductCampaignsByStoreIdQueryHandler : IRequestHandler<GetActiveProductCampaignsByStoreIdQuery,
     Result<List<CampaignProductPerStoreViewRecord>>>
 {
-    private CampaignProductSubmissionFieldConfiguration _campaignProductSubmissionFieldConfiguration;
+    private CampaignProductSubmissionFieldConfig _campaignProductSubmissionFieldConfig;
 
     private readonly ICheckpointRepository<CampaignEntity> _checkpointRepository;
     private readonly ICheckpointRepository<SubmissionEntity> _submissionChekpointRepository;
@@ -29,7 +29,7 @@ public class GetActiveProductCampaignsByStoreIdQueryHandler : IRequestHandler<Ge
     private readonly IUserService _userService;
 
     public GetActiveProductCampaignsByStoreIdQueryHandler(
-        IOptions<CampaignProductSubmissionFieldConfiguration> campaignProductSubmissionFieldConfiguration,
+        IOptions<CampaignProductSubmissionFieldConfig> campaignProductSubmissionFieldConfiguration,
         ICheckpointRepository<CampaignEntity> checkpointRepository,
         IContainerRepository<SubmissionWithStoreViewRecord> submissionWithStoreContainerRepository,
         ICheckpointRepository<SubmissionEntity> submissionChekpointRepository,
@@ -39,7 +39,7 @@ public class GetActiveProductCampaignsByStoreIdQueryHandler : IRequestHandler<Ge
         IValidator<GetActiveProductCampaignsByStoreIdQuery> validator,
         ILogger<GetActiveProductCampaignsByStoreIdQueryHandler> logger)
     {
-        _campaignProductSubmissionFieldConfiguration = campaignProductSubmissionFieldConfiguration.Value;
+        _campaignProductSubmissionFieldConfig = campaignProductSubmissionFieldConfiguration.Value;
 
         _checkpointRepository = checkpointRepository;
         _submissionWithStoreContainerRepository = submissionWithStoreContainerRepository;
@@ -182,7 +182,7 @@ public class GetActiveProductCampaignsByStoreIdQueryHandler : IRequestHandler<Ge
             if (fullSubmissions.FirstOrDefault(i => i.Id == camSub.Id) is { } fullSub)
             {
                 var focusProduct = fullSub.FirstOrDefaultResultByTemplateFieldId<ItemValueRecord>(
-                    _campaignProductSubmissionFieldConfiguration.ProductFocusFieldId, SubmissionFieldType.focus);
+                    _campaignProductSubmissionFieldConfig.ProductFocusFieldId, SubmissionFieldType.focus);
 
                 if (Guid.TryParse(focusProduct?.ItemId, out var productId))
                 {
@@ -197,35 +197,35 @@ public class GetActiveProductCampaignsByStoreIdQueryHandler : IRequestHandler<Ge
                         FocusProductName = focusProduct.ItemName,
                         Aisle =
                             fullSub.FirstOrDefaultResultByTemplateFieldId<string>(
-                                _campaignProductSubmissionFieldConfiguration.AisleFieldId,
+                                _campaignProductSubmissionFieldConfig.AisleFieldId,
                                 SubmissionFieldType.picker),
                         Section =
                             fullSub.FirstOrDefaultResultByTemplateFieldId<string>(
-                                _campaignProductSubmissionFieldConfiguration.ShelfSectionFieldId,
+                                _campaignProductSubmissionFieldConfig.ShelfSectionFieldId,
                                 SubmissionFieldType.picker),
                         Shelf =
                             fullSub.FirstOrDefaultResultByTemplateFieldId<string>(
-                                _campaignProductSubmissionFieldConfiguration.ShelfLabelFieldId,
+                                _campaignProductSubmissionFieldConfig.ShelfLabelFieldId,
                                 SubmissionFieldType.picker),
                         Price =
                             fullSub.FirstOrDefaultResultByTemplateFieldId<double?>(
-                                _campaignProductSubmissionFieldConfiguration.ProductPriceFieldId,
+                                _campaignProductSubmissionFieldConfig.ProductPriceFieldId,
                                 SubmissionFieldType.currency),
                         Quantity =
                             fullSub.FirstOrDefaultResultByTemplateFieldId<int?>(
-                                _campaignProductSubmissionFieldConfiguration.QuantityFieldId,
+                                _campaignProductSubmissionFieldConfig.QuantityFieldId,
                                 SubmissionFieldType.integer),
                         NearestUseByDate =
                             fullSub.FirstOrDefaultResultByTemplateFieldId<DateTime?>(
-                                _campaignProductSubmissionFieldConfiguration.NearestUseByDateFieldId,
+                                _campaignProductSubmissionFieldConfig.NearestUseByDateFieldId,
                                 SubmissionFieldType.date),
                         Issue =
                             fullSub.FirstOrDefaultResultByTemplateFieldId<string>(
-                                _campaignProductSubmissionFieldConfiguration.ShelfIssueFieldId,
+                                _campaignProductSubmissionFieldConfig.ShelfIssueFieldId,
                                 SubmissionFieldType.picker),
                         Comments = fullSub
                             .FirstOrDefaultResultByTemplateFieldId<string>(
-                                _campaignProductSubmissionFieldConfiguration.CommentsFieldId,
+                                _campaignProductSubmissionFieldConfig.CommentsFieldId,
                                 SubmissionFieldType.text),
                     };
 

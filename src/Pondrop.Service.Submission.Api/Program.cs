@@ -168,8 +168,8 @@ services.Configure<QuickPriceAndQuantityTemplateConfig>(configuration.GetSection
 services.Configure<ShelfStockLevelsTemplateConfig>(configuration.GetSection(ShelfStockLevelsTemplateConfig.Key));
 
 // Campaign field configs
-services.Configure<CampaignCategorySubmissionFieldConfiguration>(configuration.GetSection(CampaignCategorySubmissionFieldConfiguration.Key));
-services.Configure<CampaignProductSubmissionFieldConfiguration>(configuration.GetSection(CampaignProductSubmissionFieldConfiguration.Key));
+services.Configure<CampaignCategorySubmissionFieldConfig>(configuration.GetSection(CampaignCategorySubmissionFieldConfig.Key));
+services.Configure<CampaignProductSubmissionFieldConfig>(configuration.GetSection(CampaignProductSubmissionFieldConfig.Key));
 
 services.AddHostedService<ServiceBusHostedService>();
 services.AddSingleton<IServiceBusListenerService, ServiceBusListenerService>();

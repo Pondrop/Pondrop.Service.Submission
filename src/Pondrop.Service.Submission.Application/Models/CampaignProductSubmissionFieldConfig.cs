@@ -1,8 +1,8 @@
 ﻿namespace Pondrop.Service.Submission.Application.Models;
 
-public class CampaignProductSubmissionFieldConfiguration
+public class CampaignProductSubmissionFieldConfig
 {
-    public const string Key = nameof(CampaignProductSubmissionFieldConfiguration);
+    public const string Key = nameof(CampaignProductSubmissionFieldConfig);
     
     public Guid ProductFocusFieldId { get; set; } = Guid.Empty;
     public Guid AisleFieldId { get; set; } = Guid.Empty;

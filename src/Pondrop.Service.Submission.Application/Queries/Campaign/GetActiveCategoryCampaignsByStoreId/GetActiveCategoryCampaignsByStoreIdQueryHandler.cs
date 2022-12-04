@@ -17,7 +17,7 @@ namespace Pondrop.Service.Submission.Application.Queries.Campaign.GetAllCampaign
 public class GetActiveCategoryCampaignsByStoreIdQueryHandler : IRequestHandler<GetActiveCategoryCampaignsByStoreIdQuery,
     Result<List<CampaignCategoryPerStoreViewRecord>>>
 {
-    private CampaignCategorySubmissionFieldConfiguration _campaignCategorySubmissionFieldConfiguration;
+    private CampaignCategorySubmissionFieldConfig _campaignCategorySubmissionFieldConfig;
 
     private readonly ICheckpointRepository<CampaignEntity> _checkpointRepository;
     private readonly ICheckpointRepository<SubmissionEntity> _submissionCheckpointRepository;
@@ -29,7 +29,7 @@ public class GetActiveCategoryCampaignsByStoreIdQueryHandler : IRequestHandler<G
     private readonly IUserService _userService;
 
     public GetActiveCategoryCampaignsByStoreIdQueryHandler(
-        IOptions<CampaignCategorySubmissionFieldConfiguration> campaignCategorySubmissionFieldConfiguration,
+        IOptions<CampaignCategorySubmissionFieldConfig> campaignCategorySubmissionFieldConfiguration,
         ICheckpointRepository<CampaignEntity> checkpointRepository,
         IContainerRepository<SubmissionWithStoreViewRecord> submissionWithStoreContainerRepository,
         ICheckpointRepository<SubmissionEntity> submissionCheckpointRepository,
@@ -39,7 +39,7 @@ public class GetActiveCategoryCampaignsByStoreIdQueryHandler : IRequestHandler<G
         IValidator<GetActiveCategoryCampaignsByStoreIdQuery> validator,
         ILogger<GetActiveCategoryCampaignsByStoreIdQueryHandler> logger)
     {
-        _campaignCategorySubmissionFieldConfiguration = campaignCategorySubmissionFieldConfiguration.Value;
+        _campaignCategorySubmissionFieldConfig = campaignCategorySubmissionFieldConfiguration.Value;
 
         _checkpointRepository = checkpointRepository;
         _submissionWithStoreContainerRepository = submissionWithStoreContainerRepository;
@@ -182,7 +182,7 @@ public class GetActiveCategoryCampaignsByStoreIdQueryHandler : IRequestHandler<G
             if (fullSubmissions.FirstOrDefault(i => i.Id == camSub.Id) is { } fullSub)
             {
                 var focusCategory = fullSub.FirstOrDefaultResultByTemplateFieldId<ItemValueRecord>(
-                    _campaignCategorySubmissionFieldConfiguration.CategoryFocusFieldId, SubmissionFieldType.focus);
+                    _campaignCategorySubmissionFieldConfig.CategoryFocusFieldId, SubmissionFieldType.focus);
 
                 if (Guid.TryParse(focusCategory?.ItemId, out var categoryId))
                 {
@@ -197,28 +197,28 @@ public class GetActiveCategoryCampaignsByStoreIdQueryHandler : IRequestHandler<G
                         FocusCategoryName = focusCategory.ItemName,
                         Aisle =
                             fullSub.FirstOrDefaultResultByTemplateFieldId<string>(
-                                _campaignCategorySubmissionFieldConfiguration.AisleFieldId,
+                                _campaignCategorySubmissionFieldConfig.AisleFieldId,
                                 SubmissionFieldType.picker),
                         Section =
                             fullSub.FirstOrDefaultResultByTemplateFieldId<string>(
-                                _campaignCategorySubmissionFieldConfiguration.ShelfSectionFieldId,
+                                _campaignCategorySubmissionFieldConfig.ShelfSectionFieldId,
                                 SubmissionFieldType.picker),
                         Shelf =
                             fullSub.FirstOrDefaultResultByTemplateFieldId<string>(
-                                _campaignCategorySubmissionFieldConfiguration.ShelfLabelFieldId,
+                                _campaignCategorySubmissionFieldConfig.ShelfLabelFieldId,
                                 SubmissionFieldType.picker),
                         Products =
                             fullSub.ResultsByTemplateFieldId(
-                                    _campaignCategorySubmissionFieldConfiguration.ProductsFieldId,
+                                    _campaignCategorySubmissionFieldConfig.ProductsFieldId,
                                     SubmissionFieldType.search)
                                 .OfType<ItemValueRecord>().ToList(),
                         Issue =
                             fullSub.FirstOrDefaultResultByTemplateFieldId<string>(
-                                _campaignCategorySubmissionFieldConfiguration.ShelfIssueFieldId,
+                                _campaignCategorySubmissionFieldConfig.ShelfIssueFieldId,
                                 SubmissionFieldType.picker),
                         Comments = fullSub
                             .FirstOrDefaultResultByTemplateFieldId<string>(
-                                _campaignCategorySubmissionFieldConfiguration.CommentsFieldId,
+                                _campaignCategorySubmissionFieldConfig.CommentsFieldId,
                                 SubmissionFieldType.text),
                     };
 
