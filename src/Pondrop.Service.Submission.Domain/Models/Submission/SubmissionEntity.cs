@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using Pondrop.Service.Events;
 using Pondrop.Service.Models;
+using Pondrop.Service.Submission.Domain.Enums.SubmissionTemplate;
 using Pondrop.Service.Submission.Domain.Events.Submission;
 
 namespace Pondrop.Service.Submission.Domain.Models.Submission;
@@ -48,6 +49,23 @@ public record SubmissionEntity : EventEntity
 
     [JsonProperty(PropertyName = "steps")]
     public List<SubmissionStepRecord> Steps { get; private set; }
+    
+    public T? FirstOrDefaultResultByTemplateFieldId<T>(Guid templateFieldId, SubmissionFieldType fieldType)
+    {
+        var results = ResultsByTemplateFieldId(templateFieldId, fieldType);
+        return results.OfType<T>().FirstOrDefault();
+    }
+    
+    public List<object> ResultsByTemplateFieldId(Guid templateFieldId, SubmissionFieldType fieldType)
+    {
+        return
+            (from step in Steps
+             from field in step.Fields
+             where field.TemplateFieldId == templateFieldId && field.Values.Any()
+             from result in field.GetResults(fieldType)
+             where result is not null
+             select result).ToList();
+    }
 
     protected sealed override void Apply(IEvent eventToApply)
     {

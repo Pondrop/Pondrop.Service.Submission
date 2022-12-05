@@ -167,6 +167,10 @@ services.Configure<PriceTemplateConfig>(configuration.GetSection(PriceTemplateCo
 services.Configure<QuickPriceAndQuantityTemplateConfig>(configuration.GetSection(QuickPriceAndQuantityTemplateConfig.Key));
 services.Configure<ShelfStockLevelsTemplateConfig>(configuration.GetSection(ShelfStockLevelsTemplateConfig.Key));
 
+// Campaign field configs
+services.Configure<CampaignCategorySubmissionFieldConfig>(configuration.GetSection(CampaignCategorySubmissionFieldConfig.Key));
+services.Configure<CampaignProductSubmissionFieldConfig>(configuration.GetSection(CampaignProductSubmissionFieldConfig.Key));
+
 services.AddHostedService<ServiceBusHostedService>();
 services.AddSingleton<IServiceBusListenerService, ServiceBusListenerService>();
 

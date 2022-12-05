@@ -2,17 +2,23 @@
 using FluentValidation;
 using MediatR;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Pondrop.Service.Interfaces;
 using Pondrop.Service.Interfaces.Services;
+using Pondrop.Service.Submission.Application.Extensions;
 using Pondrop.Service.Submission.Application.Models;
+using Pondrop.Service.Submission.Domain.Enums.SubmissionTemplate;
 using Pondrop.Service.Submission.Domain.Models.Campaign;
 using Pondrop.Service.Submission.Domain.Models.Product;
 using Pondrop.Service.Submission.Domain.Models.Submission;
 
 namespace Pondrop.Service.Submission.Application.Queries.Campaign.GetAllCampaigns;
 
-public class GetActiveProductCampaignsByStoreIdQueryHandler : IRequestHandler<GetActiveProductCampaignsByStoreIdQuery, Result<List<CampaignProductPerStoreViewRecord>>>
+public class GetActiveProductCampaignsByStoreIdQueryHandler : IRequestHandler<GetActiveProductCampaignsByStoreIdQuery,
+    Result<List<CampaignProductPerStoreViewRecord>>>
 {
+    private CampaignProductSubmissionFieldConfig _campaignProductSubmissionFieldConfig;
+
     private readonly ICheckpointRepository<CampaignEntity> _checkpointRepository;
     private readonly ICheckpointRepository<SubmissionEntity> _submissionChekpointRepository;
     private readonly IContainerRepository<SubmissionWithStoreViewRecord> _submissionWithStoreContainerRepository;
@@ -23,6 +29,7 @@ public class GetActiveProductCampaignsByStoreIdQueryHandler : IRequestHandler<Ge
     private readonly IUserService _userService;
 
     public GetActiveProductCampaignsByStoreIdQueryHandler(
+        IOptions<CampaignProductSubmissionFieldConfig> campaignProductSubmissionFieldConfiguration,
         ICheckpointRepository<CampaignEntity> checkpointRepository,
         IContainerRepository<SubmissionWithStoreViewRecord> submissionWithStoreContainerRepository,
         ICheckpointRepository<SubmissionEntity> submissionChekpointRepository,
@@ -32,6 +39,8 @@ public class GetActiveProductCampaignsByStoreIdQueryHandler : IRequestHandler<Ge
         IValidator<GetActiveProductCampaignsByStoreIdQuery> validator,
         ILogger<GetActiveProductCampaignsByStoreIdQueryHandler> logger)
     {
+        _campaignProductSubmissionFieldConfig = campaignProductSubmissionFieldConfiguration.Value;
+
         _checkpointRepository = checkpointRepository;
         _submissionWithStoreContainerRepository = submissionWithStoreContainerRepository;
         _submissionChekpointRepository = submissionChekpointRepository;
@@ -42,7 +51,8 @@ public class GetActiveProductCampaignsByStoreIdQueryHandler : IRequestHandler<Ge
         _userService = userService;
     }
 
-    public async Task<Result<List<CampaignProductPerStoreViewRecord>>> Handle(GetActiveProductCampaignsByStoreIdQuery request, CancellationToken cancellationToken)
+    public async Task<Result<List<CampaignProductPerStoreViewRecord>>> Handle(
+        GetActiveProductCampaignsByStoreIdQuery request, CancellationToken cancellationToken)
     {
         var validation = _validator.Validate(request);
 
@@ -53,109 +63,97 @@ public class GetActiveProductCampaignsByStoreIdQueryHandler : IRequestHandler<Ge
             return Result<List<CampaignProductPerStoreViewRecord>>.Error(errorMessage);
         }
 
-        var result = default(Result<List<CampaignProductPerStoreViewRecord>>);
+        if (request.StoreIds is not { Count: > 0 } && request.CampaignIds is not { Count: > 0 })
+            return Result<List<CampaignProductPerStoreViewRecord>>.Success(
+                new List<CampaignProductPerStoreViewRecord>(0));
 
-        if ((request.StoreIds == null || request.StoreIds.Count <= 0) && (request.CampaignIds == null || request.CampaignIds.Count <= 0))
-            return result;
+        var result = default(Result<List<CampaignProductPerStoreViewRecord>>);
 
         try
         {
-            var storeIdsString = request.StoreIds != null ? string.Join(',', request.StoreIds.Select(s => $"'{s}'")) : string.Empty;
-            var productIdsString = request.CampaignIds != null ? string.Join(',', request.CampaignIds.Select(s => $"'{s}'")) : string.Empty;
-            var query = $"SELECT * FROM c WHERE c.campaignStatus = 'live' AND c.campaignFocusProductIds != null";
+            var storeIdsString = request.StoreIds.ToIdQueryString();
+            var campaignIdsString = request.CampaignIds.ToIdQueryString();
+
+            var utcNow = DateTime.UtcNow;
+
+            var query =
+                $"SELECT * FROM c" +
+                $" WHERE c.campaignStatus = 'live'" +
+                $" AND c.campaignFocusProductIds != null" +
+                $" AND ARRAY_LENGTH(c.campaignFocusProductIds) > 0" +
+                $" AND c.selectedTemplateIds != null" +
+                $" AND ARRAY_LENGTH(c.selectedTemplateIds) > 0" +
+                $" AND c.campaignPublishedDate <= '{utcNow:O}'" +
+                $" AND c.campaignEndDate > '{utcNow:O}'";
+
             if (!string.IsNullOrEmpty(storeIdsString))
-                query += $" AND (ARRAY_CONTAINS(c.storeIds, {storeIdsString}) OR c.storeIds = null)";
-            if (!string.IsNullOrEmpty(productIdsString))
-                query += $" AND c.id in ({productIdsString})";
+                query +=
+                    $" AND (c.storeIds = null OR ARRAY_LENGTH(c.storeIds) = 0 OR ARRAY_CONTAINS(c.storeIds, {storeIdsString}))";
+            if (!string.IsNullOrEmpty(campaignIdsString))
+                query += $" AND c.id in ({campaignIdsString})";
 
             var entities = await _checkpointRepository.QueryAsync(query);
-            var campaigns = _mapper.Map<List<CampaignRecord>>(entities.Where(s => s.CampaignEndDate > DateTime.UtcNow));
+            var campaigns = _mapper.Map<List<CampaignRecord>>(entities);
 
+            // To get product names
+            var productIds = campaigns.SelectMany(i => i.CampaignFocusProductIds!).Distinct().ToList();
+            var productsTask = GetProductsByIds(productIds);
+
+            var productSubmissionsTask =
+                GetCampaignProductSubmissions(
+                    campaigns.Select(s => s.Id).ToList(),
+                    request.StoreIds ?? new List<Guid>(0));
+
+            await Task.WhenAll(productsTask, productSubmissionsTask);
+
+            var productsLookup = (await productsTask).ToDictionary(i => i.Id, i => i);
+            var productSubmissionsLookup = await productSubmissionsTask;
+
+            var currentUserId = Guid.Parse(_userService.CurrentUserId());
             var activeCampaigns = new List<CampaignProductPerStoreViewRecord>();
-            var submissionsFromAllCampaigns = await GetSubmissionsByCampaignIds(campaigns.Select(s => s.Id).ToList());
 
             foreach (var campaign in campaigns)
             {
-                if (campaign.StoreIds != null)
-                    foreach (var storeCampaign in campaign.StoreIds)
+                // Per store
+                foreach (var storeId in campaign.StoreIds!)
+                {
+                    // Per product
+                    foreach (var productId in
+                             campaign.CampaignFocusProductIds!.Where(i => productsLookup.ContainsKey(i)))
                     {
-                        if (campaign != null && campaign.CampaignFocusProductIds != null && campaign.CampaignFocusProductIds.Count() > 0)
+                        var key = (campaign.Id, storeId, productId);
+                        productSubmissionsLookup.TryGetValue(key, out var submissions);
+                        submissions ??= new List<CampaignProductSubmissionViewRecord>(0);
+
+                        // Exclude campaigns with required submissions
+                        // Or if have been completed by current user
+                        if (submissions.Count < campaign.RequiredSubmissions &&
+                            submissions.All(i => i.UserId != currentUserId))
                         {
-                            var submissions = submissionsFromAllCampaigns.Where(s => s.CampaignId == campaign.Id);
-                            var categories = await GetProductsByIds(campaign.CampaignFocusProductIds);
-
-                            foreach (var focusProduct in campaign.CampaignFocusProductIds)
+                            var campaignToBeAdded = new CampaignProductPerStoreViewRecord()
                             {
-                                var product = categories.FirstOrDefault(s => s.Id == focusProduct);
-                                var productSubmissions = new List<CampaignProductSubmissionViewRecord>();
+                                Id = campaign.Id,
+                                Name = campaign.Name,
+                                CampaignStatus = campaign.CampaignStatus,
+                                StoreId = storeId,
+                                SubmissionCount = submissions.Count,
+                                SubmissionTemplateId = campaign.SelectedTemplateIds!.First(),
+                                RequiredSubmissions = campaign.RequiredSubmissions,
+                                CampaignEndDate = campaign.CampaignEndDate,
+                                CampaignPublishedDate = campaign.CampaignPublishedDate,
+                                CampaignType = campaign.CampaignType,
+                                FocusProductId = productId,
+                                FocusProductName = productsLookup[productId].Name,
+                                CampaignProductSubmissions = submissions
+                            };
 
-                                if (submissions != null)
-                                {
-                                    foreach (var submission in submissions)
-                                    {
-                                        var submissionFull = await _submissionChekpointRepository.GetByIdAsync(submission.Id);
-                                        var products = new List<ItemValueRecord>();
-
-                                        if (submissionFull != null)
-                                        {
-                                            Guid productListFieldGuid = Guid.Parse("3995d781-e3c4-4407-a1ac-fe613b5c487d");
-                                            Guid productFieldGuid = Guid.Parse("2ec0bcdf-340e-4876-89f3-799e6f00e7bb");
-
-                                            foreach (var step in submissionFull.Steps)
-                                            {
-                                                foreach (var field in step.Fields.Where(f => f?.TemplateFieldId == productFieldGuid || f?.TemplateFieldId == productListFieldGuid))
-                                                {
-                                                    foreach (var itemValue in field?.Values)
-                                                    {
-                                                        products.Add(itemValue?.ItemValue ?? new ItemValueRecord());
-                                                    }
-                                                }
-                                            }
-                                        }
-
-                                        if (campaign.RequiredSubmissions <= products.Where(p => p.ItemId == focusProduct.ToString() || p.ItemName == product?.Name).Count())
-                                            continue;
-
-                                        productSubmissions.Add(new CampaignProductSubmissionViewRecord()
-                                        {
-                                            CampaignId = campaign.Id,
-                                            StoreId = submission.StoreId,
-                                            StoreName = submission.StoreName ?? string.Empty,
-                                            UserId = submission.UserId,
-                                            SubmissionId = submission.Id,
-                                            FocusProductId = focusProduct,
-                                            FocusProductName = product?.Name ?? string.Empty
-                                        });
-                                    }
-                                }
-
-                                var campaignToBeAdded = new CampaignProductPerStoreViewRecord()
-                                {
-                                    Id = campaign.Id,
-                                    Name = campaign.Name,
-                                    CampaignStatus = campaign.CampaignStatus,
-                                    StoreId = storeCampaign,
-                                    SubmissionCount = productSubmissions.Count(),
-                                    SubmissionTemplateId = campaign?.SelectedTemplateIds?.FirstOrDefault() ?? null,
-                                    RequiredSubmissions = campaign?.RequiredSubmissions ?? 0,
-                                    CampaignEndDate = campaign?.CampaignEndDate,
-                                    CampaignPublishedDate = campaign?.CampaignPublishedDate,
-                                    CampaignType = campaign?.CampaignType,
-                                    FocusProductId = focusProduct,
-                                    FocusProductName = product?.Name ?? string.Empty,
-                                    CampaignProductSubmissions = productSubmissions
-                                };
-
-                                activeCampaigns.Add(campaignToBeAdded);
-                            }
-                            //}
+                            activeCampaigns.Add(campaignToBeAdded);
                         }
                     }
+                }
             }
-            var response = request?.StoreIds != null && request?.StoreIds.Count() > 0 ? activeCampaigns?.Where(c => c.RequiredSubmissions > c.SubmissionCount && request.StoreIds.Any(s => s == c.StoreId.Value)) : activeCampaigns?.Where(c => c.RequiredSubmissions > c.SubmissionCount);
 
-            return Result<List<CampaignProductPerStoreViewRecord>>.Success(response?.ToList());
-
+            return Result<List<CampaignProductPerStoreViewRecord>>.Success(activeCampaigns);
         }
         catch (Exception ex)
         {
@@ -166,47 +164,125 @@ public class GetActiveProductCampaignsByStoreIdQueryHandler : IRequestHandler<Ge
         return result;
     }
 
-
-    private async Task<List<SubmissionWithStoreViewRecord>> GetSubmissionsByCampaignIds(List<Guid>? campaignIds)
+    private async
+        Task<Dictionary<(Guid campaignId, Guid storeId, Guid productId), List<CampaignProductSubmissionViewRecord>>>
+        GetCampaignProductSubmissions(List<Guid> campaignIds, List<Guid> storeIds)
     {
-        const string campaignIdKey = "@campaignId";
+        // Get related campaign submissions
+        var campaignSubmissions = await GetSubmissionsWithStore(campaignIds, storeIds);
+        var fullSubmissions = await GetSubmissionsWithResults(campaignSubmissions.Select(i => i.Id).ToList());
 
-        var conditions = new List<string>();
-        //var parameters = new Dictionary<string, string>();
+        var submissionLookup =
+            new Dictionary<(Guid campaignId, Guid storeId, Guid productId),
+                List<CampaignProductSubmissionViewRecord>>();
 
-        if (campaignIds != null && campaignIds.Count > 0)
+        // Process campaign submissions
+        foreach (var camSub in campaignSubmissions)
         {
-            var campaignIdsString = string.Join(',', campaignIds.Select(s => $"'{s}'"));
-            conditions.Add($"c.campaignId IN ({campaignIdsString})");
+            if (fullSubmissions.FirstOrDefault(i => i.Id == camSub.Id) is { } fullSub)
+            {
+                var focusProduct = fullSub.FirstOrDefaultResultByTemplateFieldId<ItemValueRecord>(
+                    _campaignProductSubmissionFieldConfig.ProductFocusFieldId, SubmissionFieldType.focus);
+
+                if (Guid.TryParse(focusProduct?.ItemId, out var productId))
+                {
+                    var proSub = new CampaignProductSubmissionViewRecord()
+                    {
+                        CampaignId = camSub.CampaignId!.Value,
+                        StoreId = camSub.StoreId,
+                        StoreName = camSub.StoreName ?? string.Empty,
+                        UserId = camSub.UserId,
+                        SubmissionId = camSub.Id,
+                        FocusProductId = productId,
+                        FocusProductName = focusProduct.ItemName,
+                        Aisle =
+                            fullSub.FirstOrDefaultResultByTemplateFieldId<string>(
+                                _campaignProductSubmissionFieldConfig.AisleFieldId,
+                                SubmissionFieldType.picker),
+                        Section =
+                            fullSub.FirstOrDefaultResultByTemplateFieldId<string>(
+                                _campaignProductSubmissionFieldConfig.ShelfSectionFieldId,
+                                SubmissionFieldType.picker),
+                        Shelf =
+                            fullSub.FirstOrDefaultResultByTemplateFieldId<string>(
+                                _campaignProductSubmissionFieldConfig.ShelfLabelFieldId,
+                                SubmissionFieldType.picker),
+                        Price =
+                            fullSub.FirstOrDefaultResultByTemplateFieldId<double?>(
+                                _campaignProductSubmissionFieldConfig.ProductPriceFieldId,
+                                SubmissionFieldType.currency),
+                        Quantity =
+                            fullSub.FirstOrDefaultResultByTemplateFieldId<int?>(
+                                _campaignProductSubmissionFieldConfig.QuantityFieldId,
+                                SubmissionFieldType.integer),
+                        NearestUseByDate =
+                            fullSub.FirstOrDefaultResultByTemplateFieldId<DateTime?>(
+                                _campaignProductSubmissionFieldConfig.NearestUseByDateFieldId,
+                                SubmissionFieldType.date),
+                        Issue =
+                            fullSub.FirstOrDefaultResultByTemplateFieldId<string>(
+                                _campaignProductSubmissionFieldConfig.ShelfIssueFieldId,
+                                SubmissionFieldType.picker),
+                        Comments = fullSub
+                            .FirstOrDefaultResultByTemplateFieldId<string>(
+                                _campaignProductSubmissionFieldConfig.CommentsFieldId,
+                                SubmissionFieldType.text),
+                    };
+
+                    var key = (proSub.CampaignId, proSub.StoreId, proSub.FocusProductId);
+                    if (!submissionLookup.ContainsKey(key))
+                    {
+                        submissionLookup[key] = new List<CampaignProductSubmissionViewRecord>();
+                    }
+
+                    submissionLookup[key].Add(proSub);
+                }
+            }
         }
 
-        if (!conditions.Any())
+        return submissionLookup;
+    }
+
+    private async Task<List<SubmissionWithStoreViewRecord>> GetSubmissionsWithStore(List<Guid> campaignIds,
+        List<Guid> storeIds)
+    {
+        if (!campaignIds.Any())
             return new List<SubmissionWithStoreViewRecord>(0);
 
-        var sqlQueryText = $"SELECT * FROM c WHERE {string.Join(" AND ", conditions)}";
+        var campaignIdsString = campaignIds.ToIdQueryString();
+        var sqlQueryText = $"SELECT * FROM c WHERE c.campaignId IN ({campaignIdsString})";
 
-        var affected = await _submissionWithStoreContainerRepository.QueryAsync(sqlQueryText);
-        return affected;
-    }
-    private async Task<List<ProductViewRecord>> GetProductsByIds(List<Guid>? productIds)
-    {
-        const string productIdKey = "@productId";
-
-        var conditions = new List<string>();
-        //var parameters = new Dictionary<string, string>();
-
-        if (productIds != null && productIds.Count > 0)
+        if (storeIds.Any())
         {
-            var productIdString = string.Join(',', productIds.Select(s => $"'{s}'"));
-            conditions.Add($"c.id IN ({productIdString})");
+            var storeIdsString = storeIds.ToIdQueryString();
+            sqlQueryText += $" AND c.storeId IN ({storeIdsString})";
         }
 
-        if (!conditions.Any())
+        var result = await _submissionWithStoreContainerRepository.QueryAsync(sqlQueryText);
+        return result;
+    }
+
+    private async Task<List<SubmissionEntity>> GetSubmissionsWithResults(List<Guid> submissionIds)
+    {
+        if (!submissionIds.Any())
+            return new List<SubmissionEntity>(0);
+
+        var submissionIdsString = submissionIds.ToIdQueryString();
+        var sqlQueryText = $"SELECT * FROM c WHERE c.id IN ({submissionIdsString})";
+
+        var result = await _submissionChekpointRepository.QueryAsync(sqlQueryText);
+        return result;
+    }
+
+    private async Task<List<ProductViewRecord>> GetProductsByIds(List<Guid> productIds)
+    {
+        if (!productIds.Any())
             return new List<ProductViewRecord>(0);
 
-        var sqlQueryText = $"SELECT * FROM c WHERE {string.Join(" AND ", conditions)}";
+        var productIdString = productIds.ToIdQueryString();
+        var sqlQueryText = $"SELECT * FROM c WHERE c.id IN ({productIdString})";
 
-        var affected = await _productContainerRepository.QueryAsync(sqlQueryText);
-        return affected;
+        var result = await _productContainerRepository.QueryAsync(sqlQueryText);
+        return result;
     }
 }

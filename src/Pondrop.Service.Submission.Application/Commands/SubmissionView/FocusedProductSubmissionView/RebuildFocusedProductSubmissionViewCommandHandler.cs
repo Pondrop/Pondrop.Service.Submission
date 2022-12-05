@@ -91,7 +91,7 @@ public class RebuildFocusedProductSubmissionViewCommandHandler : IRequestHandler
                 if (i.CampaignId.HasValue)
                     campaign = await _campaignCheckpointRepository.GetByIdAsync(i.CampaignId.Value);
 
-                var fields = await ExtractFieldValues(i.SubmissionTemplateId.ToString(), i.Steps);
+                var fields = await ExtractFieldValues(i.SubmissionTemplateId, i.Steps);
 
                 var submissionView = fields with
                 {
@@ -154,11 +154,11 @@ public class RebuildFocusedProductSubmissionViewCommandHandler : IRequestHandler
         return distance;
     }
 
-    private async Task<FocusedProductSubmissionViewRecord?> ExtractFieldValues(string submissionTemplateId, List<SubmissionStepRecord> steps)
+    private async Task<FocusedProductSubmissionViewRecord?> ExtractFieldValues(Guid submissionTemplateId, List<SubmissionStepRecord> steps)
     {
         FocusedProductSubmissionViewRecord? fields = null;
 
-        if (submissionTemplateId.ToString() == _priceTemplateConfig.Id)
+        if (submissionTemplateId == _priceTemplateConfig.Id)
         {
             var product = new ItemValueRecord();
             double productPrice = 0;
@@ -180,7 +180,7 @@ public class RebuildFocusedProductSubmissionViewCommandHandler : IRequestHandler
                 {
                     if (field != null)
                     {
-                        if (field.TemplateFieldId.ToString() == _priceTemplateConfig.SearchProductFieldId)
+                        if (field.TemplateFieldId == _priceTemplateConfig.SearchProductFieldId)
                         {
                             product = field?.Values?.FirstOrDefault()?.ItemValue;
 
@@ -198,35 +198,35 @@ public class RebuildFocusedProductSubmissionViewCommandHandler : IRequestHandler
                                     }
                             }
                         }
-                        if (field.TemplateFieldId.ToString() == _priceTemplateConfig.ProductPriceFieldId)
+                        if (field.TemplateFieldId == _priceTemplateConfig.ProductPriceFieldId)
                         {
                             productPrice = field?.Values?.FirstOrDefault()?.DoubleValue ?? 0;
                         }
-                        if (field.TemplateFieldId.ToString() == _priceTemplateConfig.LabelProductNameFieldId)
+                        if (field.TemplateFieldId == _priceTemplateConfig.LabelProductNameFieldId)
                         {
                             labelProduct = field?.Values?.FirstOrDefault()?.StringValue ?? string.Empty;
                         }
-                        if (field.TemplateFieldId.ToString() == _priceTemplateConfig.LabelBarcodeFieldId)
+                        if (field.TemplateFieldId == _priceTemplateConfig.LabelBarcodeFieldId)
                         {
                             labelBarcode = field?.Values?.FirstOrDefault()?.StringValue ?? string.Empty;
                         }
-                        if (field.TemplateFieldId.ToString() == _priceTemplateConfig.PriceTypeFieldId)
+                        if (field.TemplateFieldId == _priceTemplateConfig.PriceTypeFieldId)
                         {
                             priceType = field?.Values?.FirstOrDefault()?.StringValue ?? string.Empty;
                         }
-                        if (field.TemplateFieldId.ToString() == _priceTemplateConfig.UnitPriceFieldId)
+                        if (field.TemplateFieldId == _priceTemplateConfig.UnitPriceFieldId)
                         {
                             unitPrice = field?.Values?.FirstOrDefault()?.DoubleValue ?? 0;
                         }
-                        if (field.TemplateFieldId.ToString() == _priceTemplateConfig.UnitPriceUOMFieldId)
+                        if (field.TemplateFieldId == _priceTemplateConfig.UnitPriceUOMFieldId)
                         {
                             unitPriceUOM = field?.Values?.FirstOrDefault()?.StringValue ?? string.Empty;
                         }
-                        if (field.TemplateFieldId.ToString() == _priceTemplateConfig.PhotoFieldId)
+                        if (field.TemplateFieldId == _priceTemplateConfig.PhotoFieldId)
                         {
                             photoUrl = field?.Values?.FirstOrDefault()?.PhotoUrl ?? string.Empty;
                         }
-                        if (field.TemplateFieldId.ToString() == _priceTemplateConfig.CommentFieldId)
+                        if (field.TemplateFieldId == _priceTemplateConfig.CommentFieldId)
                         {
                             comment = field?.Values?.FirstOrDefault()?.StringValue ?? string.Empty;
                         }
@@ -249,7 +249,7 @@ public class RebuildFocusedProductSubmissionViewCommandHandler : IRequestHandler
                 FocusProductSize = productSize
             };
         }
-        else if (submissionTemplateId.ToString() == _quickPriceAndQuantityTemplateConfig.Id)
+        else if (submissionTemplateId == _quickPriceAndQuantityTemplateConfig.Id)
         {
             var product = new ItemValueRecord();
             double productPrice = 0;
@@ -272,7 +272,7 @@ public class RebuildFocusedProductSubmissionViewCommandHandler : IRequestHandler
                 {
                     if (field != null)
                     {
-                        if (field.TemplateFieldId.ToString() == _quickPriceAndQuantityTemplateConfig.SearchProductFieldId)
+                        if (field.TemplateFieldId == _quickPriceAndQuantityTemplateConfig.SearchProductFieldId)
                         {
                             product = field?.Values?.FirstOrDefault()?.ItemValue;
 
@@ -290,35 +290,35 @@ public class RebuildFocusedProductSubmissionViewCommandHandler : IRequestHandler
                                     }
                             }
                         }
-                        if (field.TemplateFieldId.ToString() == _quickPriceAndQuantityTemplateConfig.ProductPriceFieldId)
+                        if (field.TemplateFieldId == _quickPriceAndQuantityTemplateConfig.ProductPriceFieldId)
                         {
                             productPrice = field?.Values?.FirstOrDefault()?.DoubleValue ?? 0;
                         }
-                        if (field.TemplateFieldId.ToString() == _quickPriceAndQuantityTemplateConfig.AisleFieldId)
+                        if (field.TemplateFieldId == _quickPriceAndQuantityTemplateConfig.AisleFieldId)
                         {
                             aisle = field?.Values?.FirstOrDefault()?.StringValue ?? string.Empty;
                         }
-                        if (field.TemplateFieldId.ToString() == _quickPriceAndQuantityTemplateConfig.ShelfSectionFieldId)
+                        if (field.TemplateFieldId == _quickPriceAndQuantityTemplateConfig.ShelfSectionFieldId)
                         {
                             shelfSection = field?.Values?.FirstOrDefault()?.StringValue ?? string.Empty;
                         }
-                        if (field.TemplateFieldId.ToString() == _quickPriceAndQuantityTemplateConfig.ShelfNumberFieldId)
+                        if (field.TemplateFieldId == _quickPriceAndQuantityTemplateConfig.ShelfNumberFieldId)
                         {
                             shelfNumber = field?.Values?.FirstOrDefault()?.StringValue ?? string.Empty;
                         }
-                        if (field.TemplateFieldId.ToString() == _quickPriceAndQuantityTemplateConfig.QuanityFieldId)
+                        if (field.TemplateFieldId == _quickPriceAndQuantityTemplateConfig.QuantityFieldId)
                         {
                             quantity = field?.Values?.FirstOrDefault()?.IntValue ?? 0;
                         }
-                        if (field.TemplateFieldId.ToString() == _quickPriceAndQuantityTemplateConfig.ShelfIssueFieldId)
+                        if (field.TemplateFieldId == _quickPriceAndQuantityTemplateConfig.ShelfIssueFieldId)
                         {
                             shelfIssue = field?.Values?.FirstOrDefault()?.StringValue ?? string.Empty;
                         }
-                        if (field.TemplateFieldId.ToString() == _quickPriceAndQuantityTemplateConfig.PhotoFieldId)
+                        if (field.TemplateFieldId == _quickPriceAndQuantityTemplateConfig.PhotoFieldId)
                         {
                             photoUrl = field?.Values?.FirstOrDefault()?.PhotoUrl ?? string.Empty;
                         }
-                        if (field.TemplateFieldId.ToString() == _quickPriceAndQuantityTemplateConfig.CommentFieldId)
+                        if (field.TemplateFieldId == _quickPriceAndQuantityTemplateConfig.CommentFieldId)
                         {
                             comment = field?.Values?.FirstOrDefault()?.StringValue ?? string.Empty;
                         }
@@ -343,7 +343,7 @@ public class RebuildFocusedProductSubmissionViewCommandHandler : IRequestHandler
                 FocusProductSize = productSize
             };
         }
-        else if (submissionTemplateId.ToString() == _shelfStockLevelsTemplateConfig.Id)
+        else if (submissionTemplateId == _shelfStockLevelsTemplateConfig.Id)
         {
             var product = new ItemValueRecord();
             DateTime nearestUseByDate = DateTime.MinValue;
@@ -367,7 +367,7 @@ public class RebuildFocusedProductSubmissionViewCommandHandler : IRequestHandler
                 {
                     if (field != null)
                     {
-                        if (field.TemplateFieldId.ToString() == _shelfStockLevelsTemplateConfig.SearchProductFieldId)
+                        if (field.TemplateFieldId == _shelfStockLevelsTemplateConfig.SearchProductFieldId)
                         {
                             product = field?.Values?.FirstOrDefault()?.ItemValue;
                             if (product?.ItemId != null && product?.ItemId != Guid.Empty.ToString())
@@ -387,43 +387,43 @@ public class RebuildFocusedProductSubmissionViewCommandHandler : IRequestHandler
                                 }
                             }
                         }
-                        if (field.TemplateFieldId.ToString() == _shelfStockLevelsTemplateConfig.NearestUseByDateFieldId)
+                        if (field.TemplateFieldId == _shelfStockLevelsTemplateConfig.NearestUseByDateFieldId)
                         {
                             nearestUseByDate = field?.Values?.FirstOrDefault()?.DateTimeValue ?? DateTime.MinValue;
                         }
-                        if (field.TemplateFieldId.ToString() == _shelfStockLevelsTemplateConfig.FurthestUseByDateFieldId)
+                        if (field.TemplateFieldId == _shelfStockLevelsTemplateConfig.FurthestUseByDateFieldId)
                         {
                             furthestUseByDate = field?.Values?.FirstOrDefault()?.DateTimeValue ?? DateTime.MinValue;
                         }
-                        if (field.TemplateFieldId.ToString() == _shelfStockLevelsTemplateConfig.QuantityAtNearestUseByDateFieldId)
+                        if (field.TemplateFieldId == _shelfStockLevelsTemplateConfig.QuantityAtNearestUseByDateFieldId)
                         {
                             quantityNearestUseByDate = field?.Values?.FirstOrDefault()?.IntValue ?? 0;
                         }
-                        if (field.TemplateFieldId.ToString() == _shelfStockLevelsTemplateConfig.QuantityAtFurthestUseByDateFieldId)
+                        if (field.TemplateFieldId == _shelfStockLevelsTemplateConfig.QuantityAtFurthestUseByDateFieldId)
                         {
                             quantityFurthestUseByDate = field?.Values?.FirstOrDefault()?.IntValue ?? 0;
                         }
-                        if (field.TemplateFieldId.ToString() == _shelfStockLevelsTemplateConfig.AisleFieldId)
+                        if (field.TemplateFieldId == _shelfStockLevelsTemplateConfig.AisleFieldId)
                         {
                             aisle = field?.Values?.FirstOrDefault()?.StringValue ?? string.Empty;
                         }
-                        if (field.TemplateFieldId.ToString() == _shelfStockLevelsTemplateConfig.ShelfSectionFieldId)
+                        if (field.TemplateFieldId == _shelfStockLevelsTemplateConfig.ShelfSectionFieldId)
                         {
                             shelfSection = field?.Values?.FirstOrDefault()?.StringValue ?? string.Empty;
                         }
-                        if (field.TemplateFieldId.ToString() == _shelfStockLevelsTemplateConfig.ShelfNumberFieldId)
+                        if (field.TemplateFieldId == _shelfStockLevelsTemplateConfig.ShelfNumberFieldId)
                         {
                             shelfNumber = field?.Values?.FirstOrDefault()?.StringValue ?? string.Empty;
                         }
-                        if (field.TemplateFieldId.ToString() == _shelfStockLevelsTemplateConfig.QuanityFieldId)
+                        if (field.TemplateFieldId == _shelfStockLevelsTemplateConfig.QuantityFieldId)
                         {
                             quantity = field?.Values?.FirstOrDefault()?.IntValue ?? 0;
                         }
-                        if (field.TemplateFieldId.ToString() == _shelfStockLevelsTemplateConfig.PhotoFieldId)
+                        if (field.TemplateFieldId == _shelfStockLevelsTemplateConfig.PhotoFieldId)
                         {
                             photoUrl = field?.Values?.FirstOrDefault()?.PhotoUrl ?? string.Empty;
                         }
-                        if (field.TemplateFieldId.ToString() == _shelfStockLevelsTemplateConfig.CommentFieldId)
+                        if (field.TemplateFieldId == _shelfStockLevelsTemplateConfig.CommentFieldId)
                         {
                             comment = field?.Values?.FirstOrDefault()?.StringValue ?? string.Empty;
                         }

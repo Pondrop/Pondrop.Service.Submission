@@ -6,18 +6,18 @@ namespace Pondrop.Service.Submission.Application.Models;
 public class ShelfStockLevelsTemplateConfig
 {
     public const string Key = nameof(ShelfStockLevelsTemplateConfig);
-    public string? Id { get; set; }
-    public string? SearchProductFieldId { get; set; }
-    public string? PhotoFieldId { get; set; }
-    public string? QuanityFieldId { get; set; }
-    public string? AisleFieldId { get; set; }
-    public string? ShelfSectionFieldId { get; set; }
-    public string? ShelfNumberFieldId { get; set; }
-    public string? NearestUseByDateFieldId { get; set; }
-    public string? QuantityAtNearestUseByDateFieldId { get; set; }
-    public string? FurthestUseByDateFieldId { get; set; }
-    public string? QuantityAtFurthestUseByDateFieldId { get; set; }
-    public string? CommentFieldId { get; set; }
+    public Guid Id { get; set; } = Guid.Empty;
+    public Guid SearchProductFieldId { get; set; } = Guid.Empty;
+    public Guid PhotoFieldId { get; set; } = Guid.Empty;
+    public Guid QuantityFieldId { get; set; } = Guid.Empty;
+    public Guid AisleFieldId { get; set; } = Guid.Empty;
+    public Guid ShelfSectionFieldId { get; set; } = Guid.Empty;
+    public Guid ShelfNumberFieldId { get; set; } = Guid.Empty; 
+    public Guid NearestUseByDateFieldId { get; set; } = Guid.Empty;
+    public Guid QuantityAtNearestUseByDateFieldId { get; set; } = Guid.Empty;
+    public Guid FurthestUseByDateFieldId { get; set; } = Guid.Empty;
+    public Guid QuantityAtFurthestUseByDateFieldId { get; set; } = Guid.Empty;
+    public Guid CommentFieldId { get; set; } = Guid.Empty;
 }
 
 
