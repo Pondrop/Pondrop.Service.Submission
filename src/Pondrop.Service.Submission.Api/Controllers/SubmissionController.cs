@@ -155,6 +155,9 @@ public class SubmissionController : ControllerBase
             (ex, msg) => new BadRequestObjectResult(msg));
     }
 
+  
+
+
     [AllowAnonymous]
     [HttpPost]
     [Route("rebuild/checkpoint")]
@@ -173,6 +176,17 @@ public class SubmissionController : ControllerBase
     public async Task<IActionResult> RebuildReportingView()
     {
         await _mediator.Send(new RebuildFocusedProductSubmissionViewCommand());
+        return new AcceptedResult();
+    }
+
+    [AllowAnonymous]
+    [HttpPost]
+    [Route("update/reporting/view")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> UpdateReportingView([FromBody] UpdateFocusedProductSubmissionViewCommand command)
+    {
+        await _mediator.Send(command);
         return new AcceptedResult();
     }
 
