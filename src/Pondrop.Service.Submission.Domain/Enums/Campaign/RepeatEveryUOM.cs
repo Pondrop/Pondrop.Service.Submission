@@ -3,22 +3,19 @@ using Newtonsoft.Json.Converters;
 
 namespace Pondrop.Service.Submission.Domain.Enums.Campaign;
 
-[JsonConverter(typeof(CampaignStatusEnumConverter))]
-public enum CampaignStatus
+[JsonConverter(typeof(RepeatEveryUOMEnumConverter))]
+public enum RepeatEveryUOM
 {
-    draft, 
-    live, 
-    ended,
-    scheduled
+    mins, hours, days, weeks, months, years
 }
 
 
-internal class CampaignStatusEnumConverter : StringEnumConverter
+internal class RepeatEveryUOMEnumConverter : StringEnumConverter
 {
     public override object? ReadJson(JsonReader reader, Type objectType, object? existingValue, JsonSerializer serializer)
     {
         if (string.IsNullOrEmpty(reader?.Value?.ToString()))
-            return CampaignStatus.draft;
+            return null;
 
         return base.ReadJson(reader, objectType, existingValue, serializer);
     }

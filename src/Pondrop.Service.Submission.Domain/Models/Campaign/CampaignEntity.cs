@@ -22,7 +22,12 @@ public record CampaignEntity : EventEntity
         RequiredSubmissions = 0;
         RewardSchemeId = Guid.Empty;
         CampaignEndDate = null;
+        CampaignPublishedDate = null;
+        CampaignStartDate = null;
         CampaignStatus = null;
+        MinimumTimeIntervalMins = null;
+        RepeatEvery = null;
+        RepeatEveryUOM = null;
         PublicationlifecycleId = string.Empty;
     }
 
@@ -45,6 +50,10 @@ public record CampaignEntity : EventEntity
         Guid? rewardSchemeId,
         DateTime? campaignPublishedDate,
         DateTime? campaignEndDate,
+        DateTime? campaignStartDate,
+        int? minimumTimeIntervalMins,
+        int? repeatEvery,
+        RepeatEveryUOM? repeatEveryUOM,
         CampaignStatus? campaignStatus,
         string publicationlifecycleId, string createdBy) : this()
     {
@@ -60,6 +69,10 @@ public record CampaignEntity : EventEntity
                                         rewardSchemeId,
                                         campaignPublishedDate,
                                         campaignEndDate,
+                                        campaignStartDate,
+                                        minimumTimeIntervalMins,
+                                        repeatEvery,
+                                        repeatEveryUOM,
                                         campaignStatus,
                                         publicationlifecycleId);
         Apply(create, createdBy);
@@ -97,6 +110,18 @@ public record CampaignEntity : EventEntity
 
     [JsonProperty("campaignEndDate")]
     public DateTime? CampaignEndDate { get; private set; }
+
+    [JsonProperty("minimumTimeIntervalMins ")]
+    public int? MinimumTimeIntervalMins { get; private set; }
+
+    [JsonProperty("repeatEvery")]
+    public int? RepeatEvery { get; private set; }
+
+    [JsonProperty("repeatEveryUOM")]
+    public RepeatEveryUOM? RepeatEveryUOM { get; private set; }
+
+    [JsonProperty("campaignStartDate")]
+    public DateTime? CampaignStartDate { get; private set; }
 
     [JsonProperty("campaignStatus")]
     public CampaignStatus? CampaignStatus { get; private set; }
@@ -151,6 +176,10 @@ public record CampaignEntity : EventEntity
         RewardSchemeId = create.RewardSchemeId;
         CampaignPublishedDate = create.CampaignPublishedDate;
         CampaignEndDate = create.CampaignEndDate;
+        CampaignStartDate = create.CampaignStartDate;
+        MinimumTimeIntervalMins = create.minimumTimeIntervalMins;
+        RepeatEvery = create.repeatEvery;
+        RepeatEveryUOM = create.repeatEveryUOM;
         CampaignStatus = create.CampaignStatus;
         PublicationlifecycleId = create.PublicationlifecycleId;
         CreatedBy = createdBy;
@@ -175,6 +204,10 @@ public record CampaignEntity : EventEntity
             var oldCampaignEndDate = CampaignEndDate;
             var oldCampaignStatus = CampaignStatus;
             var oldPublicationlifecycleId = PublicationlifecycleId;
+            var oldCampaignStartDate = CampaignStartDate;
+            var oldMinimumTimeIntervalMins = MinimumTimeIntervalMins;
+            var oldRepeatEvery = RepeatEvery;
+            var oldRepeatEveryUOM = RepeatEveryUOM;
 
             Name = update.Name;
             CampaignType = update.CampaignType;
@@ -187,7 +220,11 @@ public record CampaignEntity : EventEntity
             RewardSchemeId = update.RewardSchemeId;
             CampaignPublishedDate = update.CampaignPublishedDate;
             CampaignEndDate = update.CampaignEndDate;
+            CampaignStartDate = update.CampaignStartDate;
             CampaignStatus = update.CampaignStatus;
+            MinimumTimeIntervalMins = update.minimumTimeIntervalMins;
+            RepeatEvery = update.repeatEvery;
+            RepeatEveryUOM = update.repeatEveryUOM;
             PublicationlifecycleId = update.PublicationlifecycleId;
 
             if (oldName != Name ||
@@ -202,6 +239,10 @@ public record CampaignEntity : EventEntity
                 oldCampaignEndDate != CampaignEndDate ||
                 oldCampaignPublishedDate != CampaignPublishedDate ||
                 oldCampaignStatus != CampaignStatus ||
+                oldCampaignStartDate != CampaignStartDate ||
+                oldMinimumTimeIntervalMins != MinimumTimeIntervalMins ||
+                oldRepeatEvery != RepeatEvery ||
+                oldRepeatEveryUOM != RepeatEveryUOM ||
                 oldPublicationlifecycleId != PublicationlifecycleId)
             {
                 UpdatedBy = createdBy;
