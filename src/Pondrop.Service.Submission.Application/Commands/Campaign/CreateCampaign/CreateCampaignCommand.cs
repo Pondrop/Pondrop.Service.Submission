@@ -36,7 +36,7 @@ public class CreateCampaignCommand : IRequest<Result<CampaignRecord>>
 
     public int? RepeatEvery { get; init; } = null;
 
-    public string? RepeatEveryUOM { get; init; } = string.Empty;
+    public RepeatEveryUOM? RepeatEveryUOM { get; init; } = null;
 
     public CampaignStatus? CampaignStatus { get; init; } = null;
 
