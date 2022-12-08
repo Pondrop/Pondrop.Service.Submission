@@ -16,5 +16,9 @@ public record UpdateCampaign(
         Guid? RewardSchemeId,
         DateTime? CampaignPublishedDate,
         DateTime? CampaignEndDate,
+        DateTime? CampaignStartDate,
+        int? minimumTimeIntervalMins,
+        int? repeatEvery,
+        RepeatEveryUOM? repeatEveryUOM,
         CampaignStatus? CampaignStatus,
         string PublicationlifecycleId) : EventPayload;

@@ -80,6 +80,10 @@ public class UpdateCampaignCommandHandler : DirtyCommandHandler<CampaignEntity, 
                 command.RewardSchemeId,
                 command.CampaignPublishedDate,
                 command.CampaignEndDate,
+                command.CampaignStartDate,
+                command.MinimumTimeIntervalMins,
+                command.RepeatEvery,
+                command.RepeatEveryUOM,
                 command.CampaignStatus,
                 command.PublicationlifecycleId
                );

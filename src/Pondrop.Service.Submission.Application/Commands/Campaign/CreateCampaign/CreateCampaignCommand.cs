@@ -30,6 +30,14 @@ public class CreateCampaignCommand : IRequest<Result<CampaignRecord>>
 
     public DateTime? CampaignEndDate { get; init; } = null;
 
+    public DateTime? CampaignStartDate { get; init; } = null;
+
+    public int? MinimumTimeIntervalMins { get; init; } = null;
+
+    public int? RepeatEvery { get; init; } = null;
+
+    public RepeatEveryUOM? RepeatEveryUOM { get; init; } = null;
+
     public CampaignStatus? CampaignStatus { get; init; } = null;
 
     public string PublicationlifecycleId { get; init; } = string.Empty;
