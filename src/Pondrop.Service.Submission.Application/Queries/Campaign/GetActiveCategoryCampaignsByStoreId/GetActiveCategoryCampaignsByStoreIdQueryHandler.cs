@@ -71,7 +71,6 @@ public class GetActiveCategoryCampaignsByStoreIdQueryHandler : IRequestHandler<G
 
         try
         {
-            var storeIdsString = request.StoreIds.ToIdQueryString();
             var campaignIdsString = request.CampaignIds.ToIdQueryString();
 
             var utcNow = DateTime.UtcNow;
@@ -86,9 +85,9 @@ public class GetActiveCategoryCampaignsByStoreIdQueryHandler : IRequestHandler<G
                 $" AND c.campaignPublishedDate <= '{utcNow:O}'" +
                 $" AND c.campaignEndDate > '{utcNow:O}'";
 
-            if (!string.IsNullOrEmpty(storeIdsString))
+            if (request.StoreIds?.Any() == true)
                 query +=
-                    $" AND (c.storeIds = null OR ARRAY_LENGTH(c.storeIds) = 0 OR ARRAY_CONTAINS(c.storeIds, {storeIdsString}))";
+                    $" AND (c.storeIds = null OR ARRAY_LENGTH(c.storeIds) = 0 OR {string.Join(" OR ", request.StoreIds.Select(i => $"ARRAY_CONTAINS(c.storeIds, '{i}')"))})";
             if (!string.IsNullOrEmpty(campaignIdsString))
                 query += $" AND c.id in ({campaignIdsString})";
 
@@ -114,8 +113,12 @@ public class GetActiveCategoryCampaignsByStoreIdQueryHandler : IRequestHandler<G
 
             foreach (var campaign in campaigns)
             {
+                var storeIds = campaign.StoreIds!;
+                if (request.StoreIds?.Any() == true)
+                    storeIds = storeIds.Intersect(request.StoreIds!).ToList();
+                
                 // Per store
-                foreach (var storeId in campaign.StoreIds!)
+                foreach (var storeId in storeIds)
                 {
                     // Per category
                     foreach (var categoryId in

@@ -71,7 +71,6 @@ public class GetActiveProductCampaignsByStoreIdQueryHandler : IRequestHandler<Ge
 
         try
         {
-            var storeIdsString = request.StoreIds.ToIdQueryString();
             var campaignIdsString = request.CampaignIds.ToIdQueryString();
 
             var utcNow = DateTime.UtcNow;
@@ -86,11 +85,11 @@ public class GetActiveProductCampaignsByStoreIdQueryHandler : IRequestHandler<Ge
                 $" AND c.campaignPublishedDate <= '{utcNow:O}'" +
                 $" AND c.campaignEndDate > '{utcNow:O}'";
 
-            if (!string.IsNullOrEmpty(storeIdsString))
+            if (request.StoreIds?.Any() == true)
                 query +=
-                    $" AND (c.storeIds = null OR ARRAY_LENGTH(c.storeIds) = 0 OR ARRAY_CONTAINS(c.storeIds, {storeIdsString}))";
+                    $" AND (c.storeIds = null OR ARRAY_LENGTH(c.storeIds) = 0 OR {string.Join(" OR ", request.StoreIds.Select(i => $"ARRAY_CONTAINS(c.storeIds, '{i}')"))})";
             if (!string.IsNullOrEmpty(campaignIdsString))
-                query += $" AND c.id in ({campaignIdsString})";
+                query += $" AND c.id IN ({campaignIdsString})";
 
             var entities = await _checkpointRepository.QueryAsync(query);
             var campaigns = _mapper.Map<List<CampaignRecord>>(entities);
@@ -114,8 +113,12 @@ public class GetActiveProductCampaignsByStoreIdQueryHandler : IRequestHandler<Ge
 
             foreach (var campaign in campaigns)
             {
+                var storeIds = campaign.StoreIds!;
+                if (request.StoreIds?.Any() == true)
+                    storeIds = storeIds.Intersect(request.StoreIds!).ToList();
+                
                 // Per store
-                foreach (var storeId in campaign.StoreIds!)
+                foreach (var storeId in storeIds)
                 {
                     // Per product
                     foreach (var productId in
