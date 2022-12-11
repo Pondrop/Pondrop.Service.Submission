@@ -11,6 +11,7 @@ using Pondrop.Service.Submission.Domain.Enums.SubmissionTemplate;
 using Pondrop.Service.Submission.Domain.Models.Campaign;
 using Pondrop.Service.Submission.Domain.Models.Product;
 using Pondrop.Service.Submission.Domain.Models.Submission;
+using System.Text;
 
 namespace Pondrop.Service.Submission.Application.Queries.Campaign.GetAllCampaigns;
 
@@ -72,25 +73,35 @@ public class GetActiveProductCampaignsByStoreIdQueryHandler : IRequestHandler<Ge
         try
         {
             var campaignIdsString = request.CampaignIds.ToIdQueryString();
-
             var utcNow = DateTime.UtcNow;
 
-            var query =
-                $"SELECT * FROM c" +
-                $" WHERE c.campaignStatus = 'live'" +
-                $" AND c.campaignFocusProductIds != null" +
-                $" AND ARRAY_LENGTH(c.campaignFocusProductIds) > 0" +
-                $" AND c.selectedTemplateIds != null" +
-                $" AND ARRAY_LENGTH(c.selectedTemplateIds) > 0" +
-                $" AND c.campaignPublishedDate <= '{utcNow:O}'" +
-                $" AND c.campaignEndDate > '{utcNow:O}'";
+            var queryBuilder = new StringBuilder();
+            queryBuilder.AppendLine("SELECT * FROM c");
+            queryBuilder.AppendLine("WHERE c.campaignStatus = 'live'");
+            queryBuilder.AppendLine("AND c.campaignFocusProductIds != null");
+            queryBuilder.AppendLine("AND ARRAY_LENGTH(c.campaignFocusProductIds) > 0");
+            queryBuilder.AppendLine("AND c.selectedTemplateIds != null");
+            queryBuilder.AppendLine("AND ARRAY_LENGTH(c.selectedTemplateIds) > 0");
+            queryBuilder.AppendLine($"AND c.campaignPublishedDate <= '{utcNow:O}'");
+            queryBuilder.AppendLine($"AND c.campaignStartDate <= '{utcNow:O}'");
+            queryBuilder.AppendLine($"AND c.campaignEndDate > '{utcNow:O}'");
 
             if (request.StoreIds?.Any() == true)
-                query +=
-                    $" AND (c.storeIds = null OR ARRAY_LENGTH(c.storeIds) = 0 OR {string.Join(" OR ", request.StoreIds.Select(i => $"ARRAY_CONTAINS(c.storeIds, '{i}')"))})";
-            if (!string.IsNullOrEmpty(campaignIdsString))
-                query += $" AND c.id IN ({campaignIdsString})";
+            {
+                queryBuilder.Append("AND (c.storeIds = null OR ARRAY_LENGTH(c.storeIds) = 0");
+                foreach (var i in request.StoreIds)
+                {
+                    queryBuilder.Append($" OR ARRAY_CONTAINS(c.storeIds, '{i}')");
+                }
+                queryBuilder.AppendLine(")");
+            }
 
+            if (!string.IsNullOrEmpty(campaignIdsString))
+            {
+                queryBuilder.AppendLine($" AND c.id IN ({campaignIdsString})");
+            }
+
+            var query = queryBuilder.ToString();
             var entities = await _checkpointRepository.QueryAsync(query);
             var campaigns = _mapper.Map<List<CampaignRecord>>(entities);
 
@@ -142,8 +153,9 @@ public class GetActiveProductCampaignsByStoreIdQueryHandler : IRequestHandler<Ge
                                 SubmissionCount = submissions.Count,
                                 SubmissionTemplateId = campaign.SelectedTemplateIds!.First(),
                                 RequiredSubmissions = campaign.RequiredSubmissions,
-                                CampaignEndDate = campaign.CampaignEndDate,
-                                CampaignPublishedDate = campaign.CampaignPublishedDate,
+                                CampaignStartDate = campaign.CampaignStartDate!.Value,
+                                CampaignEndDate = campaign.CampaignEndDate!.Value,
+                                CampaignPublishedDate = campaign.CampaignPublishedDate!.Value,
                                 CampaignType = campaign.CampaignType,
                                 FocusProductId = productId,
                                 FocusProductName = productsLookup[productId].Name,
