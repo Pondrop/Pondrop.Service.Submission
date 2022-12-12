@@ -94,9 +94,9 @@ public class UpdateCampaignViewCommandHandler : IRequestHandler<UpdateCampaignVi
                         templateTitles,
                         campaign.StoreIds?.Count ?? 0,
                         completions,
-                        campaign.CampaignPublishedDate ?? DateTime.MinValue,
-                        campaign.CampaignStartDate ?? DateTime.MinValue,
-                        campaign.CampaignEndDate ?? DateTime.MinValue,
+                        campaign.CampaignPublishedDate,
+                        campaign.CampaignStartDate,
+                        campaign.CampaignEndDate,
                         campaign.CampaignStatus.HasValue ? campaign.CampaignStatus.Value.ToString().FirstCharToUpper() : string.Empty
                         );
 
