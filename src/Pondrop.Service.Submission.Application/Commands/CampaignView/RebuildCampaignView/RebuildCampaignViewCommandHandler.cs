@@ -84,7 +84,9 @@ public class RebuildCampaignViewCommandHandler : IRequestHandler<RebuildCampaign
                             templateTitles,
                             i.StoreIds?.Count ?? 0,
                             completions,
-                            i.CampaignPublishedDate,
+                            i.CampaignPublishedDate ?? DateTime.MinValue,
+                            i.CampaignStartDate ?? DateTime.MinValue,
+                            i.CampaignEndDate ?? DateTime.MinValue,
                             i.CampaignStatus.HasValue ? i.CampaignStatus.Value.ToString().FirstCharToUpper() : string.Empty
                             );
 
