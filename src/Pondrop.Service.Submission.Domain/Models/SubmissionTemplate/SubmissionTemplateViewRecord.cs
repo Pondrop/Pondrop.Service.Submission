@@ -1,12 +1,18 @@
-﻿namespace Pondrop.Service.Submission.Domain.Models.SubmissionTemplate;
+﻿using Pondrop.Service.Submission.Domain.Enums.SubmissionTemplate;
+
+namespace Pondrop.Service.Submission.Domain.Models.SubmissionTemplate;
 
 public record SubmissionTemplateViewRecord(
          Guid Id,
         string Title,
         string Description,
-         int IconCodePoint,
-         string IconFontFamily,
-         List<StepViewRecord> Steps,
+        int IconCodePoint,
+        string IconFontFamily,
+        SubmissionTemplateType Type,
+        SubmissionTemplateStatus Status,
+        bool? IsForManualSubmissions,
+        SubmissionTemplateFocus Focus,
+        List<StepViewRecord> Steps,
         string CreatedBy,
         string UpdatedBy,
         DateTime CreatedUtc,
@@ -18,6 +24,10 @@ public record SubmissionTemplateViewRecord(
         string.Empty,
         int.MinValue,
         string.Empty,
+        SubmissionTemplateType.unknown,
+        SubmissionTemplateStatus.unknown,
+        null,
+        SubmissionTemplateFocus.unknown,
         new List<StepViewRecord>(0),
         string.Empty,
         string.Empty,

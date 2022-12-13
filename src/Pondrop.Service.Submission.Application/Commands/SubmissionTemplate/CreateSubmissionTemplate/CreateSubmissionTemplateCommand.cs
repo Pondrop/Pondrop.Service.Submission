@@ -1,5 +1,6 @@
 ﻿using MediatR;
 using Pondrop.Service.Submission.Application.Models;
+using Pondrop.Service.Submission.Domain.Enums.SubmissionTemplate;
 using Pondrop.Service.Submission.Domain.Models.SubmissionTemplate;
 
 namespace Pondrop.Service.Submission.Application.Commands.SubmissionTemplate.CreateSubmissionTemplate;
@@ -15,6 +16,10 @@ public class CreateSubmissionTemplateCommand : IRequest<Result<SubmissionTemplat
     public string IconFontFamily { get; set; } = string.Empty;
 
     public string CreatedBy { get; set; } = string.Empty;
+    public SubmissionTemplateType Type { get; set; } = SubmissionTemplateType.unknown;
+    public SubmissionTemplateStatus Status { get; set; } = SubmissionTemplateStatus.unknown;
+    public SubmissionTemplateFocus Focus { get; set; } = SubmissionTemplateFocus.unknown;
+    public bool? IsForManualSubmissions { get; set; } = null;
 
     public List<StepRecord?> Steps { get; init; } = default;
 }

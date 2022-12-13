@@ -1,4 +1,5 @@
 ﻿using Pondrop.Service.Models;
+using Pondrop.Service.Submission.Domain.Enums.SubmissionTemplate;
 
 namespace Pondrop.Service.Submission.Domain.Models.SubmissionTemplate;
 
@@ -8,6 +9,7 @@ public record SubmissionTemplateRecord(
         string Description,
         int IconCodePoint,
         string IconFontFamily,
+        SubmissionTemplateType Type,
         List<StepRecord> Steps,
         string CreatedBy,
         string UpdatedBy,
@@ -22,6 +24,7 @@ public record SubmissionTemplateRecord(
         string.Empty,
         int.MinValue,
         string.Empty,
+        SubmissionTemplateType.unknown,
         new List<StepRecord>(0),
         string.Empty,
         string.Empty,

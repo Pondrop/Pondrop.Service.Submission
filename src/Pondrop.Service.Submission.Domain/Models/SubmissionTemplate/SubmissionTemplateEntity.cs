@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using Pondrop.Service.Events;
 using Pondrop.Service.Models;
+using Pondrop.Service.Submission.Domain.Enums.SubmissionTemplate;
 using Pondrop.Service.Submission.Domain.Events.SubmissionTemplate;
 using Pondrop.Service.Submission.Domain.Models.SubmissionTemplate;
 
@@ -16,6 +17,10 @@ public record SubmissionTemplateEntity : EventEntity
         IconFontFamily = string.Empty;
         Description = string.Empty;
         Steps = new List<StepRecord>();
+        Type = SubmissionTemplateType.unknown;
+        Status = SubmissionTemplateStatus.unknown;
+        Focus = SubmissionTemplateFocus.unknown;
+        IsForManualSubmissions = null;
     }
 
     public SubmissionTemplateEntity(IEnumerable<IEvent> events) : this()
@@ -26,9 +31,9 @@ public record SubmissionTemplateEntity : EventEntity
         }
     }
 
-    public SubmissionTemplateEntity(string title, string description, int iconCodePoint, string iconFontFamily, string createdBy) : this()
+    public SubmissionTemplateEntity(string title, string description, int iconCodePoint, string iconFontFamily, SubmissionTemplateType type, SubmissionTemplateStatus status, bool? isForManualSubmissions, SubmissionTemplateFocus focus, string createdBy) : this()
     {
-        var create = new CreateSubmissionTemplate(Guid.NewGuid(), title, description, iconCodePoint, iconFontFamily);
+        var create = new CreateSubmissionTemplate(Guid.NewGuid(), title, description, iconCodePoint, iconFontFamily, type, status, isForManualSubmissions, focus);
         Apply(create, createdBy);
     }
 
@@ -47,6 +52,19 @@ public record SubmissionTemplateEntity : EventEntity
 
     [JsonProperty(PropertyName = "steps")]
     public List<StepRecord> Steps { get; private set; }
+
+    [JsonProperty("type")]
+    public SubmissionTemplateType Type { get; private set; }
+
+    [JsonProperty("isForManualSubmissions")]
+    public bool? IsForManualSubmissions { get; private set; }
+
+
+    [JsonProperty("status")]
+    public SubmissionTemplateStatus Status { get; private set; }
+    [JsonProperty("focus")]
+    public SubmissionTemplateFocus Focus { get; private set; }
+
 
     protected sealed override void Apply(IEvent eventToApply)
     {
@@ -89,6 +107,10 @@ public record SubmissionTemplateEntity : EventEntity
         Description = create.Description;
         IconCodePoint = create.IconCodePoint;
         IconFontFamily = create.IconFontFamily;
+        Type = create.Type;
+        Status = create.Status;
+        IsForManualSubmissions = create.IsForManualSubmissions;
+        Focus = create.Focus;
         CreatedBy = UpdatedBy = createdBy;
         CreatedUtc = UpdatedUtc = createdUtc;
     }

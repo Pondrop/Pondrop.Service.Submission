@@ -164,4 +164,17 @@ public class SubmissionTemplateController : ControllerBase
         return new AcceptedResult();
     }
 
+     [AllowAnonymous]
+    [HttpPost]
+    [Route("rebuild/view")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> RebuildReportingView()
+    {
+        await _mediator.Send(new RebuildSubmissionTemplateViewCommand());
+        return new AcceptedResult();
+    }
+
+   
+
 }
