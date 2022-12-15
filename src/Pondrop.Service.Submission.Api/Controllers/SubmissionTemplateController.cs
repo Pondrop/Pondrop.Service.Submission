@@ -12,6 +12,12 @@ using Microsoft.Net.Http.Headers;
 using Pondrop.Service.Submission.Api.Services.Interfaces;
 using System.Security.Claims;
 using Pondrop.Service.Interfaces;
+using Pondrop.Service.Submission.Api.Models;
+using Microsoft.Extensions.Options;
+using Azure.Search.Documents.Indexes;
+using Azure;
+using AspNetCore.Proxy.Options;
+using AspNetCore.Proxy;
 
 namespace Pondrop.Service.Submission.Api.Controllers;
 
@@ -25,12 +31,16 @@ public class SubmissionTemplateController : ControllerBase
     private readonly IRebuildCheckpointQueueService _rebuildCheckpointQueueService;
     private readonly ITokenProvider _jwtTokenProvider;
     private readonly ILogger<SubmissionTemplateController> _logger;
+    private readonly SearchIndexConfiguration _searchIdxConfig;
+    private readonly SearchIndexerClient _searchIndexerClient;
+    private HttpProxyOptions _searchProxyOptions;
 
     public SubmissionTemplateController(
         IMediator mediator,
         ITokenProvider jWTTokenProvider,
         IServiceBusService serviceBusService,
         IRebuildCheckpointQueueService rebuildCheckpointQueueService,
+        IOptions<SearchIndexConfiguration> searchIdxConfig,
         ILogger<SubmissionTemplateController> logger)
     {
         _mediator = mediator;
@@ -38,6 +48,17 @@ public class SubmissionTemplateController : ControllerBase
         _jwtTokenProvider = jWTTokenProvider;
         _rebuildCheckpointQueueService = rebuildCheckpointQueueService;
         _logger = logger;
+        _searchIdxConfig = searchIdxConfig.Value;
+
+        _searchIndexerClient = new SearchIndexerClient(new Uri(_searchIdxConfig.BaseUrl), new AzureKeyCredential(_searchIdxConfig.ManagementKey));
+
+        _searchProxyOptions = HttpProxyOptionsBuilder
+            .Instance
+            .WithBeforeSend((httpContext, requestMessage) =>
+            {
+                requestMessage.Headers.Add("api-key", _searchIdxConfig.ApiKey);
+                return Task.CompletedTask;
+            }).Build();
     }
 
     [HttpGet]
@@ -164,7 +185,7 @@ public class SubmissionTemplateController : ControllerBase
         return new AcceptedResult();
     }
 
-     [AllowAnonymous]
+    [AllowAnonymous]
     [HttpPost]
     [Route("rebuild/view")]
     [ProducesResponseType(StatusCodes.Status200OK)]
@@ -175,6 +196,33 @@ public class SubmissionTemplateController : ControllerBase
         return new AcceptedResult();
     }
 
-   
+    [HttpGet, HttpPost]
+    [Route("search")]
+    public Task ProxySearchCatchAll()
+    {
+        var queryString = this.Request.QueryString.Value?.TrimStart('?') ?? string.Empty;
+        var url = Path.Combine(
+            _searchIdxConfig.BaseUrl,
+            "indexes",
+            _searchIdxConfig.SubmissionTemplateIndexName,
+            $"docs?api-version=2021-04-30-Preview&{queryString}");
+
+        return this.HttpProxyAsync(url, _searchProxyOptions);
+    }
+
+    [HttpGet]
+    [Route("indexer/run")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> RunIndexer()
+    {
+        var response = await _searchIndexerClient.RunIndexerAsync(_searchIdxConfig.SubmissionTemplateIndexerName);
+
+        if (response.IsError)
+            return new BadRequestObjectResult(response.ReasonPhrase);
+
+        return new AcceptedResult();
+    }
+
 
 }

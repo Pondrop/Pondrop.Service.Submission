@@ -13,6 +13,10 @@ public class SearchIndexConfiguration
 
     public string SubmissionIndexerName { get; set; } = string.Empty;
 
+    public string SubmissionTemplateIndexName { get; set; } = string.Empty;
+
+    public string SubmissionTemplateIndexerName { get; set; } = string.Empty;
+
     public string CampaignIndexName { get; set; } = string.Empty;
 
     public string CampaignIndexerName { get; set; } = string.Empty;

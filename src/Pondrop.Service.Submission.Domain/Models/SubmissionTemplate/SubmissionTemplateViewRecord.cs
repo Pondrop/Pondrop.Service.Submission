@@ -10,7 +10,7 @@ public record SubmissionTemplateViewRecord(
         string IconFontFamily,
         SubmissionTemplateType Type,
         SubmissionTemplateStatus Status,
-        bool? IsForManualSubmissions,
+        string? IsForManualSubmissions,
         SubmissionTemplateFocus Focus,
         List<StepViewRecord> Steps,
         string CreatedBy,

@@ -61,7 +61,7 @@ public class RebuildSubmissionTemplateViewCommandHandler : IRequestHandler<Rebui
                                                                                       i.IconFontFamily,
                                                                                       i.Type,
                                                                                       i.Status,
-                                                                                      i.IsForManualSubmissions,
+                                                                                      i.IsForManualSubmissions.HasValue ? (i.IsForManualSubmissions.Value ? "Yes" : "No") : null,
                                                                                       i.Focus,
                                                                                       new List<StepViewRecord>(),
                                                                                       i.CreatedBy,
