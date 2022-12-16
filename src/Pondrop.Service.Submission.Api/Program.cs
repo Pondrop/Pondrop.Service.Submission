@@ -30,6 +30,7 @@ using Pondrop.Service.Submission.Domain.Models.Product;
 using Pondrop.Service.Submission.Domain.Models.StoreVisit;
 using Pondrop.Service.Submission.Domain.Models.Submission;
 using Pondrop.Service.Submission.Domain.Models.SubmissionTemplate;
+using Pondrop.Service.Submission.Domain.Models.SuggestedFieldValue;
 using Pondrop.Service.Submission.Infrastructure.BlobStorage;
 using System.Text;
 using System.Text.Json;
@@ -192,6 +193,7 @@ services.AddSingleton<IContainerRepository<SubmissionWithStoreViewRecord>, Conta
 services.AddSingleton<IContainerRepository<SubmissionViewRecord>, ContainerRepository<SubmissionViewRecord>>();
 services.AddSingleton<IContainerRepository<CampaignViewRecord>, ContainerRepository<CampaignViewRecord>>();
 services.AddSingleton<IContainerRepository<FocusedProductSubmissionViewRecord>, ContainerRepository<FocusedProductSubmissionViewRecord>>();
+services.AddSingleton<IContainerRepository<SuggestedFieldValueViewRecord>, ContainerRepository<SuggestedFieldValueViewRecord>>();
 services.AddSingleton<IContainerRepository<StoreViewRecord>, ContainerRepository<StoreViewRecord>>(provider =>
     new ContainerRepository<StoreViewRecord>(
         Options.Create(new CosmosConfiguration()

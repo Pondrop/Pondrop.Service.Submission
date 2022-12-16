@@ -77,6 +77,22 @@ public class SubmissionTemplateController : ControllerBase
             (ex, msg) => new BadRequestObjectResult(msg));
     }
 
+    [HttpGet("active")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> GetAllActiveSubmissionTemplates(int offset = 0, int limit = 10)
+    {
+        var result = await _mediator.Send(new GetAllActiveSubmissionTemplatesQuery()
+        {
+            Offset = offset,
+            Limit = limit
+        });
+        return result.Match<IActionResult>(
+            i => new OkObjectResult(new { Items = i, Offset = offset, Limit = limit, count = i!.Count() }
+            ),
+            (ex, msg) => new BadRequestObjectResult(msg));
+    }
+
     [HttpGet]
     [Route("{id:guid}")]
     [ProducesResponseType(StatusCodes.Status200OK)]

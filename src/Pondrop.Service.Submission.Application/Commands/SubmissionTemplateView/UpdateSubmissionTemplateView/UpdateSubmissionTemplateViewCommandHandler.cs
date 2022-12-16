@@ -63,7 +63,7 @@ public class UpdateSubmissionTemplateViewCommandHandler : IRequestHandler<Update
                                                                                   submissionTemplate.IconFontFamily,
                                                                                       submissionTemplate.Type,
                                                                                       submissionTemplate.Status,
-                                                                                      submissionTemplate.IsForManualSubmissions.HasValue ? (submissionTemplate.IsForManualSubmissions.Value ? "Yes" : "No") : null,
+                                                                                      submissionTemplate.IsForManualSubmissions,
                                                                                       submissionTemplate.Focus,
                                                                                   new List<StepViewRecord>(),
                                                                                   submissionTemplate.CreatedBy,
