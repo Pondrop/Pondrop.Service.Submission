@@ -20,4 +20,8 @@ public class SearchIndexConfiguration
     public string CampaignIndexName { get; set; } = string.Empty;
 
     public string CampaignIndexerName { get; set; } = string.Empty;
+
+    public string FieldIndexName { get; set; } = string.Empty;
+
+    public string FieldIndexerName { get; set; } = string.Empty;
 }

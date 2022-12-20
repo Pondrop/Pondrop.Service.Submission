@@ -57,6 +57,7 @@ public class CreateFieldCommandHandler : DirtyCommandHandler<FieldEntity, Create
             var fieldEntity = new FieldEntity(
                 command.Label,
                 command!.Mandatory,
+                command!.FieldStatus,
                 command!.FieldType,
                 command!.ItemType,
                 command!.MaxValue,

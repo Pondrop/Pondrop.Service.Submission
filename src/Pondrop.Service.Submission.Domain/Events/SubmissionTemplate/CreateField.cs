@@ -6,6 +6,7 @@ public record CreateField(
     Guid Id,
     string Label,
     bool Mandatory,
+    SubmissionFieldStatus FieldStatus,
     SubmissionFieldType FieldType,
     SubmissionFieldItemType? ItemType,
     int? MaxValue,

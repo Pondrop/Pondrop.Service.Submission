@@ -190,65 +190,64 @@ public record CampaignEntity : EventEntity
 
     private void When(UpdateCampaign update, string createdBy, DateTime createdUtc)
     {
+        var oldName = Name;
+        var oldCampaignType = CampaignType;
+        var oldCampaignTriggerIds = CampaignTriggerIds;
+        var oldCampaignFocusCategoryIds = CampaignFocusCategoryIds;
+        var oldCampaignFocusProductIds = CampaignFocusProductIds;
+        var oldSelectedTemplateIds = SelectedTemplateIds;
+        var oldStoreIds = StoreIds;
+        var oldRequiredSubmissions = RequiredSubmissions;
+        var oldRewardSchemeId = RewardSchemeId;
+        var oldCampaignPublishedDate = CampaignPublishedDate;
+        var oldCampaignEndDate = CampaignEndDate;
+        var oldCampaignStatus = CampaignStatus;
+        var oldPublicationlifecycleId = PublicationlifecycleId;
+        var oldCampaignStartDate = CampaignStartDate;
+        var oldMinimumTimeIntervalMins = MinimumTimeIntervalMins;
+        var oldRepeatEvery = RepeatEvery;
+        var oldRepeatEveryUOM = RepeatEveryUOM;
+
+        Name = update.Name;
+        CampaignType = update.CampaignType;
+        CampaignTriggerIds = update.CampaignTriggerIds;
+        CampaignFocusCategoryIds = update.CampaignFocusCategoryIds;
+        CampaignFocusProductIds = update.CampaignFocusProductIds;
+        SelectedTemplateIds = update.SelectedTemplateIds;
+        StoreIds = update.StoreIds;
+        RequiredSubmissions = update.RequiredSubmissions;
+        RewardSchemeId = update.RewardSchemeId;
+        CampaignPublishedDate = update.CampaignPublishedDate;
+        CampaignEndDate = update.CampaignEndDate;
+        CampaignStartDate = update.CampaignStartDate;
+        CampaignStatus = update.CampaignStatus;
+        MinimumTimeIntervalMins = update.minimumTimeIntervalMins;
+        RepeatEvery = update.repeatEvery;
+        RepeatEveryUOM = update.repeatEveryUOM;
+        PublicationlifecycleId = update.PublicationlifecycleId;
+
+        if (oldName != Name ||
+            oldCampaignType != CampaignType ||
+            oldCampaignTriggerIds != CampaignTriggerIds ||
+            oldCampaignFocusCategoryIds != CampaignFocusCategoryIds ||
+            oldCampaignFocusProductIds != CampaignFocusProductIds ||
+            oldSelectedTemplateIds != SelectedTemplateIds ||
+            oldStoreIds != StoreIds ||
+            oldRequiredSubmissions != RequiredSubmissions ||
+            oldRewardSchemeId != RewardSchemeId ||
+            oldCampaignEndDate != CampaignEndDate ||
+            oldCampaignPublishedDate != CampaignPublishedDate ||
+            oldCampaignStatus != CampaignStatus ||
+            oldCampaignStartDate != CampaignStartDate ||
+            oldMinimumTimeIntervalMins != MinimumTimeIntervalMins ||
+            oldRepeatEvery != RepeatEvery ||
+            oldRepeatEveryUOM != RepeatEveryUOM ||
+            oldPublicationlifecycleId != PublicationlifecycleId)
         {
-            var oldName = Name;
-            var oldCampaignType = CampaignType;
-            var oldCampaignTriggerIds = CampaignTriggerIds;
-            var oldCampaignFocusCategoryIds = CampaignFocusCategoryIds;
-            var oldCampaignFocusProductIds = CampaignFocusProductIds;
-            var oldSelectedTemplateIds = SelectedTemplateIds;
-            var oldStoreIds = StoreIds;
-            var oldRequiredSubmissions = RequiredSubmissions;
-            var oldRewardSchemeId = RewardSchemeId;
-            var oldCampaignPublishedDate = CampaignPublishedDate;
-            var oldCampaignEndDate = CampaignEndDate;
-            var oldCampaignStatus = CampaignStatus;
-            var oldPublicationlifecycleId = PublicationlifecycleId;
-            var oldCampaignStartDate = CampaignStartDate;
-            var oldMinimumTimeIntervalMins = MinimumTimeIntervalMins;
-            var oldRepeatEvery = RepeatEvery;
-            var oldRepeatEveryUOM = RepeatEveryUOM;
-
-            Name = update.Name;
-            CampaignType = update.CampaignType;
-            CampaignTriggerIds = update.CampaignTriggerIds;
-            CampaignFocusCategoryIds = update.CampaignFocusCategoryIds;
-            CampaignFocusProductIds = update.CampaignFocusProductIds;
-            SelectedTemplateIds = update.SelectedTemplateIds;
-            StoreIds = update.StoreIds;
-            RequiredSubmissions = update.RequiredSubmissions;
-            RewardSchemeId = update.RewardSchemeId;
-            CampaignPublishedDate = update.CampaignPublishedDate;
-            CampaignEndDate = update.CampaignEndDate;
-            CampaignStartDate = update.CampaignStartDate;
-            CampaignStatus = update.CampaignStatus;
-            MinimumTimeIntervalMins = update.minimumTimeIntervalMins;
-            RepeatEvery = update.repeatEvery;
-            RepeatEveryUOM = update.repeatEveryUOM;
-            PublicationlifecycleId = update.PublicationlifecycleId;
-
-            if (oldName != Name ||
-                oldCampaignType != CampaignType ||
-                oldCampaignTriggerIds != CampaignTriggerIds ||
-                oldCampaignFocusCategoryIds != CampaignFocusCategoryIds ||
-                oldCampaignFocusProductIds != CampaignFocusProductIds ||
-                oldSelectedTemplateIds != SelectedTemplateIds ||
-                oldStoreIds != StoreIds ||
-                oldRequiredSubmissions != RequiredSubmissions ||
-                oldRewardSchemeId != RewardSchemeId ||
-                oldCampaignEndDate != CampaignEndDate ||
-                oldCampaignPublishedDate != CampaignPublishedDate ||
-                oldCampaignStatus != CampaignStatus ||
-                oldCampaignStartDate != CampaignStartDate ||
-                oldMinimumTimeIntervalMins != MinimumTimeIntervalMins ||
-                oldRepeatEvery != RepeatEvery ||
-                oldRepeatEveryUOM != RepeatEveryUOM ||
-                oldPublicationlifecycleId != PublicationlifecycleId)
-            {
-                UpdatedBy = createdBy;
-                UpdatedUtc = createdUtc;
-            }
+            UpdatedBy = createdBy;
+            UpdatedUtc = createdUtc;
         }
     }
+
 
 }

@@ -73,6 +73,9 @@ public record SubmissionTemplateEntity : EventEntity
             case CreateSubmissionTemplate create:
                 When(create, eventToApply.CreatedBy, eventToApply.CreatedUtc);
                 break;
+            case UpdateSubmissionTemplate update:
+                When(update, eventToApply.CreatedBy, eventToApply.CreatedUtc);
+                break;
             case AddStepToSubmissionTemplate addStep:
                 When(addStep, eventToApply.CreatedBy, eventToApply.CreatedUtc);
                 break;
@@ -93,6 +96,11 @@ public record SubmissionTemplateEntity : EventEntity
         if (eventPayloadToApply is CreateSubmissionTemplate create)
         {
             Apply(new Event(GetStreamId<SubmissionTemplateEntity>(create.Id), StreamType, 0, create, createdBy));
+
+        }
+        if (eventPayloadToApply is UpdateSubmissionTemplate update)
+        {
+            Apply(new Event(GetStreamId<SubmissionTemplateEntity>(update.Id), StreamType, 0, update, createdBy));
         }
         else
         {
@@ -113,6 +121,40 @@ public record SubmissionTemplateEntity : EventEntity
         Focus = create.Focus;
         CreatedBy = UpdatedBy = createdBy;
         CreatedUtc = UpdatedUtc = createdUtc;
+    }
+
+    private void When(UpdateSubmissionTemplate update, string createdBy, DateTime createdUtc)
+    {
+        var oldTitle = Title;
+        var oldDescription = Description;
+        var oldIconCodePoint = IconCodePoint;
+        var oldIconFontFamily = IconFontFamily;
+        var oldType = Type;
+        var oldStatus = Status;
+        var oldIsForManualSubmissions = IsForManualSubmissions;
+        var oldFocus = Focus;
+
+        Title = update.Title;
+        Description = update.Description;
+        IconCodePoint = update.IconCodePoint;
+        IconFontFamily = update.IconFontFamily;
+        Type = update.Type;
+        Status = update.Status;
+        IsForManualSubmissions = update.IsForManualSubmissions;
+        Focus = update.Focus;
+
+        if (oldTitle != Title ||
+            oldDescription != Description ||
+            oldIconCodePoint != IconCodePoint ||
+            oldIconFontFamily != IconFontFamily ||
+            oldType != Type ||
+            oldStatus != Status ||
+            oldFocus != Focus ||
+            oldIsForManualSubmissions != IsForManualSubmissions)
+        {
+            UpdatedBy = createdBy;
+            UpdatedUtc = createdUtc;
+        }
     }
 
     private void When(AddStepToSubmissionTemplate step, string createdBy, DateTime createdUtc)

@@ -83,7 +83,7 @@ public class UpdateSubmissionTemplateViewCommandHandler : IRequestHandler<Update
                                 {
                                     Label = field.Label ?? retrievedField.Label,
                                     MaxValue = field.MaxValue ?? retrievedField.MaxValue,
-                                    Mandatory = field.Mandatory ?? retrievedField.Mandatory,
+                                    Mandatory = field.Mandatory ?? retrievedField.Mandatory
                                 };
 
                                 fields.Add(fieldRecord);

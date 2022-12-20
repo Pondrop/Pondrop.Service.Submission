@@ -6,6 +6,7 @@ public record UpdateField(
     Guid Id,
     string Label,
     bool Mandatory,
+    SubmissionFieldStatus FieldStatus,
     SubmissionFieldType FieldType,
     SubmissionFieldItemType? ItemType,
     int? MaxValue,

@@ -18,6 +18,7 @@ using Azure.Search.Documents.Indexes;
 using Azure;
 using AspNetCore.Proxy.Options;
 using AspNetCore.Proxy;
+using Pondrop.Service.SubmissionTemplate.Application.Commands;
 
 namespace Pondrop.Service.Submission.Api.Controllers;
 
@@ -123,6 +124,25 @@ public class SubmissionTemplateController : ControllerBase
             },
             (ex, msg) => Task.FromResult<IActionResult>(new BadRequestObjectResult(msg)));
     }
+
+
+    [HttpPut]
+    [Route("update")]
+    [ProducesResponseType(StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> UpdateSubmissionTemplate([FromBody] UpdateSubmissionTemplateCommand command)
+    {
+        var result = await _mediator.Send(command);
+        return await result.MatchAsync<IActionResult>(
+            async i =>
+            {
+                await _serviceBusService.SendMessageAsync(new UpdateSubmissionTemplateCheckpointByIdCommand() { Id = i!.Id });
+                return StatusCode(StatusCodes.Status201Created, i);
+            },
+            (ex, msg) => Task.FromResult<IActionResult>(new BadRequestObjectResult(msg)));
+    }
+
 
     [HttpPost]
     [Route("step/add")]

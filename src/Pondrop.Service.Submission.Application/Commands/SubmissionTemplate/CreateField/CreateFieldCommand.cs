@@ -13,6 +13,8 @@ public class CreateFieldCommand : IRequest<Result<FieldRecord>>
 
     public SubmissionFieldType FieldType { get; init; } = SubmissionFieldType.unknown;
 
+    public SubmissionFieldStatus FieldStatus { get; init; } = SubmissionFieldStatus.unknown;
+
     public SubmissionFieldItemType? ItemType { get; init; } = null;
 
     public int? MaxValue { get; init; } = null;

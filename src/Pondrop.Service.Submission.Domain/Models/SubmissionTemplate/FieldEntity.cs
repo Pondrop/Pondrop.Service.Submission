@@ -15,6 +15,7 @@ public record FieldEntity : EventEntity
         Mandatory = false;
         FieldType = SubmissionFieldType.unknown;
         ItemType = SubmissionFieldItemType.unknown;
+        FieldStatus = SubmissionFieldStatus.unknown;
         MaxValue = null;
         PickerValues = null;
     }
@@ -28,20 +29,25 @@ public record FieldEntity : EventEntity
 
     public FieldEntity(string label,
     bool mandatory,
+    SubmissionFieldStatus fieldStatus,
     SubmissionFieldType fieldType,
     SubmissionFieldItemType? itemType,
     int? maxValue,
     List<string?>? pickerValues, string createdBy) : this()
     {
-        var create = new CreateField(Guid.NewGuid(), label, mandatory, fieldType, itemType, maxValue, pickerValues);
+        var create = new CreateField(Guid.NewGuid(), label, mandatory, fieldStatus, fieldType, itemType, maxValue, pickerValues);
         Apply(create, createdBy);
     }
 
-    [JsonProperty(PropertyName = "label")]
+    [JsonProperty("label")]
     public string Label { get; private set; }
 
-    [JsonProperty(PropertyName = "mandatory")]
+    [JsonProperty("mandatory")]
     public bool Mandatory { get; private set; }
+
+    [JsonProperty("fieldStatus")]
+    public SubmissionFieldStatus FieldStatus { get; private set; }
+
 
     [JsonProperty("fieldType")]
     public SubmissionFieldType FieldType { get; private set; }
@@ -52,7 +58,7 @@ public record FieldEntity : EventEntity
     [JsonProperty("maxValue")]
     public int? MaxValue { get; private set; }
 
-    [JsonProperty(PropertyName = "pickerValues")]
+    [JsonProperty("pickerValues")]
     public List<string?>? PickerValues { get; private set; }
 
     protected sealed override void Apply(IEvent eventToApply)
@@ -92,6 +98,7 @@ public record FieldEntity : EventEntity
         Label = create.Label;
         Mandatory = create.Mandatory;
         FieldType = create.FieldType;
+        FieldStatus = create.FieldStatus;
         ItemType = create.ItemType;
         MaxValue = create.MaxValue;
         PickerValues = create.PickerValues;
@@ -105,12 +112,14 @@ public record FieldEntity : EventEntity
             var oldLabel = Label;
             var oldMandatory = Mandatory;
             var oldFieldType = FieldType;
+            var oldFieldStatus = FieldStatus;
             var oldItemType = ItemType;
             var oldMaxValue = MaxValue;
             var oldPickerValues = PickerValues;
 
             Label = update.Label;
             Mandatory = update.Mandatory;
+            FieldStatus = update.FieldStatus;
             FieldType = update.FieldType;
             ItemType = update.ItemType;
             MaxValue = update.MaxValue;
@@ -119,6 +128,7 @@ public record FieldEntity : EventEntity
             if (oldLabel != Label ||
                 oldMandatory != Mandatory ||
                 oldFieldType != FieldType ||
+                oldFieldStatus != FieldStatus ||
                 oldItemType != ItemType ||
                 oldMaxValue != MaxValue ||
                 oldPickerValues != PickerValues)

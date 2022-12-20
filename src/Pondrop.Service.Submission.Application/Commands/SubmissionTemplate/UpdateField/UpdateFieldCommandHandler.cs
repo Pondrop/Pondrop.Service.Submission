@@ -7,6 +7,7 @@ using Pondrop.Service.Interfaces;
 using Pondrop.Service.Interfaces.Services;
 using Pondrop.Service.Submission.Application.Commands.SubmissionTemplate.AddStepToSubmission;
 using Pondrop.Service.Submission.Application.Models;
+using Pondrop.Service.Submission.Domain.Enums.SubmissionTemplate;
 using Pondrop.Service.Submission.Domain.Events.Field;
 using Pondrop.Service.Submission.Domain.Models;
 using Pondrop.Service.Submission.Domain.Models.SubmissionTemplate;
@@ -64,7 +65,8 @@ public class UpdateFieldCommandHandler : DirtyCommandHandler<FieldEntity, Update
                     command.Id,
                     command.Label,
                     command!.Mandatory ?? false,
-                    command!.FieldType ?? Domain.Enums.SubmissionTemplate.SubmissionFieldType.unknown,
+                    command!.FieldStatus ?? SubmissionFieldStatus.unknown,
+                    command!.FieldType ?? SubmissionFieldType.unknown,
                     command!.ItemType,
                     command!.MaxValue,
                     command!.PickerValues);
