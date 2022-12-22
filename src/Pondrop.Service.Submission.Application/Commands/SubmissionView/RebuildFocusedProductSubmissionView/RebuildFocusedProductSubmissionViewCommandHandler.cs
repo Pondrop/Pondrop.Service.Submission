@@ -161,13 +161,13 @@ public class RebuildFocusedProductSubmissionViewCommandHandler : IRequestHandler
         if (submissionTemplateId == _priceTemplateConfig.Id)
         {
             var product = new ItemValueRecord();
-            double productPrice = 0;
+            double productPrice = -999;
             var labelProduct = string.Empty;
             var labelBarcode = string.Empty;
             var priceType = string.Empty;
             var unitPriceUOM = string.Empty;
             var photoUrl = string.Empty;
-            double unitPrice = 0;
+            double unitPrice = -999;
             var comment = string.Empty;
             var productEAN = string.Empty;
             var productSize = string.Empty;
@@ -200,7 +200,7 @@ public class RebuildFocusedProductSubmissionViewCommandHandler : IRequestHandler
                         }
                         if (field.TemplateFieldId == _priceTemplateConfig.ProductPriceFieldId)
                         {
-                            productPrice = field?.Values?.FirstOrDefault()?.DoubleValue ?? 0;
+                            productPrice = field?.Values?.FirstOrDefault()?.DoubleValue ?? -999;
                         }
                         if (field.TemplateFieldId == _priceTemplateConfig.LabelProductNameFieldId)
                         {
@@ -216,7 +216,7 @@ public class RebuildFocusedProductSubmissionViewCommandHandler : IRequestHandler
                         }
                         if (field.TemplateFieldId == _priceTemplateConfig.UnitPriceFieldId)
                         {
-                            unitPrice = field?.Values?.FirstOrDefault()?.DoubleValue ?? 0;
+                            unitPrice = field?.Values?.FirstOrDefault()?.DoubleValue ?? -999;
                         }
                         if (field.TemplateFieldId == _priceTemplateConfig.UnitPriceUOMFieldId)
                         {
@@ -252,8 +252,8 @@ public class RebuildFocusedProductSubmissionViewCommandHandler : IRequestHandler
         else if (submissionTemplateId == _quickPriceAndQuantityTemplateConfig.Id)
         {
             var product = new ItemValueRecord();
-            double productPrice = 0;
-            double quantity = 0;
+            double productPrice = -999;
+            double quantity = -999;
             var aisle = string.Empty;
             var shelfNumber = string.Empty;
             var shelfSection = string.Empty;
@@ -292,7 +292,7 @@ public class RebuildFocusedProductSubmissionViewCommandHandler : IRequestHandler
                         }
                         if (field.TemplateFieldId == _quickPriceAndQuantityTemplateConfig.ProductPriceFieldId)
                         {
-                            productPrice = field?.Values?.FirstOrDefault()?.DoubleValue ?? 0;
+                            productPrice = field?.Values?.FirstOrDefault()?.DoubleValue ?? -999;
                         }
                         if (field.TemplateFieldId == _quickPriceAndQuantityTemplateConfig.AisleFieldId)
                         {
@@ -308,7 +308,7 @@ public class RebuildFocusedProductSubmissionViewCommandHandler : IRequestHandler
                         }
                         if (field.TemplateFieldId == _quickPriceAndQuantityTemplateConfig.QuantityFieldId)
                         {
-                            quantity = field?.Values?.FirstOrDefault()?.IntValue ?? 0;
+                            quantity = field?.Values?.FirstOrDefault()?.IntValue ?? -999;
                         }
                         if (field.TemplateFieldId == _quickPriceAndQuantityTemplateConfig.ShelfIssueFieldId)
                         {
@@ -348,9 +348,9 @@ public class RebuildFocusedProductSubmissionViewCommandHandler : IRequestHandler
             var product = new ItemValueRecord();
             DateTime nearestUseByDate = DateTime.MinValue;
             DateTime furthestUseByDate = DateTime.MinValue;
-            double quantity = 0;
-            double quantityNearestUseByDate = 0;
-            double quantityFurthestUseByDate = 0;
+            double quantity = -999;
+            double quantityNearestUseByDate = -999;
+            double quantityFurthestUseByDate = -999;
             var aisle = string.Empty;
             var shelfNumber = string.Empty;
             var shelfSection = string.Empty;
@@ -397,11 +397,11 @@ public class RebuildFocusedProductSubmissionViewCommandHandler : IRequestHandler
                         }
                         if (field.TemplateFieldId == _shelfStockLevelsTemplateConfig.QuantityAtNearestUseByDateFieldId)
                         {
-                            quantityNearestUseByDate = field?.Values?.FirstOrDefault()?.IntValue ?? 0;
+                            quantityNearestUseByDate = field?.Values?.FirstOrDefault()?.IntValue ?? -999;
                         }
                         if (field.TemplateFieldId == _shelfStockLevelsTemplateConfig.QuantityAtFurthestUseByDateFieldId)
                         {
-                            quantityFurthestUseByDate = field?.Values?.FirstOrDefault()?.IntValue ?? 0;
+                            quantityFurthestUseByDate = field?.Values?.FirstOrDefault()?.IntValue ?? -999;
                         }
                         if (field.TemplateFieldId == _shelfStockLevelsTemplateConfig.AisleFieldId)
                         {
@@ -417,7 +417,7 @@ public class RebuildFocusedProductSubmissionViewCommandHandler : IRequestHandler
                         }
                         if (field.TemplateFieldId == _shelfStockLevelsTemplateConfig.QuantityFieldId)
                         {
-                            quantity = field?.Values?.FirstOrDefault()?.IntValue ?? 0;
+                            quantity = field?.Values?.FirstOrDefault()?.IntValue ?? -999;
                         }
                         if (field.TemplateFieldId == _shelfStockLevelsTemplateConfig.PhotoFieldId)
                         {
