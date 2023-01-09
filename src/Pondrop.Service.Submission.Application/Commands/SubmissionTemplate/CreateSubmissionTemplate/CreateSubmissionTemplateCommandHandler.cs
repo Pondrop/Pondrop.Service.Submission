@@ -61,6 +61,7 @@ public class CreateSubmissionTemplateCommandHandler : DirtyCommandHandler<Submis
                 command.Status,
                 command.IsForManualSubmissions,
                 command.Focus,
+                command.InitiatedBy,
                 _userService.CurrentUserId()
                );
 

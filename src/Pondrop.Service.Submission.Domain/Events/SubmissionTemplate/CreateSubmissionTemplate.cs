@@ -12,4 +12,5 @@ public record CreateSubmissionTemplate(
     SubmissionTemplateType Type,
         SubmissionTemplateStatus Status,
         bool? IsForManualSubmissions,
-        SubmissionTemplateFocus Focus) : EventPayload;
+        SubmissionTemplateFocus Focus,
+        SubmissionTemplateInitiationType InitiatedBy) : EventPayload;

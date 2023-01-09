@@ -64,6 +64,7 @@ public class RebuildSubmissionTemplateViewCommandHandler : IRequestHandler<Rebui
                                                                                       i.IsForManualSubmissions,
                                                                                       i.Focus,
                                                                                       new List<StepViewRecord>(),
+                                                                                      i.InitiatedBy,
                                                                                       i.CreatedBy,
                                                                                       i.UpdatedBy,
                                                                                       i.CreatedUtc,

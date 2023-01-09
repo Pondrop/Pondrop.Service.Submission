@@ -66,6 +66,7 @@ public class UpdateSubmissionTemplateViewCommandHandler : IRequestHandler<Update
                                                                                       submissionTemplate.IsForManualSubmissions,
                                                                                       submissionTemplate.Focus,
                                                                                   new List<StepViewRecord>(),
+                                                                                  submissionTemplate.InitiatedBy,
                                                                                   submissionTemplate.CreatedBy,
                                                                                   submissionTemplate.UpdatedBy,
                                                                                   submissionTemplate.CreatedUtc,

@@ -73,7 +73,8 @@ public class UpdateSubmissionTemplateCommandHandler : DirtyCommandHandler<Submis
                         command.Type,
                         command.Status,
                         command.IsForManualSubmissions,
-                        command.Focus
+                        command.Focus,
+                        command.InitiatedBy
                        );
 
 

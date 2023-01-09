@@ -20,6 +20,7 @@ public record SubmissionTemplateEntity : EventEntity
         Type = SubmissionTemplateType.unknown;
         Status = SubmissionTemplateStatus.unknown;
         Focus = SubmissionTemplateFocus.unknown;
+        InitiatedBy = SubmissionTemplateInitiationType.unknown;
         IsForManualSubmissions = null;
     }
 
@@ -31,9 +32,9 @@ public record SubmissionTemplateEntity : EventEntity
         }
     }
 
-    public SubmissionTemplateEntity(string title, string description, int iconCodePoint, string iconFontFamily, SubmissionTemplateType type, SubmissionTemplateStatus status, bool? isForManualSubmissions, SubmissionTemplateFocus focus, string createdBy) : this()
+    public SubmissionTemplateEntity(string title, string description, int iconCodePoint, string iconFontFamily, SubmissionTemplateType type, SubmissionTemplateStatus status, bool? isForManualSubmissions, SubmissionTemplateFocus focus, SubmissionTemplateInitiationType initiatedBy, string createdBy) : this()
     {
-        var create = new CreateSubmissionTemplate(Guid.NewGuid(), title, description, iconCodePoint, iconFontFamily, type, status, isForManualSubmissions, focus);
+        var create = new CreateSubmissionTemplate(Guid.NewGuid(), title, description, iconCodePoint, iconFontFamily, type, status, isForManualSubmissions, focus, initiatedBy);
         Apply(create, createdBy);
     }
 
@@ -62,9 +63,12 @@ public record SubmissionTemplateEntity : EventEntity
 
     [JsonProperty("status")]
     public SubmissionTemplateStatus Status { get; private set; }
+
     [JsonProperty("focus")]
     public SubmissionTemplateFocus Focus { get; private set; }
 
+    [JsonProperty("initiatedBy")]
+    public SubmissionTemplateInitiationType InitiatedBy { get; private set; }
 
     protected sealed override void Apply(IEvent eventToApply)
     {
@@ -119,6 +123,7 @@ public record SubmissionTemplateEntity : EventEntity
         Status = create.Status;
         IsForManualSubmissions = create.IsForManualSubmissions;
         Focus = create.Focus;
+        InitiatedBy = create.InitiatedBy;
         CreatedBy = UpdatedBy = createdBy;
         CreatedUtc = UpdatedUtc = createdUtc;
     }
@@ -133,6 +138,7 @@ public record SubmissionTemplateEntity : EventEntity
         var oldStatus = Status;
         var oldIsForManualSubmissions = IsForManualSubmissions;
         var oldFocus = Focus;
+        var oldInitiatedBy = InitiatedBy;
 
         Title = update.Title;
         Description = update.Description;
@@ -141,6 +147,7 @@ public record SubmissionTemplateEntity : EventEntity
         Type = update.Type;
         Status = update.Status;
         IsForManualSubmissions = update.IsForManualSubmissions;
+        InitiatedBy = update.InitiatedBy;
         Focus = update.Focus;
 
         if (oldTitle != Title ||
@@ -150,6 +157,7 @@ public record SubmissionTemplateEntity : EventEntity
             oldType != Type ||
             oldStatus != Status ||
             oldFocus != Focus ||
+            oldInitiatedBy != InitiatedBy ||
             oldIsForManualSubmissions != IsForManualSubmissions)
         {
             UpdatedBy = createdBy;
