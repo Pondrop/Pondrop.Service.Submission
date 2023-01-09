@@ -19,7 +19,7 @@ public class CreateSubmissionTemplateCommand : IRequest<Result<SubmissionTemplat
     public SubmissionTemplateType Type { get; set; } = SubmissionTemplateType.unknown;
     public SubmissionTemplateStatus Status { get; set; } = SubmissionTemplateStatus.unknown;
     public SubmissionTemplateFocus Focus { get; set; } = SubmissionTemplateFocus.unknown;
-    public SubmissionTemplateInitiationType InitiatedBy { get; set; } = SubmissionTemplateInitiationType.unknown;
+    public SubmissionTemplateInitiationType InitiatedBy { get; set; } = SubmissionTemplateInitiationType.shopper;
     public bool? IsForManualSubmissions { get; set; } = null;
 
     public List<StepRecord?> Steps { get; init; } = default;

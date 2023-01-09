@@ -24,13 +24,13 @@ internal class SubmissionTemplateInitiationTypeEnumConverter : StringEnumConvert
         try
         {
             if (string.IsNullOrEmpty(reader?.Value?.ToString()))
-                return SubmissionTemplateInitiationType.unknown;
+                return SubmissionTemplateInitiationType.shopper;
 
             return base.ReadJson(reader, objectType, existingValue, serializer);
         }
         catch
         {
-            return SubmissionTemplateInitiationType.unknown;
+            return SubmissionTemplateInitiationType.shopper;
         }
     }
 
