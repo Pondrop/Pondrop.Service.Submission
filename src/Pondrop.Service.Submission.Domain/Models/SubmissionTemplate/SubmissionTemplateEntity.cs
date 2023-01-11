@@ -186,8 +186,8 @@ public record SubmissionTemplateEntity : EventEntity
 
     private void When(RemoveStepFromSubmissionTemplate removeItemFromList, string updatedBy, DateTime updatedUtc)
     {
-        var step = Steps.Single(i => i.Id == removeItemFromList.Id);
-        Steps.Remove(step);
+        var steps = Steps.Where(i => i.Id != removeItemFromList.Id);
+        Steps = new List<StepRecord>(steps);
 
         UpdatedBy = updatedBy;
         UpdatedUtc = updatedUtc;
