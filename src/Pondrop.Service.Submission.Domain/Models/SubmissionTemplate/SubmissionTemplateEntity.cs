@@ -102,10 +102,6 @@ public record SubmissionTemplateEntity : EventEntity
             Apply(new Event(GetStreamId<SubmissionTemplateEntity>(create.Id), StreamType, 0, create, createdBy));
 
         }
-        if (eventPayloadToApply is UpdateSubmissionTemplate update)
-        {
-            Apply(new Event(GetStreamId<SubmissionTemplateEntity>(update.Id), StreamType, 0, update, createdBy));
-        }
         else
         {
             Apply(new Event(StreamId, StreamType, AtSequence + 1, eventPayloadToApply, createdBy));
