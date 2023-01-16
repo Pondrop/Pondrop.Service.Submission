@@ -15,7 +15,7 @@ namespace Pondrop.Service.Submission.Application.Commands.Field.AddStepToSubmiss
 public class CreateFieldCommandHandler : DirtyCommandHandler<FieldEntity, CreateFieldCommand, Result<FieldRecord>>
 {
     private readonly IEventRepository _eventRepository;
-    private readonly ICheckpointRepository<FieldEntity> _submissionTemplateCheckpointRepository;
+    private readonly ICheckpointRepository<FieldEntity> _checkpointRepository;
     private readonly IMapper _mapper;
     private readonly IUserService _userService;
     private readonly IValidator<CreateFieldCommand> _validator;
@@ -24,7 +24,7 @@ public class CreateFieldCommandHandler : DirtyCommandHandler<FieldEntity, Create
     public CreateFieldCommandHandler(
         IOptions<SubmissionUpdateConfiguration> submissionTemplateUpdateConfig,
         IEventRepository eventRepository,
-        ICheckpointRepository<FieldEntity> submissionTemplateCheckpointRepository,
+        ICheckpointRepository<FieldEntity> checkpointRepository,
         IDaprService daprService,
         IUserService userService,
         IMapper mapper,
@@ -32,7 +32,7 @@ public class CreateFieldCommandHandler : DirtyCommandHandler<FieldEntity, Create
         ILogger<CreateFieldCommandHandler> logger) : base(eventRepository, submissionTemplateUpdateConfig.Value, daprService, logger)
     {
         _eventRepository = eventRepository;
-        _submissionTemplateCheckpointRepository = submissionTemplateCheckpointRepository;
+        _checkpointRepository = checkpointRepository;
         _mapper = mapper;
         _userService = userService;
         _validator = validator;
@@ -54,6 +54,11 @@ public class CreateFieldCommandHandler : DirtyCommandHandler<FieldEntity, Create
 
         try
         {
+            var duplicateMessage = $"Possible field match found";
+            var existingFields = await GetExistingFieldByLabel(command.Label);
+            if (existingFields != null && existingFields.Count > 0)
+                return Result<FieldRecord>.Error(duplicateMessage);
+
             var fieldEntity = new FieldEntity(
                 command.Label,
                 command!.Mandatory,
@@ -85,4 +90,23 @@ public class CreateFieldCommandHandler : DirtyCommandHandler<FieldEntity, Create
 
     private static string FailedToCreateMessage(CreateFieldCommand command) =>
         $"Failed to create field\nCommand: '{JsonConvert.SerializeObject(command)}'";
+
+    private async Task<List<FieldEntity>> GetExistingFieldByLabel(string fieldLabel)
+    {
+        const string fieldLabelKey = "@fieldLabel";
+
+        var conditions = new List<string>();
+        var parameters = new Dictionary<string, string>();
+
+        conditions.Add($"LOWER(c.label) = {fieldLabelKey}");
+        parameters.Add(fieldLabelKey, fieldLabel.ToLower());
+
+        if (!conditions.Any())
+            return new List<FieldEntity>(0);
+
+        var sqlQueryText = $"SELECT * FROM c WHERE {string.Join(" AND ", conditions)}";
+
+        var affectedFields = await _checkpointRepository.QueryAsync(sqlQueryText, parameters);
+        return affectedFields;
+    }
 }

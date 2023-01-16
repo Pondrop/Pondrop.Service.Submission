@@ -56,6 +56,11 @@ public class UpdateFieldCommandHandler : DirtyCommandHandler<FieldEntity, Update
 
         try
         {
+            var duplicateMessage = $"Possible field match found";
+            var existingFields = await GetExistingFieldByLabelAndId(command.Id, command.Label);
+            if (existingFields != null && existingFields.Count > 0)
+                return Result<FieldRecord>.Error(duplicateMessage);
+
             var fieldEntity = await _checkpointRepository.GetByIdAsync(command.Id);
             fieldEntity ??= await GetFromStreamAsync(command.Id);
 
@@ -105,4 +110,28 @@ public class UpdateFieldCommandHandler : DirtyCommandHandler<FieldEntity, Update
 
     private static string FailedToUpdateMessage(UpdateFieldCommand command) =>
         $"Failed to create field\nCommand: '{JsonConvert.SerializeObject(command)}'";
+
+
+    private async Task<List<FieldEntity>> GetExistingFieldByLabelAndId(Guid id, string fieldLabel)
+    {
+        const string idKey = "@id";
+        const string fieldLabelKey = "@fieldLabel";
+
+        var conditions = new List<string>();
+        var parameters = new Dictionary<string, string>();
+
+        conditions.Add($"c.id != {idKey}");
+        parameters.Add(idKey, id.ToString());
+
+        conditions.Add($"LOWER(c.label) = {fieldLabelKey}");
+        parameters.Add(fieldLabelKey, fieldLabel.ToLower());
+
+        if (!conditions.Any())
+            return new List<FieldEntity>(0);
+
+        var sqlQueryText = $"SELECT * FROM c WHERE {string.Join(" AND ", conditions)}";
+
+        var affectedFields = await _checkpointRepository.QueryAsync(sqlQueryText, parameters);
+        return affectedFields;
+    }
 }
