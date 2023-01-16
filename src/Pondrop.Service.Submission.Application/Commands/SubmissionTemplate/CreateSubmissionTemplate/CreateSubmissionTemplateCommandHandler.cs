@@ -51,6 +51,19 @@ public class CreateSubmissionTemplateCommandHandler : DirtyCommandHandler<Submis
 
         try
         {
+            var fieldLabels = command.Steps.SelectMany(s => s.FieldDefinitions.Where(fd => !string.IsNullOrEmpty(fd.Label)).Select(f => f.Label));
+
+            var fieldLabelDuplicates = fieldLabels.GroupBy(x => x)
+               .Where(g => g.Count() > 1)
+               .Select(y => y.Key)
+               .ToList();
+
+            if (fieldLabelDuplicates != null && fieldLabelDuplicates.Count > 0)
+            {
+                var errorMessage = $"Create submissionTemplate template failed, duplicate field labels";
+                _logger.LogError(errorMessage);
+                return Result<SubmissionTemplateRecord>.Error(errorMessage);
+            }
 
             var SubmissionTemplateEntity = new SubmissionTemplateEntity(
                 command.Title,
