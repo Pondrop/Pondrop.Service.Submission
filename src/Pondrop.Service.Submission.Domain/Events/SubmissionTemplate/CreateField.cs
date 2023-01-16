@@ -8,6 +8,7 @@ public record CreateField(
     bool Mandatory,
     SubmissionFieldStatus FieldStatus,
     SubmissionFieldType FieldType,
+    SubmissionTemplateType TemplateType,
     SubmissionFieldItemType? ItemType,
     int? MaxValue,
     List<string?>? PickerValues) : EventPayload;

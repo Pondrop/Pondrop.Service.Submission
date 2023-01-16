@@ -9,7 +9,8 @@ public enum SubmissionTemplateType
     unknown,
     task,
     survey,
-    advert
+    advert,
+    all
 }
 
 internal class SubmissionTemplateTypeEnumConverter : StringEnumConverter

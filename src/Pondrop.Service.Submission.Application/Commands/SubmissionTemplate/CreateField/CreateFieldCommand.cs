@@ -15,6 +15,8 @@ public class CreateFieldCommand : IRequest<Result<FieldRecord>>
 
     public SubmissionFieldStatus FieldStatus { get; init; } = SubmissionFieldStatus.unknown;
 
+    public SubmissionTemplateType TemplateType { get; init; } = SubmissionTemplateType.all;
+
     public SubmissionFieldItemType? ItemType { get; init; } = null;
 
     public int? MaxValue { get; init; } = null;

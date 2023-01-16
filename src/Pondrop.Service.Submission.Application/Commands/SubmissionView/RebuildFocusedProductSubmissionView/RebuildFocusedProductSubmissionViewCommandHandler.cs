@@ -69,7 +69,7 @@ public class RebuildFocusedProductSubmissionViewCommandHandler : IRequestHandler
         {
             var storeVisitTask = _storeVisitCheckpointRepository.GetAllAsync();
             var submissionTemplateTask = _submissionTemplateCheckpointRepository.GetAllAsync();
-            var submissionsTask = _submissionCheckpointRepository.QueryAsync($"SELECT * FROM c WHERE c.submissionTemplateId in ('{_priceTemplateConfig.Id}','{_shelfStockLevelsTemplateConfig.Id}','{_quickPriceAndQuantityTemplateConfig.Id}')");
+            var submissionsTask = _submissionCheckpointRepository.QueryAsync($"SELECT * FROM c WHERE c.id = '4ff66a80-83dc-4159-b141-b53ac8a6e8b0' and c.submissionTemplateId in ('{_priceTemplateConfig.Id}','{_shelfStockLevelsTemplateConfig.Id}','{_quickPriceAndQuantityTemplateConfig.Id}')");
             //var submissionsTask = _submissionCheckpointRepository.QueryAsync($"SELECT * FROM c WHERE c.campaignId != null");
 
             await Task.WhenAll(storeVisitTask, submissionTemplateTask, submissionsTask);

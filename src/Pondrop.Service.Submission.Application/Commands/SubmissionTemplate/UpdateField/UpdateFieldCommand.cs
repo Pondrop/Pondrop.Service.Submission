@@ -17,6 +17,7 @@ public class UpdateFieldCommand : IRequest<Result<FieldRecord>>
 
     public SubmissionFieldStatus? FieldStatus { get; init; } = null;
 
+    public SubmissionTemplateType? TemplateType { get; init; } = null;
     public SubmissionFieldItemType? ItemType { get; init; } = null;
 
     public int? MaxValue { get; init; } = null;

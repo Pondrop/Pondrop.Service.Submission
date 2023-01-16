@@ -8,6 +8,7 @@ public record FieldRecord(
         bool Mandatory,
         SubmissionFieldStatus FieldStatus,
         SubmissionFieldType FieldType,
+        SubmissionTemplateType TemplateType,
         SubmissionFieldItemType? ItemType,
         int? MaxValue,
         List<string?>? PickerValues)
@@ -18,6 +19,7 @@ public record FieldRecord(
         false,
         SubmissionFieldStatus.unknown,
         SubmissionFieldType.unknown,
+        SubmissionTemplateType.all,
         null,
         null,
         null)
