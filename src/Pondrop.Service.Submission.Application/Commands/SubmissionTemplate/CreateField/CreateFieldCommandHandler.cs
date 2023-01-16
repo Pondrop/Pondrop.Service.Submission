@@ -54,7 +54,7 @@ public class CreateFieldCommandHandler : DirtyCommandHandler<FieldEntity, Create
 
         try
         {
-            var duplicateMessage = $"Possible field match found";
+            var duplicateMessage = $"Possible match found";
             var existingFields = await GetExistingFieldByLabel(command.Label);
             if (existingFields != null && existingFields.Count > 0)
                 return Result<FieldRecord>.Error(duplicateMessage);
