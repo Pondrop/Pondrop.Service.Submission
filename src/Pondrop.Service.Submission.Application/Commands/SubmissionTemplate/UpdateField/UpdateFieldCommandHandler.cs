@@ -67,6 +67,7 @@ public class UpdateFieldCommandHandler : DirtyCommandHandler<FieldEntity, Update
                     command!.Mandatory ?? false,
                     command!.FieldStatus ?? SubmissionFieldStatus.unknown,
                     command!.FieldType ?? SubmissionFieldType.unknown,
+                    command!.TemplateType ?? SubmissionTemplateType.all,
                     command!.ItemType,
                     command!.MaxValue,
                     command!.PickerValues);

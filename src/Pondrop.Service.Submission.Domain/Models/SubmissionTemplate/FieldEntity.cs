@@ -16,6 +16,7 @@ public record FieldEntity : EventEntity
         FieldType = SubmissionFieldType.unknown;
         ItemType = SubmissionFieldItemType.unknown;
         FieldStatus = SubmissionFieldStatus.unknown;
+        TemplateType = SubmissionTemplateType.all;
         MaxValue = null;
         PickerValues = null;
     }
@@ -31,11 +32,12 @@ public record FieldEntity : EventEntity
     bool mandatory,
     SubmissionFieldStatus fieldStatus,
     SubmissionFieldType fieldType,
+    SubmissionTemplateType templateType,
     SubmissionFieldItemType? itemType,
     int? maxValue,
     List<string?>? pickerValues, string createdBy) : this()
     {
-        var create = new CreateField(Guid.NewGuid(), label, mandatory, fieldStatus, fieldType, itemType, maxValue, pickerValues);
+        var create = new CreateField(Guid.NewGuid(), label, mandatory, fieldStatus, fieldType, templateType, itemType, maxValue, pickerValues);
         Apply(create, createdBy);
     }
 
@@ -51,6 +53,9 @@ public record FieldEntity : EventEntity
 
     [JsonProperty("fieldType")]
     public SubmissionFieldType FieldType { get; private set; }
+
+    [JsonProperty("templateType")]
+    public SubmissionTemplateType? TemplateType { get; private set; }
 
     [JsonProperty("itemType")]
     public SubmissionFieldItemType? ItemType { get; private set; }
@@ -116,6 +121,7 @@ public record FieldEntity : EventEntity
             var oldItemType = ItemType;
             var oldMaxValue = MaxValue;
             var oldPickerValues = PickerValues;
+            var oldTemplateType = TemplateType;
 
             Label = update.Label;
             Mandatory = update.Mandatory;
@@ -124,6 +130,7 @@ public record FieldEntity : EventEntity
             ItemType = update.ItemType;
             MaxValue = update.MaxValue;
             PickerValues = update.PickerValues;
+            TemplateType = update.TemplateType;
 
             if (oldLabel != Label ||
                 oldMandatory != Mandatory ||
@@ -131,6 +138,7 @@ public record FieldEntity : EventEntity
                 oldFieldStatus != FieldStatus ||
                 oldItemType != ItemType ||
                 oldMaxValue != MaxValue ||
+                oldTemplateType != TemplateType || 
                 oldPickerValues != PickerValues)
             {
                 UpdatedBy = createdBy;

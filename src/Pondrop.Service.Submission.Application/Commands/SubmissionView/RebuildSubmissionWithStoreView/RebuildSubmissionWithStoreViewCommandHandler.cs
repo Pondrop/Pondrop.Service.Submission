@@ -50,7 +50,7 @@ public class RebuildSubmissionWithStoreViewCommandHandler : IRequestHandler<Rebu
         try
         {
             var submissionTemplateTask = _submissionTemplateCheckpointRepository.GetAllAsync();
-            var submissionsTask = _submissionCheckpointRepository.GetAllAsync();
+            var submissionsTask = _submissionCheckpointRepository.QueryAsync("SELECT * FROM c WHERE c.Id = '1c89f188-7be8-40ad-b450-c1b293a76fbb'");
 
             await Task.WhenAll(submissionTemplateTask, submissionsTask);
 

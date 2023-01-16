@@ -59,6 +59,7 @@ public class CreateFieldCommandHandler : DirtyCommandHandler<FieldEntity, Create
                 command!.Mandatory,
                 command!.FieldStatus,
                 command!.FieldType,
+                command!.TemplateType,
                 command!.ItemType,
                 command!.MaxValue,
                 command!.PickerValues,

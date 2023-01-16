@@ -1,4 +1,6 @@
-﻿namespace Pondrop.Service.Submission.Domain.Models.SubmissionTemplate;
+﻿using Pondrop.Service.Submission.Domain.Enums.SubmissionTemplate;
+
+namespace Pondrop.Service.Submission.Domain.Models.SubmissionTemplate;
 
 public record SubmissionTemplateFieldRecord(
         Guid Id,
