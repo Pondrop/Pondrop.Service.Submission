@@ -62,8 +62,7 @@ public static class SubmissionTemplateFaker
             .RuleFor(x => x.InstructionsContinueButton, f => f.PickRandom(InstructionButtons))
             .RuleFor(x => x.InstructionsSkipButton, f => f.PickRandom(InstructionButtons))
             .RuleFor(x => x.InstructionsIconCodePoint, f => f.Random.Int())
-            .RuleFor(x => x.InstructionsIconFontFamily, f => f.PickRandom(IconFontFamilies))
-            .RuleFor(x => x.FieldIds, f => new List<Guid>() { Guid.NewGuid() });
+            .RuleFor(x => x.InstructionsIconFontFamily, f => f.PickRandom(IconFontFamilies));
 
         return faker.Generate(Math.Max(0, count));
     }
@@ -116,8 +115,7 @@ public static class SubmissionTemplateFaker
             .RuleFor(x => x.InstructionsSkipButton, f => f.PickRandom(InstructionButtons))
             .RuleFor(x => x.InstructionsIconCodePoint, f => f.Random.Int())
             .RuleFor(x => x.InstructionsIconFontFamily, f => f.PickRandom(IconFontFamilies))
-            .RuleFor(x => x.CreatedBy, f => f.PickRandom(UserNames))
-            .RuleFor(x => x.FieldIds, f => new List<Guid>() { Guid.NewGuid() });
+            .RuleFor(x => x.CreatedBy, f => f.PickRandom(UserNames));
 
         return faker.Generate();
     }
