@@ -8,7 +8,5 @@ public class CreateStoreVisitCommandHandlerValidator : AbstractValidator<CreateS
     {
 
         RuleFor(x => x.StoreId).NotEmpty();
-        RuleFor(x => x.Latitude).NotEmpty();
-        RuleFor(x => x.Longitude).NotEmpty();
     }
 }
